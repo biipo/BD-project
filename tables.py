@@ -5,6 +5,8 @@ engine = create_engine('sqlite:///data.db', echo=True)
 
 Base = declarative_base()
 
+# Le relationship() vengono definite nelle tabelle in cui "arriva" una foreign key (nel senso: se tab 1
+# ha la sua chiave, e poi c'è tab 2 che ha una FK che indica tab 1; in tab 1 dobbiamo mettere una relationship()
 
 class Users(Base):
     __tablename__ = 'Users'
@@ -42,26 +44,32 @@ class Cart(Base):
     __tablename__ = 'Cart'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey(Users.id))
+    user_id = Column(Integer, ForeignKey('Users.id'))
+
+    # Collega la foreign key (alla tabella CartProducts), secondary (in teoria) è perché è una relazione molti-molti
+    # e quindi c'è una tabella intermedia, appunto CartProducts, prima di raggiungere Products
+    product = relationship('Products', secondary='CartProducts', back_populates='Cart', cascade='all, delete, '
+                                                                                                'delete-orphan'
+                                                                                                ', save-update')
+
+    items = relationship('Products')
 
     def __repr__(self):
         return f"{self.id} {self.user_id}"
 
+
 # https://stackoverflow.com/questions/5756559/how-to-build-many-to-many-relations-using-sqlalchemy-a-good-example
-CartProducts = Table('CartProducts',
-                     Column('id', Integer, primary_key=True),
-                     )
 
+class CartProducts(Base):
+    __tablename__ = 'CartProducts'
 
-# class CartProducts(Base):
-#     __tablename__ = 'CartProducts'
+    id = Column(Integer, primary_key=True)
+    cart_id = Column(Integer, ForeignKey('Cart.id'))
+    product_id = Column(Integer, ForeignKey('Products.id'))
+    quantity = Column(Integer)
 
-#     cart_id = Column(Integer, primary_key=True, ForeignKey('Cart.id'))
-#     product_id = Column(Integer, primary_key=True, ForeignKey('Products.id'))
-#     quantity = Column(Integer)
-
-#     def __repr__(self):
-#         return f"{self.cart_id} {self.product_id} {self.quantity}"
+    def __repr__(self):
+        return f"{self.cart_id} {self.product_id} {self.quantity}"
 
 
 class Products(Base):
@@ -76,6 +84,12 @@ class Products(Base):
     price = Column(Float)
     availability = Column(Integer)
     descr = Column(String)
+
+    # Serve per collegare la foreign key alla tabella CartProducts (secondary) che a sua volta collega a Cart
+    # Preso da seconda risposta: https://stackoverflow.com/questions/5756559/how-to-build-many-to-many-relations-using-sqlalchemy-a-good-example
+    cart = relationship('Cart', secondary='CartProducts', back_populates='Cart', cascade='all, delete, '
+                                                                                         'delete-orphan'
+                                                                                         ', save-update')
 
     def __repr__(self):
         return f"{self.id} {self.product_name} {self.brand} {self.date} {self.category_id} {self.price} {self.availability} {self.descr}"
