@@ -1,9 +1,6 @@
-from re import U
-import re
-from sqlalchemy import ForeignKey, Boolean, create_engine, Date, Float, sessionmaker
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship, mapped_column, Mapped
-
-engine = create_engine('sqlite:///data.db', echo=True)
+from datetime import datetime
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import declarative_base, relationship, mapped_column, Mapped
 
 Base = declarative_base()
 
@@ -19,7 +16,7 @@ class Users(Base):
     passsword: Mapped[str] = mapped_column(nullable=False)
     name: Mapped[str]
     last_name: Mapped[str]
-    user_type: Mapped[Boolean]
+    user_type: Mapped[bool]
 
     # Da addresses
     addresses_fk: Mapped['Addresses'] = relationship(back_populates='user_fk', cascade='all, delete, delete-orphan, save-update')
@@ -46,7 +43,7 @@ class Addresses(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('Users.id', ondelete='CASCADE'))
-    active: Mapped[Boolean]
+    active: Mapped[bool]
     state: Mapped[str]
     province: Mapped[str]
 
@@ -95,9 +92,9 @@ class Products(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('Users.id'))  # venditore
     brand: Mapped[str]
     product_name: Mapped[str]
-    date: Mapped[Date]
+    date: Mapped[datetime]
     category_id: Mapped[int] = mapped_column(ForeignKey('Categories.id'))
-    price: Mapped[Float]
+    price: Mapped[float]
     availability: Mapped[int]
     descr: Mapped[str]
 
@@ -129,8 +126,8 @@ class Orders(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('Users.id'))
-    date: Mapped[Date]
-    price: Mapped[Float]
+    date: Mapped[datetime]
+    price: Mapped[float]
     address: Mapped[int]
     payment_method: Mapped[str]
     status: Mapped[str]
@@ -208,23 +205,3 @@ class Reviews(Base):
         return f"{self.id} {self.product_id} {self.user_id} {self.review}"
 
 
-def data_insertion():
-    Session = sessionmaker(engine)
-    session = Session()
-        # session.add_all([Products(),
-        #                  Products(),
-        #                  Products(),
-        #                  Products() ])   
-
-    session.add_all([ Categories(id=1, name='Arts'),
-                                 Categories(id=2, name='Personal Care'),
-                                 Categories(id=3, name='Eletronics'),
-                                 Categories(id=4, name='Music'),
-                                 Categories(id=5, name='Sports'),
-                                 Categories(id=6, name='Movies & TV'),
-                                 Categories(id=7, name='Software'),
-                                 Categories(id=8, name='Games'),
-                                 Categories(id=9, name='House'),
-                                 Categories(id=10, name='DIY'), ])
-
-    session.commit()
