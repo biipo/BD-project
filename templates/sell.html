@@ -13,7 +13,7 @@
         <link rel="icon" href="https://cdn.icon-icons.com/icons2/3149/PNG/32/shopping_basket_icon_192634.png">
     </head>
     <body>
-<nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary py-0"> 
+        <nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary py-0"> 
             <div class="container-fluid px-4">
                 <div class="w-25">
                 <a class="navbar-brand" href="#">Store</a>
@@ -56,13 +56,18 @@
         </nav>
         
         <div class="container-md mt-5">
+            <h2 class="mb-4">Sell a product</h2>
                 <form id="form" method="POST" action="">
                     <div class="row">
                         <div class="col-sm-3">
-                            <img class="mb-4 border rounded mw-100 mh-100" id="prod-img" width="250px" src="http://placehold.it/250" alt="Your image" />
-                            <div class="mb-4">
-                                <label>Product image</label>
+                            <label for="prodImage">
+                                <input type="file" name="prod-image" class="d-none" id="prodImage" onchange="readUrl(this);"/>
+                                <img class="mb-1 border rounded mw-100 mh-100" id="prod-img" src="../static/img/300x300.svg" />
+                            </label>
+                            <p><small class="d-none" id="filename"></small></p>
+                            <div class="input-group mb-4">
                                 <input type="file" class="form-control" id="prodImage" onchange="readUrl(this);"/>
+                                <label class="input-group-text" for="prodImage"><i class="bi bi-upload"></i></label>
                             </div>
                             <div class="d-grid gap-2 mb-3">
                                 <!-- <button type="submit" class="w-3 btn btn-primary">Sell</button> -->
@@ -113,6 +118,7 @@
                                 <span class="input-group-text">Description</span>
                                 <textarea class="form-control" aria-label="Description" name="description"></textarea>
                             </div>
+                            <button class="btn btn-success" type="submit" value="Sell">Sell</button>
                         </div>
                     </div>
                 </form>
@@ -131,6 +137,9 @@
                     };
 
                     reader.readAsDataURL(input.files[0]);
+
+                    // document.querySelector("#filename").innerText = input.files[0].name;
+                    // $('#filename').removeClass("d-none");
                 }
             }
         </script>
