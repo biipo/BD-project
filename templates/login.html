@@ -63,7 +63,7 @@
             <div class="row justify-content-center">
                 <div class="col-md-4">
                     <h2 class="mb-4">Login</h2>
-                    <form id="loginForm">
+					<form id="loginForm" method='POST' action="{{url_for('login')}}">
                         <div class="input-group mb-3">
                             <span class="input-group-text" id="basic-addon1"><i class="bi bi-envelope-at"></i></span>
                             <input type="text" class="form-control" id="email" name="email" placeholder="E-mail" required="">

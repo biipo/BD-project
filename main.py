@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, redirect, render_template, request
 from tables import Base, Categories
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -35,7 +35,20 @@ def main():
 
 @app.route('/')
 def start():
-    return render_template('index.html')
+    return redirect('/login', code=302)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+    elif request.method == 'POST':
+        # if 'email' in request.args and 'password' in request.args:
+        email = request.form.get('email')
+        password = request.form.get('password')
+        return f"The email: {email} and password: {password}"
+    else:
+        return "Nooooooo"
+    # return render_template('login.html')
 
 
 
