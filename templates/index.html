@@ -3,43 +3,59 @@
    <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <title>Home</title>
+        
         <link href="../static/css/bootstrap.min.css" rel="stylesheet">
         <link href="../static/css/styles.css" rel="stylesheet">
+        <link href="../static/icons/font/bootstrap-icons.css" rel="stylesheet">
+
+        <link rel="icon" href="https://cdn.icon-icons.com/icons2/3149/PNG/32/shopping_basket_icon_192634.png">
     </head>
     <body>
-        <nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary"> 
+<nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary py-0"> 
             <div class="container-fluid px-4">
+                <div class="w-25">
                 <a class="navbar-brand" href="#">Store</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent"> 
-                        <form class="d-flex mx-auto my-2 w-25">
-                            <div class="input-group mb-3">
-                                <input class="form-control mr-sm-1" type="search" placeholder="Search" aria-label="Search">
-                                <button class="btn btn-outline-success"  id="button-addon2">Cerca</button>
-                            </div>
-                        </form>
+            </div>
+            
+            <div class="w-25">
+                <div class="mx-0">
+                    <form class="">
+                        <div class="my-3 input-group">
+                            <input class="form-control mr-sm-1" type="search" placeholder="Search" aria-label="Search">
+                            <button class="btn btn-outline-success" id="button-addon2"><i class="bi bi-search"></i></button>
+                        </div>
+                    </form>
                 </div>
-                <ul class="navbar-nav">
+            </div>
+                
+            <div class="w-25">
+                <ul class="navbar-nav justify-content-end">
                     <li class="nav-item active">
-                        <a class="nav-link" href="#">Messages</a>
+                        <a class="nav-link" href="#"><i class="bi bi-cart3"></i> Cart</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle='dropdown' aria-haspopup="true" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Menu
                         </a>
                         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#">Profilo</a>
-                            <a class="dropdown-item" href="">Ordini</a>
-                            <hr class="dropdown-divider" />
-                            <a class="dropdown-item" href="#">Logout</a>
+                            <a class="dropdown-item" href="#"><i class="bi bi-person-fill"></i> Profile</a>
+                            <a class="dropdown-item" href=""><i class="bi bi-box-seam"></i> Orders</a>
+                            <a class="dropdown-item" href=""><i class="bi bi-cash-coin"></i> Sell</a>
+
+                            <hr class="dropdown-divider">
+                            <a class="dropdown-item" href="#"><i class="bi bi-box-arrow-left"></i> Logout</a>
                         </div>
                     </li>
                 </ul>
             </div>
+
         </nav>
+
         <script src="../static/js/bootstrap.bundle.min.js"></script>
         <script src="../static/js/jquery-3.7.1.min.js"></script>
     </body>
