@@ -60,11 +60,11 @@
             <div class="row justify-content-center">
                 <div class="col-md-4">
                     <h2 class="mb-4">Register</h2>
-                    <form id="loginForm">
+					<form id="loginForm" action="{{ url_for('registration') }}" method="POST">
                         <div class="input-group mb-3">
                             <span class="input-group-text" id="basic-addon1"><i class="bi bi-person-vcard"></i></span>
-                            <input type="text" aria-label="First name" class="form-control" id="firstname" placeholder="First name">
-                            <input type="text" aria-label="Last name" class="form-control" id="lastname" placeholder="Last name">
+                            <input type="text" aria-label="First name" class="form-control" id="firstname" name="firstname"  placeholder="First name">
+                            <input type="text" aria-label="Last name" class="form-control" id="lastname" name="lastname" placeholder="Last name">
                         </div>
                         <div class="input-group mb-3">
                             <span class="input-group-text" id="basic-addon1"><i class="bi bi-person"></i></span>

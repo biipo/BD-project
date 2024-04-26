@@ -1,6 +1,7 @@
 from datetime import datetime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import declarative_base, relationship, mapped_column, Mapped
+from typing import List
 
 Base = declarative_base()
 
@@ -31,11 +32,11 @@ class Users(Base):
     cart_fk: Mapped['Cart'] = relationship(back_populates='user_fk', cascade='all, delete, save-update')
 
     # A Products (come venditore)
-    product_fk: Mapped['Products'] = relationship(back_populates='user_fk', cascade='all, delete, save-update')
+    product_fk: Mapped[List['Products']] = relationship(back_populates='user_fk') # , cascade='all, delete, save-update'
 
 
     def __repr__(self):
-        return f"{self.id} {self.email} {self.username} {self.password} {self.name} {self.last_name} {self.user_type}"
+        return f"Id:{self.id}, Email:{self.email}, Username:{self.username}, Password:{self.password}, Nome:{self.name}, Cognome:{self.last_name}, Tipo utente:{self.user_type}"
 
 
 class Addresses(Base):
@@ -112,13 +113,13 @@ class Products(Base):
     review_fk: Mapped['Reviews'] = relationship(back_populates='product_fk', cascade='all, delete, save-update')
 
     # Collega a Users (venditore)
-    user_fk: Mapped['Users'] = relationship(back_populates='product_fk', cascade='all, delete, save-update')
+    user_fk: Mapped['Users'] = relationship(back_populates='product_fk') # , cascade='all, delete, save-update'
 
     # Collega a Categories
     category_fk: Mapped['Categories'] = relationship(back_populates='product_fk', cascade='all, delete, save-update')
 
     def __repr__(self):
-        return f"{self.id} {self.product_name} {self.brand} {self.date} {self.category_id} {self.price} {self.availability} {self.descr}"
+        return f"Id:{self.id}, Venditore:{self.user_id}, Prodotto:{self.product_name}, Brand:{self.brand}, Messo in vendita: {self.date}, Categoria:{self.category_id}, Prezzo:{self.price}€, Quantità in magazzino:{self.availability}, Descrizione:{self.descr}"
 
 
 class Orders(Base):
