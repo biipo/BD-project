@@ -14,7 +14,10 @@
 		{% endfor %}
 	</ul>
 	<h3> This is the user who's selling them </h3>
-		{{ vendor }}
+	<ul>
+		{% for v in vendor %}
+			<li>{{ v }}</li>
+		{% endfor %}
 
 	<h3> Product for sale by a certain user</h3>
 	<ul>

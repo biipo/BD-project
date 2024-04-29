@@ -1,6 +1,6 @@
 from flask import Flask, redirect, render_template, request, session
 from tables import Users, Base, Categories, Products
-from sqlalchemy import create_engine, select, join
+from sqlalchemy import create_engine, select, join, update
 from sqlalchemy.orm import sessionmaker
 import random
 
@@ -35,7 +35,7 @@ def main():
 @app.route('/')
 def start():
     Base.metadata.create_all(engine)
-    return redirect('/register', code=302)
+    return redirect('/products-list', code=302)
 
 
 # route dei prodotti in vendita
@@ -66,10 +66,25 @@ def sell():
 def products_list():
     products = db_session.query(Products).all()
     user_vendor = db_session.query(Users).all()
-    
-    prod_vend = db_session.scalars(select(Products).join(Products.user_id)).all()
 
-    return render_template('products.html', products=products, vendor=user_vendor, prod_vend=prod_vend)
+    prova_user = Users(id=55, email="prova", username="prova", password="prova", name="prova", last_name="prova", user_type=False,
+                       product_fk=[Products(id=38, user_id=55, brand="prova", product_name="prova", date=datetime.datetime.now(),
+                           category_id="prova", price="prova", availability=10, descr="prova")])
+    prova_product = Products(id=67, user_id=55, brand=4.0, product_name="prova", date=datetime.datetime.now(),
+                           category_id="prova", price=4.0, availability=10, descr="prova")
+
+    db_session.add(prova_user)
+    db_session.add(prova_product)
+    db_session.commit()
+    # db_session.query(Users).filter(Users.id== 1).update({'product_fk': [56]})
+    # db_session.query(Users).update({'product_fk': 56})
+    # db_session.query(Users).filter(Users.id== 6).update({'product_fk': 88})
+    # db_session.query(Users).filter(Users.id== 9).update({'product_fk': [52]})
+    # db_session.commit()
+    
+    # prod_vend = db_session.scalars(select(Products).join(Products.user_id)).all()
+
+    return render_template('products.html', products=products, vendor=user_vendor, prod_vend=user_vendor)
 
 
 # route del login
