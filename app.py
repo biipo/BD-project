@@ -1,18 +1,19 @@
 from flask import Flask, redirect, render_template, request, session
-from tables import Users, Base, Categories, Products
+from tables import User, Product, engine, Base
 from sqlalchemy import create_engine, select, join, update
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 import random
 
 import datetime
 import os.path
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
-app.secret_key = "?,u~Jnu@axx<kK_s`vcQfpqvQi4iV7XavP2£E:FI;!?apt^A%"
-engine = create_engine('sqlite:///data.db', echo=True)
 
-Session = sessionmaker(engine)
-db_session = Session()
+app = Flask(__name__, template_folder='templates', static_folder='static')
+
+Base.metadata.create_all(engine)
+db_session = Session(engine)
 
 # def db_init():
 #     db_session.add_all([ Categories(id=1, name='Arts'),
@@ -26,16 +27,10 @@ db_session = Session()
 #                                  Categories(id=9, name='House'),
 #                                  Categories(id=10, name='DIY'), ])
 
-#     db_session.commit()
 
-def main():
-    app.run(host='127.0.0.1', debug=True)
-
-# Pagina iniziale, per ora reindirizza ad altre pagine ma solo per test
 @app.route('/')
 def start():
-    Base.metadata.create_all(engine)
-    return redirect('/products-list', code=302)
+    return redirect('/products-list')
 
 
 # route dei prodotti in vendita
@@ -64,27 +59,24 @@ def sell():
 # route che lista tutti i prodotti in vendita
 @app.route('/products-list')
 def products_list():
-    products = db_session.query(Products).all()
-    user_vendor = db_session.query(Users).all()
 
-    prova_user = Users(id=55, email="prova", username="prova", password="prova", name="prova", last_name="prova", user_type=False,
-                       product_fk=[Products(id=38, user_id=55, brand="prova", product_name="prova", date=datetime.datetime.now(),
-                           category_id="prova", price="prova", availability=10, descr="prova")])
-    prova_product = Products(id=67, user_id=55, brand=4.0, product_name="prova", date=datetime.datetime.now(),
-                           category_id="prova", price=4.0, availability=10, descr="prova")
+    # prova_user = User(id=55, email="prova", username="prova", password="prova", name="prova", last_name="prova", user_type=False)
+    # prova_product = Product(id=67, user_id=55, brand="prova", product_name="prova", date=datetime.datetime.now(), price=4.0, availability=10, descr="prova")
 
-    db_session.add(prova_user)
-    db_session.add(prova_product)
-    db_session.commit()
+    # db_session.add(prova_user)
+    # db_session.add(prova_product)
+    # db_session.commit()
     # db_session.query(Users).filter(Users.id== 1).update({'product_fk': [56]})
     # db_session.query(Users).update({'product_fk': 56})
     # db_session.query(Users).filter(Users.id== 6).update({'product_fk': 88})
     # db_session.query(Users).filter(Users.id== 9).update({'product_fk': [52]})
     # db_session.commit()
     
-    # prod_vend = db_session.scalars(select(Products).join(Products.user_id)).all()
+    products = db_session.query(Product).all()
+    user_vendor = db_session.query(User).all()
+    prod_vend = db_session.scalars(select(Product).join(Product.user_fk)).all()
 
-    return render_template('products.html', products=products, vendor=user_vendor, prod_vend=user_vendor)
+    return render_template('products.html', products=products, vendor=user_vendor, prod_vend=prod_vend)
 
 
 # route del login
@@ -127,6 +119,7 @@ def registration():
     else:
         return "<h1>UNEXPECTED ERROR</h1>"
 
-
 if __name__ == '__main__':
-    main()
+    app.run(host='127.0.0.1', debug=True)
+
+
