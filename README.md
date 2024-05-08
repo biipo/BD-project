@@ -17,4 +17,4 @@
 - [ ] Sessione per utente (per ora c'è solo dopo register e solamente perché dopo viene subito usata nella /sell)
 - [ ] Fare generazione id prodotti (ora è randomica)
 - [ ] Gestire utenti venditori e non venditori (mettere controlli alla registrazione)
-- [ ] Sistemare le relationship (non funzionano le join)
+- [x] Sistemare le relationship (non funzionano le join)
