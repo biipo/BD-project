@@ -6,6 +6,10 @@ from sqlalchemy import Integer
 from flask_login import UserMixin
 
 engine = sq.create_engine('sqlite:///./data.db', echo=True)
+
+user_counter: int = 0 # usato per gli ID
+product_counter: int = 0 # usato per gli ID
+
 class Base(DeclarativeBase):
     pass
 
@@ -32,8 +36,17 @@ class User(Base, UserMixin):
         self.last_name = last_name
         self.user_type = user_type
 
-    def get_id(self):
-        return self.id
+    # def is_authenticated(self):
+    #     return 0
+
+    # def is_active(self):
+    #     return super().is_active
+
+    # def is_anonymous(self):
+    #     return 0
+
+    # def get_id(self):
+    #     return str(self.id)
 
     def __repr__(self):
         return f"Id:{self.id}, Email:{self.email}, Username:{self.username}, Password:{self.password}, Nome:{self.name}, Cognome:{self.last_name}, Tipo utente:{self.user_type}"
@@ -59,16 +72,6 @@ class Product(Base):
     price: Mapped[float] = mapped_column(nullable=False)
     availability: Mapped[int] = mapped_column(nullable=False)
     descr: Mapped[str] = mapped_column(nullable=True)
-
-    # def __init__(self, id, user_id, brand, product_name, date, price, availability, descr):
-    #     self.id = id
-    #     self.user_id = user_id
-    #     self.brand = brand
-    #     self.product_name = product_name
-    #     self.date = date
-    #     self.price = price
-    #     self.availability = availability
-    #     self.descr = descr
 
     def __repr__(self):
         return f"Id:{self.id}, Venditore:{self.user_id}, Prodotto:{self.product_name}, Brand:{self.brand}, Messo in vendita: {self.date}, Prezzo:{self.price}€, Quantità in magazzino:{self.availability}, Descrizione:{self.descr}"
@@ -98,6 +101,7 @@ class Cart(Base):
         return f"{self.id} {self.user_id}"
 
 
+# Tabella intermedia m:m
 cart_product = Table(
     'cart_products',
     Base.metadata,
@@ -121,6 +125,7 @@ class Order(Base):
         return f"{self.id} {self.user_id} {self.date} {self.price} {self.address} {self.payment_method} {self.status}"
 
 
+# Tabella intermedia m:m
 order_product = Table(
     'order_products',
     Base.metadata,
@@ -142,6 +147,7 @@ class Tag(Base):
     def __repr__(self):
         return f"{self.id} {self.name}"
 
+# Tabella intermedia m:m
 tag_product = Table(
     'tag_products',
     Base.metadata,

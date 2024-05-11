@@ -1,22 +1,26 @@
+import re
 from flask import Flask, redirect, render_template, request, session
-from tables import User, Product, engine, Base
+from tables import User, Product, engine, Base, user_counter, product_counter
 from sqlalchemy import create_engine, select, join, update
 from sqlalchemy.orm import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import login_manager, LoginManager
-from flask_bcrypt import Bcrypt
+from flask_login import login_manager, LoginManager, login_required, login_user, logout_user
+from flarender_templatesk_bcrypt import Bcrypt
 import random
 
 import datetime
 import os.path
 
-
+# Creazione app flask
 app = Flask(__name__, template_folder='templates', static_folder='static')
+
+# Configurazioni per il login manager
 app.config['SECRET KEY'] = 'jfweerjwi239marameo54:_f,,asd190ud'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+# Crea il database
 Base.metadata.create_all(engine)
 db_session = Session(engine)
 
@@ -37,33 +41,21 @@ db_session = Session(engine)
 def start():
     if current_user.is_authenticated:
         return redirect('/product-list');
-    return redirect('/test-login')
+    return redirect('/register')
 
+@app.route('/home')
+def home():
+    return render_template('home.html')
 
 # route che lista tutti i prodotti in vendita
 @app.route('/products-list')
 def products_list():
-
-    prova_user = User(id=55, email="provaDiversa", username="prova", password="prova", name="prova", last_name="prova", user_type=False)
-    # prova_user = User(id=88, email="prova", username="prova", password="prova", name="prova", last_name="prova", user_type=False)
-    # prova_product = Product(id=23, user_id=55, brand="prova", category_id=1, product_name="prova", date=datetime.datetime.now(), price=4.0, availability=10, descr="prova")
-    # prova_product1 = Product(id=14, user_id=55, brand="prova", category_id=1, product_name="prova", date=datetime.datetime.now(), price=4.0, availability=10, descr="prova")
-
-    db_session.add(prova_user)
-    # db_session.add(prova_product)
-    # db_session.add(prova_product1)
-    db_session.commit()
-    # db_session.query(Users).filter(Users.id== 1).update({'product_fk': [56]})
-    # db_session.query(Users).update({'product_fk': 56})
-    # db_session.query(Users).filter(Users.id== 6).update({'product_fk': 88})
-    # db_session.query(Users).filter(Users.id== 9).update({'product_fk': [52]})
-    # db_session.commit()
     
     products = db_session.query(Product).all()
-    user_vendor = db_session.query(User).all()
-    prod_vend = db_session.scalars(select(User).join(User.product_fk)).all()
+    # user_vendor = db_session.query(User).all()
+    # prod_vend = db_session.scalars(select(User).join(User.product_fk)).all()
 
-    return render_template('products.html', products=products, vendor=user_vendor, prod_vend=prod_vend)
+    return render_template('products.html', products=products)#, vendor=user_vendor, prod_vend=prod_vend)
 
 # route dei prodotti in vendita
 @app.route('/sell', methods=['GET', 'POST'])
@@ -82,52 +74,44 @@ def sell():
         db_session.add(product)
         db_session.commit()
         return redirect('/products-list') # Rimandato alla route con tutti i prodotti
-    elif request.method == 'GET': # Renderizziamo la pagina in cui dovrà inserire i dettagli del prodotto
+    else # Renderizziamo la pagina in cui dovrà inserire i dettagli del prodotto
         return render_template('sell.html')
-    else: # Richiesta inaspettata (NON dovrebbe neanche entrare nell'else visto che la route in se non accetta altri tipi di richieste)
-        return "<h1>UNEXPECTED ERROR</h1>"
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db_session.execute(select(User).where(User.id == user_id))
+    usr_id = int(user_id)
+    return db_session.execute(select(User).where(User.id == usr_id))
 
 # route del login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'GET': # deve inserire i dati, renderizziamo la pagina per il login
-        return render_template('login.html')
-    elif request.method == 'POST': # ha inserito i dati, li verifichiamo e reindirizziamo di conseguenza
+    if request.method == 'POST': # ha inserito i dati, li verifichiamo e reindirizziamo di conseguenza
         email = request.form.get('email')
         password = request.form.get('password')
-        if email == 'admin' and password == 'admin':
-            return f"The email: {email} and password: {password}"
-        else:
-            return redirect('/login')
-    else:
-        return "<h1>UNEXPECTED ERROR</h1>"
+        query = select(User).where(User.email == email, User.password == password)
+        try:
+            usr = db_session.scalars(query).one()
+            login_user(usr)
+        except sqalchemy.exc.NoResultFound:
+            return redirect('login.html') # Ritenta il login, aggiungere messaggio di errore nel login
+        return redirect('/home')
+        # else:
+        #     return redirect('/login')
+    else: # Carichiamo la pagina per inserire i dati
+        return render_template('login.html')
 
-@app.route('/test-login', methods=['GET', 'POST']) # 8:37
-def test_login():
-    if request.method == 'GET': # deve inserire i dati, renderizziamo la pagina per il login
-        return render_template('login.html')
-    elif request.method == 'POST': # ha inserito i dati, li verifichiamo e reindirizziamo di conseguenza
-        email = request.form.get('email')
-        password = request.form.get('password')
-        # db_session.query(User).filter()
-            # session['id'] = usr_id
-            return f"The email: {email} and password: {password}"
-        else:
-            return redirect('/login', code=302)
-    else:
-        return "<h1>UNEXPECTED ERROR</h1>"
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect('/home') # route HOME da creare
 
 # route per la registrazione
 @app.route('/register', methods=['GET','POST'])
 def registration():
-    if request.method == 'GET':
-        return render_template('register.html')
-    elif request.method == 'POST':
-        usr_id = random.randrange(20)
+    if request.method == 'POST':
+        user_counter = user_counter+1
+        id = user_counter
         name = request.form.get('firstname')
         lastname = request.form.get('lastname')
         username = request.form.get('username')
@@ -142,7 +126,8 @@ def registration():
 
         return redirect('/sell')
     else:
-        return "<h1>UNEXPECTED ERROR</h1>"
+        return render_template('register.html')
+
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', debug=True)
