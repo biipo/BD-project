@@ -7,11 +7,10 @@ from flask_login import UserMixin
 
 engine = sq.create_engine('sqlite:///./data.db', echo=True)
 
-user_counter: int = 0 # usato per gli ID
-product_counter: int = 0 # usato per gli ID
 
 class Base(DeclarativeBase):
     pass
+
 
 # Le relationship() vengono definite nelle tabelle in cui "arriva" una foreign key (nel senso: se tab 1
 # ha la sua chiave, e poi c'è tab 2 che ha una FK che indica tab 1; in tab 1 dobbiamo mettere una relationship()
@@ -36,20 +35,22 @@ class User(Base, UserMixin):
         self.last_name = last_name
         self.user_type = user_type
 
-    # def is_authenticated(self):
+    # Metodi da implementare per il login, non servono perché ereditiamo da UserMixin
+    # def is_authenticated(self): # Ritorna true se le credenziali fornite sono valide
     #     return 0
 
-    # def is_active(self):
+    # def is_active(self): # Indica lo stato dell'account (potrebe avere altri stati tipo sospeso/eliminato)
     #     return super().is_active
 
-    # def is_anonymous(self):
+    # def is_anonymous(self): # Ritorna True nel caso si tratti di un utente anonimo
     #     return 0
 
-    # def get_id(self):
+    # def get_id(self): questo metodo ritorna una STRINGA che identifica univocamente l'utente
     #     return str(self.id)
 
     def __repr__(self):
         return f"Id:{self.id}, Email:{self.email}, Username:{self.username}, Password:{self.password}, Nome:{self.name}, Cognome:{self.last_name}, Tipo utente:{self.user_type}"
+
 
 class Category(Base):
     __tablename__ = 'categories'
@@ -59,6 +60,7 @@ class Category(Base):
 
     def __repr__(self):
         return f"{self.id} {self.name}"
+
 
 class Product(Base):
     __tablename__ = 'products'
@@ -86,7 +88,6 @@ class Address(Base):
     state: Mapped[str]
     province: Mapped[str]
 
-
     def __repr__(self):
         return f"{self.id} {self.user_id} {self.active} {self.state} {self:province}"
 
@@ -108,7 +109,8 @@ cart_product = Table(
     Column('cart_id', ForeignKey(Cart.id), primary_key=True),
     Column('product_id', ForeignKey(Product.id), primary_key=True),
     Column('quantity', Integer, nullable=False),
-        )
+)
+
 
 class Order(Base):
     __tablename__ = 'orders'
@@ -132,20 +134,18 @@ order_product = Table(
     Column('order_id', ForeignKey(Order.id), primary_key=True),
     Column('product_id', ForeignKey(Product.id), primary_key=True),
     Column('quantity', Integer, nullable=False),
-        )
-
-
+)
 
 
 class Tag(Base):
     __tablename__ = 'tags'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name:Mapped[str] = mapped_column(nullable=False)
-
+    name: Mapped[str] = mapped_column(nullable=False)
 
     def __repr__(self):
         return f"{self.id} {self.name}"
+
 
 # Tabella intermedia m:m
 tag_product = Table(
@@ -153,7 +153,7 @@ tag_product = Table(
     Base.metadata,
     Column('tag_id', ForeignKey(Tag.id), primary_key=True),
     Column('product_id', ForeignKey(Product.id), primary_key=True),
-        )
+)
 
 
 class Review(Base):
@@ -167,11 +167,12 @@ class Review(Base):
     def __repr__(self):
         return f"{self.id} {self.product_id} {self.user_id} {self.review}"
 
+
 # ---------------------------------------------------------------------------------------------------------------------------
 # Relationship per le foreign key
 
 # Relazine tra venditore e prodotti in vendita
-Product.user_fk = relationship(User, back_populates='product_fk') # , cascade='all, delete, save-update'
+Product.user_fk = relationship(User, back_populates='product_fk')  # , cascade='all, delete, save-update'
 User.product_fk = relationship(Product, back_populates='user_fk', order_by=Product.id)
 
 # Relazione tra indirizzi e utenti
@@ -183,29 +184,35 @@ Cart.user_fk = relationship(User, back_populates='cart_fk', cascade='all, delete
 User.cart_fk = relationship(Cart, back_populates='user_fk', cascade='all, delete, save-update')
 
 # Relazione tra carrello e prodotti
-Cart.product_fk = relationship(Product, secondary=cart_product, back_populates='cart_fk', cascade='all, delete, save-update')
-Product.cart_fk = relationship(Cart, secondary=cart_product, back_populates='product_fk', cascade='all, delete, save-update')
+Cart.product_fk = relationship(Product, secondary=cart_product, back_populates='cart_fk',
+                               cascade='all, delete, save-update')
+Product.cart_fk = relationship(Cart, secondary=cart_product, back_populates='product_fk',
+                               cascade='all, delete, save-update')
 
 # Relazione tra utente e i suoi ordini
 Order.user_fk = relationship(User, back_populates='order_fk', cascade='all, delete, save-update')
 User.order_fk = relationship(Order, back_populates='user_fk', cascade='all, delete, save-update')
 
 # Relazione tra ordini e prodotti nell'ordine
-Order.product_fk = relationship(Product, secondary=order_product, back_populates='order_fk', cascade='all, delete, save-update')
-Product.order_fk = relationship(Order, secondary=order_product, back_populates='product_fk', cascade='all, delete, save-update')
+Order.product_fk = relationship(Product, secondary=order_product, back_populates='order_fk',
+                                cascade='all, delete, save-update')
+Product.order_fk = relationship(Order, secondary=order_product, back_populates='product_fk',
+                                cascade='all, delete, save-update')
 
 # Relazione tra prodotti e categorie a cui appartengono
 Category.product_fk = relationship(Product, back_populates='category_fk', cascade='all, delete, save-update')
 Product.category_fk = relationship(Category, back_populates='product_fk', cascade='all, delete, save-update')
 
 # Relazione tra tag e prodotti con intermedia tag_product
-Tag.product_fk = relationship(Product, secondary=tag_product, back_populates='tag_fk', cascade='all, delete, save-update')
-Product.tag_fk = relationship(Tag, secondary=tag_product, back_populates='product_fk', cascade='all, delete, save-update')
+Tag.product_fk = relationship(Product, secondary=tag_product, back_populates='tag_fk',
+                              cascade='all, delete, save-update')
+Product.tag_fk = relationship(Tag, secondary=tag_product, back_populates='product_fk',
+                              cascade='all, delete, save-update')
 
 # Relazione tra prodotti e recensioni
 Product.review_fk = relationship(Review, back_populates='product_fk', cascade='all, delete, save-update')
-Review.product_fk = relationship(Product, back_populates='review_fk', cascade='all, delete, save-update' )
+Review.product_fk = relationship(Product, back_populates='review_fk', cascade='all, delete, save-update')
 
 # Relazione tra recensioni e utenti
-Review.user_fk = relationship(User, back_populates='review_fk', cascade='all, delete, save-update' )
+Review.user_fk = relationship(User, back_populates='review_fk', cascade='all, delete, save-update')
 User.review_fk = relationship(Review, back_populates='user_fk', cascade='all, delete, save-update')

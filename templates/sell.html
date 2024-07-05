@@ -1,104 +1,47 @@
-<DOCTYPE html>
+<!DOCTYPE html>
 <html data-bs-theme="dark">
-   <head>
+    <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Sell</title>
-        
-        <link href="../static/css/bootstrap.min.css" rel="stylesheet">
-        <link href="../static/css/styles.css" rel="stylesheet">
+        <title>Login</title>
+        <link rel="stylesheet" href="https://matcha.mizu.sh/matcha.css">
+        <link rel="stylesheet" href="../static/css/styles2.css">
         <link href="../static/icons/font/bootstrap-icons.css" rel="stylesheet">
-
-        <link rel="icon" href="https://cdn.icon-icons.com/icons2/3149/PNG/32/shopping_basket_icon_192634.png">
+        <link rel="icon" href="../static/img/cart.gif">
     </head>
     <body>
-        <nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary py-0"> 
-            <div class="container-fluid px-4">
-                <div class="w-25">
-                <a class="navbar-brand" href="#">Store</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            </div>
-            
-            <div class="w-25">
-                <div class="mx-0">
-                    <form class="">
-                        <div class="my-3 input-group">
-                            <input class="form-control mr-sm-1" type="search" placeholder="Search" aria-label="Search">
-                            <button class="btn btn-outline-success" id="button-addon2"><i class="bi bi-search"></i></button>
-                        </div>
-                    </form>
+        <menu>
+            <li><a href="#">Store</a></li>
+            <li><a href="#"><i class="bi bi-cart3"></i> Cart</a></li>
+            <li>
+                <a href="#">Menu</a>
+                <menu>
+                    <li><a href="#"><i class="bi bi-person-fill"></i> Profile</a></li>
+                    <li><a href="#"><i class="bi bi-box-seam"></i> Orders</a></li>
+                    <li><a href="#"><i class="bi bi-cash-coin"></i> Sell</a></li>
+                    <li class="attention"><a href="#"><i class="bi bi-box-arrow-left"></i> Logout</a></li>
+                </menu>
+            </li>
+            <li class="m-0"><input type="search" placeholder="Search"></li>
+        </menu>
+        <div class="container-big">
+            <h1>Sell a product</h1>
+            <div class="flex">
+                <div class="col-3 m-1">
+                    <img class="mw-100 mh-100" src="../static/img/300x300.svg"/>
+                    <input type="file">
                 </div>
-            </div>
-                
-            <div class="w-25">
-                <ul class="navbar-nav justify-content-end">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="#"><i class="bi bi-cart3"></i> Cart</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Menu
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#"><i class="bi bi-person-fill"></i> Profile</a>
-                            <a class="dropdown-item" href=""><i class="bi bi-box-seam"></i> Orders</a>
-                            <a class="dropdown-item" href=""><i class="bi bi-cash-coin"></i> Sell</a>
-
-                            <hr class="dropdown-divider">
-                            <a class="dropdown-item" href="#"><i class="bi bi-box-arrow-left"></i> Logout</a>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-        
-        <div class="container-md mt-5">
-            <h2 class="mb-4">Sell a product</h2>
-			<form id="form" method="POST" action="{{ url_for('sell') }}">
-                    <div class="row">
-                        <div class="col-sm-3">
-                            <label for="prodImage">
-                                <input type="file" name="prod-image" class="d-none" id="prodImage" onchange="readUrl(this);"/>
-                                <img class="mb-1 border rounded mw-100 mh-100" id="prod-img" src="../static/img/300x300.svg" />
-                            </label>
-                            <p><small class="d-none" id="filename"></small></p>
-                            <div class="input-group mb-4">
-                                <input type="file" class="form-control" id="prodImage" onchange="readUrl(this);"/>
-                                <label class="input-group-text" for="prodImage"><i class="bi bi-upload"></i></label>
+                <div class="col-7 m-1">
+                    <form method="post" onsubmit="">
+                        <fieldset>
+                            <legend>Details</legend>
+                            <div class="mb-.5 flex">
+                                <input title="Product name" class="mr-.25" type="text" name="name" placeholder="Product name">
+                                <input title="Brand" class="ml-.25" type="text" name="brand" placeholder="Brand">
                             </div>
-                            <div class="d-grid gap-2 mb-3">
-                                <!-- <button type="submit" class="w-3 btn btn-primary">Sell</button> -->
-                            </div>
-                        </div>
-                        <div class="col">
-                            <!--id: Mapped[int] = mapped_column(primary_key=True)
-                                user_id: Mapped[int] = mapped_column(ForeignKey('Users.id'))  # venditore
-                                brand: Mapped[str]
-                                product_name: Mapped[str]
-                                date: Mapped[datetime]
-                                category_id: Mapped[int] = mapped_column(ForeignKey('Categories.id'))
-                                price: Mapped[float]
-                                availability: Mapped[int]
-                                descr: Mapped[str]--> 
-                            <div class="row">
-                                <div class="col">
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text" id="basic-addon1">Product name</span>
-                                        <input type="text" class="form-control" aria-label="Product name" id="product-name" name="product-name" aria-describedby="basic-addon1">
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text" id="basic-addon1">Brand</span>
-                                        <input type="text" class="form-control" aria-label="Brand" id="brand" name="brand" aria-describedby="basic-addon1">
-                                    </div>
-                                </div>
-                            </div>
-                            <select class="form-select mb-3" aria-label="Category" name="category">
-                                <option selected>Open this select menu</option>
+                            <select class="mb-.5" name="category">
+                                <option selected disabled>Product type</option>
                                 <option value="1">Arts</option>
                                 <option value="2">Personal Care</option>
                                 <option value="3">Electronics</option>
@@ -110,40 +53,13 @@
                                 <option value="9">House</option>
                                 <option value="10">DIY</option>
                             </select>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text">€</span>
-                                <input type="number" min="1" step="any" class="form-control" aria-label="Price" name="price" placeholder="Price">
-                            </div>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text">Description</span>
-                                <textarea class="form-control" aria-label="Description" name="description"></textarea>
-                            </div>
-							<form action="products.html" method="get">
-								<button class="btn btn-success" type="submit" value="Sell" action="">Sell</button>
-							</form>
-                        </div>
-                    </div>
-                </form>
+                            <input class="mb-.5" title="Price (€)" type="number" min="1" step="any" name="price" placeholder="Price (€)">
+                            <textarea class="mb-.5" title="Description" name="description" placeholder="Description"></textarea>
+                            <button type="submit">Sell</button>
+                        </fieldset>
+                    </form>
+                </div>
             </div>
         </div>
-
-        <script src="../static/js/bootstrap.bundle.min.js"></script>
-        <script src="../static/js/jquery-3.7.1.min.js"></script>
-        <script>
-            function readUrl(input) {
-                if (input.files && input.files[0]) {
-                    const reader = new FileReader();
-
-                    reader.onload = function (e) {
-                        document.querySelector('#prod-img').setAttribute('src',e.target.result);
-                    };
-
-                    reader.readAsDataURL(input.files[0]);
-
-                    // document.querySelector("#filename").innerText = input.files[0].name;
-                    // $('#filename').removeClass("d-none");
-                }
-            }
-        </script>
     </body>
 </html>

@@ -1,13 +1,13 @@
-import re
 from flask import Flask, redirect, render_template, request, session
-from tables import User, Product, engine, Base, user_counter, product_counter
+from tables import User, Product, engine, Base
 from sqlalchemy import create_engine, select, join, update
 from sqlalchemy.orm import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import login_manager, LoginManager, login_required, login_user, logout_user
-from flarender_templatesk_bcrypt import Bcrypt
+from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 import random
+import re
+from tables import Product, User
 
 import datetime
 import os.path
@@ -16,7 +16,7 @@ import os.path
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 # Configurazioni per il login manager
-app.config['SECRET KEY'] = 'jfweerjwi239marameo54:_f,,asd190ud'
+app.secret_key = 'jfweerjwi239marameo54:_f,,asd190ud'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -45,42 +45,38 @@ def start():
 
 @app.route('/home')
 def home():
-    return render_template('home.html')
+    users_list = db_session.query(User).all()
+    return render_template('home.html', users_list=users_list)
 
 # route che lista tutti i prodotti in vendita
 @app.route('/products-list')
 def products_list():
-    
     products = db_session.query(Product).all()
-    # user_vendor = db_session.query(User).all()
-    # prod_vend = db_session.scalars(select(User).join(User.product_fk)).all()
-
-    return render_template('products.html', products=products)#, vendor=user_vendor, prod_vend=prod_vend)
+    return render_template('products.html', products=products)
 
 # route dei prodotti in vendita
 @app.route('/sell', methods=['GET', 'POST'])
 def sell():
     if request.method == 'POST': # Sono stati inseriti i dati di un prodotto, lo memorizziamo
-        product_id = random.randrange(100) # Cambiare metodo generazione id
-        product_name = request.form.get('product-name')
-        brand = request.form.get('brand')
-        category = request.form.get('category')
-        price = request.form.get('price')
-        description = request.form.get('description')
-
-        usr_id = session['id']
-        product = Products(id=product_id, user_id=usr_id, brand=brand, product_name=product_name, date=datetime.datetime.now(),
-                           category_id=category, price=price, availability=10, descr=description)
+        product = Product(id=random.randrange(100), # cambiare metodo generazione id prodotto
+                            user_id=session['id'],
+                            brand=request.form.get('brand'),
+                            product_name=request.form.get('product-name'),
+                            date=datetime.datetime.now(),
+                            category_id=request.form.get('category'),
+                            price=request.form.get('price'),
+                            availability=10,
+                            descr=request.form.get('description')
+                            )
         db_session.add(product)
         db_session.commit()
-        return redirect('/products-list') # Rimandato alla route con tutti i prodotti
-    else # Renderizziamo la pagina in cui dovrà inserire i dettagli del prodotto
+        return redirect('/products-list') # Reindirizza alla pagina di tutti i prodotti in vendita
+    else: # Renderizziamo la pagina in cui dovrà inserire i dettagli del prodotto
         return render_template('sell.html')
 
 @login_manager.user_loader
 def load_user(user_id):
-    usr_id = int(user_id)
-    return db_session.execute(select(User).where(User.id == usr_id))
+    return db_session.execute(select(User).where(User.id == int(user_id))) # Dovrebbe ritornare 'None' se l'ID non è valido
 
 # route del login
 @app.route('/login', methods=['GET', 'POST'])
@@ -101,30 +97,70 @@ def login():
         return render_template('login.html')
 
 @app.route('/logout')
-@login_required
+@login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
 def logout():
     logout_user()
     return redirect('/home') # route HOME da creare
+
+def registration_check(email, username, password, name, last_name):
+    # Pattern da rispettare per l'email
+    pat_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+
+    email    = request.form.get('email')
+    if not re.match(pat_email, email): # Controlla che l'email segua il pattern "xxx@xxx.xxx"
+        redirect('register.html', error_registration="Invalid email")
+
+    username = request.form.get('username')
+    if len(username) < 1 or len(username) > 16:
+        redirect('register.html', error_registration="Invalid username")
+
+    password = request.form.get('password')
+    lower, upper, digit, special = 0, 0, 0, 0
+    if(len(password) >= 8):
+        for c in password:
+            if c.islower():
+                lower += 1
+            if c.isupper():
+                upper += 1
+            if c.isdigit():
+                digit += 1
+            if c in ["~","`", "!", "@","#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "=", "{", "}", "[", "]", "|", "\\", ";", ":", "<", ">", ",", ".", "/", "?"]:
+                special += 1
+        if (lower < 1 or upper < 1 or digit < 1 or special < 1):
+            redirect('register.html', error_registration="Invalid password")
+
+    pat_name = r'\b[0-9._%+-]\b'
+    name = request.form.get('fname')
+    if():
+        if re.match(pat_name, name):
+            redirect('register.html', error_registration="Invalid name")
+
+    last_name = request.form.get('lname')
+    if():
+        if re.match(pat_name, last_name):
+            redirect('register.html', error_registration="Invalid last name")
+
+    return email, username, password, name, last_name
 
 # route per la registrazione
 @app.route('/register', methods=['GET','POST'])
 def registration():
     if request.method == 'POST':
-        user_counter = user_counter+1
-        id = user_counter
-        name = request.form.get('firstname')
-        lastname = request.form.get('lastname')
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        user_type = request.form.get('user_type')
-        
-        new_user = Users(id=usr_id, email=email, username=username, password=password, name=name, last_name=lastname, user_type=user_type)
+        email, username, password, name, last_name = registration_check(request.form.get('email'), request.form.get('username'), request.form.get('password'),
+                                                                        request.form.get('fname'), request.form.get('lname')),
+        new_user = User(id       = random.randrange(100), # cambiare metodo generazione ID
+                        email=email,
+                        username=username,
+                        password=password,
+                        name=name,
+                        last_name=last_name,
+                        user_type= True if request.form.get('user_type') == "1" else False # Operatore ternario
+                        )
 
         db_session.add(new_user)
         db_session.commit()
 
-        return redirect('/sell')
+        return redirect('/login')
     else:
         return render_template('register.html')
 
