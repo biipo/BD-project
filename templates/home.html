@@ -1,9 +1,9 @@
 <h1>HOME</h1>
 <body>
-    <h4>Users...</h4>
-    <ul>
-        {% for element in users_list %}
-            <li>{{ element }}</li>
-        {% endfor %}
-    </ul>
+    <h3>Utente autenticato?</h3>
+    {% if current_user.is_authenticated %}
+    <p>HI {{ current_user.username }}</p>
+    {% endif %}
+    <a href="{{ url_for('login')}}">Authenticate yourself</a>
+    <a href="{{ url_for('logout')}}">Logout</a>
 </body>

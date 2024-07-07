@@ -35,13 +35,14 @@
                 <input class="mb-.5" type="text" name="username" placeholder="Username">
                 <input class="mb-.5" type="text" name="email" placeholder="E-mail">
                 <input class="mb-.5" type="password" name="password" placeholder="Password">
+                <input class="mb-.5" type="password" name="conf-password" placeholder="Confirm Password">
                 <select class="mb-.5" name="user_type">
                     <option selected value="1">Buyer</option>
                     <option value="0">Seller</option>
                 </select>
                 <button type="submit">Login</button>
             </form>
-            <p>{{ error_registration }}</p>
+            <p style="color:red">{{ error_registration }}</p>
             <p>Already have an account? <a href="#">Login</a></p>
         </div>
     </body>

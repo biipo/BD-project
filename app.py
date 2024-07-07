@@ -3,7 +3,7 @@ from tables import User, Product, engine, Base
 from sqlalchemy import create_engine, select, join, update
 from sqlalchemy.orm import Session
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 import random
 import re
@@ -19,6 +19,9 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 app.secret_key = 'jfweerjwi239marameo54:_f,,asd190ud'
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+bcrypt = Bcrypt()
+bcrypt.init_app(app)
 
 # Crea il database
 Base.metadata.create_all(engine)
@@ -39,14 +42,12 @@ db_session = Session(engine)
 
 @app.route('/')
 def start():
-    if current_user.is_authenticated:
-        return redirect('/product-list');
-    return redirect('/register')
+    return redirect('/home')
 
 @app.route('/home')
 def home():
-    users_list = db_session.query(User).all()
-    return render_template('home.html', users_list=users_list)
+    # users_list = db_session.query(User).all()
+    return render_template('home.html')
 
 # route che lista tutti i prodotti in vendita
 @app.route('/products-list')
@@ -56,6 +57,7 @@ def products_list():
 
 # route dei prodotti in vendita
 @app.route('/sell', methods=['GET', 'POST'])
+@login_required
 def sell():
     if request.method == 'POST': # Sono stati inseriti i dati di un prodotto, lo memorizziamo
         product = Product(id=random.randrange(100), # cambiare metodo generazione id prodotto
@@ -83,16 +85,19 @@ def load_user(user_id):
 def login():
     if request.method == 'POST': # ha inserito i dati, li verifichiamo e reindirizziamo di conseguenza
         email = request.form.get('email')
-        password = request.form.get('password')
-        query = select(User).where(User.email == email, User.password == password)
+        password_form = request.form.get('password')
         try:
-            usr = db_session.scalars(query).one()
-            login_user(usr)
+            # La query per trovare l'utente con l'email inserita, "scalars"
+            usr = db_session.scalars(select(User).where(User.email == email)).first()
         except sqalchemy.exc.NoResultFound:
-            return redirect('login.html') # Ritenta il login, aggiungere messaggio di errore nel login
+            return render_template('login.html', error_login="wrong credentials") # Ritenta il login, aggiungere messaggio di errore nel login
+
+        if bcrypt.check_password_hash(usr.password, password_form):
+            login_user(usr)
+        else:
+            return render_template('login.html', error_login="wrong credentials") # Ritenta il login, aggiungere messaggio di errore nel login
+
         return redirect('/home')
-        # else:
-        #     return redirect('/login')
     else: # Carichiamo la pagina per inserire i dati
         return render_template('login.html')
 
@@ -102,52 +107,49 @@ def logout():
     logout_user()
     return redirect('/home') # route HOME da creare
 
-def registration_check(email, username, password, name, last_name):
-    # Pattern da rispettare per l'email
-    pat_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
-
-    email    = request.form.get('email')
-    if not re.match(pat_email, email): # Controlla che l'email segua il pattern "xxx@xxx.xxx"
-        redirect('register.html', error_registration="Invalid email")
-
-    username = request.form.get('username')
-    if len(username) < 1 or len(username) > 16:
-        redirect('register.html', error_registration="Invalid username")
-
-    password = request.form.get('password')
-    lower, upper, digit, special = 0, 0, 0, 0
-    if(len(password) >= 8):
-        for c in password:
-            if c.islower():
-                lower += 1
-            if c.isupper():
-                upper += 1
-            if c.isdigit():
-                digit += 1
-            if c in ["~","`", "!", "@","#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "=", "{", "}", "[", "]", "|", "\\", ";", ":", "<", ">", ",", ".", "/", "?"]:
-                special += 1
-        if (lower < 1 or upper < 1 or digit < 1 or special < 1):
-            redirect('register.html', error_registration="Invalid password")
-
-    pat_name = r'\b[0-9._%+-]\b'
-    name = request.form.get('fname')
-    if():
-        if re.match(pat_name, name):
-            redirect('register.html', error_registration="Invalid name")
-
-    last_name = request.form.get('lname')
-    if():
-        if re.match(pat_name, last_name):
-            redirect('register.html', error_registration="Invalid last name")
-
-    return email, username, password, name, last_name
-
 # route per la registrazione
 @app.route('/register', methods=['GET','POST'])
 def registration():
     if request.method == 'POST':
-        email, username, password, name, last_name = registration_check(request.form.get('email'), request.form.get('username'), request.form.get('password'),
-                                                                        request.form.get('fname'), request.form.get('lname')),
+        # Pattern da rispettare per l'email
+        pat_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+        email = request.form.get('email')
+        if not re.match(pat_email, email): # Controlla che l'email segua il pattern "xxx@xxx.xxx"
+            return render_template('register.html', error_registration="Invalid email")
+
+        username = request.form.get('username')
+        if len(username) < 1 or len(username) > 16:
+            return render_template('register.html', error_registration="Invalid username")
+
+        password = request.form.get('password')
+        conf_password = request.form.get('conf-password')
+        if password != conf_password:
+            return render_template('register.html', error_registration="Password and Confirmation Password do not match")
+        # Controllo della password in chiaro, che abbia le caratteristiche adatte
+        lower, upper, digit, special = 0, 0, 0, 0
+        if(len(password) >= 8):
+            for c in password:
+                if c.islower():
+                    lower += 1
+                if c.isupper():
+                    upper += 1
+                if c.isdigit():
+                    digit += 1
+                if c in ["~","`", "!", "@","#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "=", "{", "}", "[", "]", "|", "\\", ";", ":", "<", ">", ",", ".", "/", "?"]:
+                    special += 1
+            if (lower < 1 or upper < 1 or digit < 1 or special < 1):
+                return render_template('register.html', error_registration="Invalid password")
+        # Salvataggio del hash della password
+        password = bcrypt.generate_password_hash(password)
+
+        name = request.form.get('fname')
+        last_name = request.form.get('lname')
+        pat_name = r'\b[0-9._%+-]\b'
+        if re.match(pat_name, name):
+            return render_template('register.html', error_registration="Invalid name")
+        if re.match(pat_name, last_name):
+            return render_template('register.html', error_registration="Invalid last name")
+
         new_user = User(id       = random.randrange(100), # cambiare metodo generazione ID
                         email=email,
                         username=username,
@@ -160,7 +162,7 @@ def registration():
         db_session.add(new_user)
         db_session.commit()
 
-        return redirect('/login')
+        return redirect('/home') # Da reindirizzare al login
     else:
         return render_template('register.html')
 
