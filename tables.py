@@ -4,6 +4,8 @@ from sqlalchemy import Column, Table, ForeignKey, except_all, null
 from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped, backref
 from sqlalchemy import Integer
 from flask_login import UserMixin
+from exceptions import InvalidCredential
+import re # regular expressions
 
 engine = sq.create_engine('sqlite:///./data.db', echo=True)
 
@@ -11,10 +13,10 @@ engine = sq.create_engine('sqlite:///./data.db', echo=True)
 class Base(DeclarativeBase):
     pass
 
-
-# Le relationship() vengono definite nelle tabelle in cui "arriva" una foreign key (nel senso: se tab 1
-# ha la sua chiave, e poi c'è tab 2 che ha una FK che indica tab 1; in tab 1 dobbiamo mettere una relationship()
-
+"""
+Le relationship() vengono definite nelle tabelle in cui "arriva" una foreign key (nel senso: se tab 1
+ha la sua chiave, e poi c'è tab 2 che ha una FK che indica tab 1; in tab 1 dobbiamo mettere una relationship()
+"""
 class User(Base, UserMixin):
     __tablename__ = 'users'
 
@@ -26,27 +28,60 @@ class User(Base, UserMixin):
     last_name: Mapped[str] = mapped_column(nullable=True)
     user_type: Mapped[bool] = mapped_column()
 
-    def __init__(self, id, email, username, password, name, last_name, user_type):
-        self.id = id
-        self.email = email
-        self.username = username
-        self.password = password
-        self.name = name
-        self.last_name = last_name
+    static_id_counter = 0
+
+    @staticmethod
+    def __email_checker(email: str):
+        pat_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+        if not re.match(pat_email, email): # Controlla che l'email segua il pattern "xxx@xxx.xxx"
+            raise InvalidCredential("Invalid email")
+        return email
+
+    @staticmethod
+    def __username_checker(username: str):
+        if len(username) < 1 or len(username) > 16:
+            raise InvalidCredential("Invalid username")
+        return username
+
+    @staticmethod
+    def __password_checker(password: str):
+        lower, upper, digit, special = 0, 0, 0, 0
+        if(len(password) >= 8):
+            for c in password:
+                if c.islower():
+                    lower += 1
+                if c.isupper():
+                    upper += 1
+                if c.isdigit():
+                    digit += 1
+                if c in ["~","`", "!", "@","#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "=", "{", "}", "[", "]", "|", "\\", ";", ":", "<", ">", ",", ".", "/", "?"]:
+                    special += 1
+            if (lower < 1 or upper < 1 or digit < 1 or special < 1):
+                raise InvalidCredential("Invalid password")
+        else:
+            raise InvalidCredential("Invalid password")
+        # Salvataggio del hash della password
+        return bcrypt.generate_password_hash(password) # Salviamo l'hash della password sul database
+
+    @staticmethod
+    def __name_lastname_checker(name: str, lastname: str): # Controlla che non ci siano numeri o simboli in nome e cognome
+        pat_name = r'\b[0-9._%+-]\b'
+        if re.match(pat_name, name):
+            raise InvalidCredential("Invalid name")
+        if re.match(pat_name, lastname):
+            raise InvalidCredential("Invalid last name")
+        return name, lastname
+
+    def __init__(self, email, username, password, name, last_name, user_type):
+        # Per fare in modo che la variabile sia statica dobbiamo usarla chiamando la classe e NON 'self.'
+        User.static_id_counter += 1
+        self.id = User.static_id_counter
+        self.email = self.__email_checker(email)
+        self.username = self.__username_checker(username)
+        self.password = self.__password_checker(password)
+        self.name, self.last_name = self.__name_lastname_checker(name, last_name)
         self.user_type = user_type
 
-    # Metodi da implementare per il login, non servono perché ereditiamo da UserMixin
-    # def is_authenticated(self): # Ritorna true se le credenziali fornite sono valide
-    #     return 0
-
-    # def is_active(self): # Indica lo stato dell'account (potrebe avere altri stati tipo sospeso/eliminato)
-    #     return super().is_active
-
-    # def is_anonymous(self): # Ritorna True nel caso si tratti di un utente anonimo
-    #     return 0
-
-    # def get_id(self): questo metodo ritorna una STRINGA che identifica univocamente l'utente
-    #     return str(self.id)
 
     def __repr__(self):
         return f"Id:{self.id}, Email:{self.email}, Username:{self.username}, Password:{self.password}, Nome:{self.name}, Cognome:{self.last_name}, Tipo utente:{self.user_type}"
@@ -74,6 +109,20 @@ class Product(Base):
     price: Mapped[float] = mapped_column(nullable=False)
     availability: Mapped[int] = mapped_column(nullable=False)
     descr: Mapped[str] = mapped_column(nullable=True)
+
+    static_id_counter = 0
+
+    def __init__(self, user_id, brand, category_id, product_name, date, price, availability, descr):
+        Product.static_id_counter += 1
+        self.id = Product.static_id_counter
+        self.user_id = user_id
+        self.brand = brand
+        self.category_id = category_id
+        self.product_name = product_name
+        self.date = date
+        self.price = price
+        self.availability = availability
+        self.descr = descr
 
     def __repr__(self):
         return f"Id:{self.id}, Venditore:{self.user_id}, Prodotto:{self.product_name}, Brand:{self.brand}, Messo in vendita: {self.date}, Prezzo:{self.price}€, Quantità in magazzino:{self.availability}, Descrizione:{self.descr}"

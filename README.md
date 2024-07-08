@@ -14,9 +14,7 @@
 - [ ] Se stato ordine completato, rendere possibile inserimento recensione
 
 ### Back-end
-- [ ] Fare autenticazione login, e migliorare registrazione (non ci sono controlli)
-- [ ] Migliorare controlli sugli attributi tabelle
-- [ ] Sessione per utente (per ora c'è solo dopo register e solamente perché dopo viene subito usata nella /sell)
-- [ ] Fare generazione id prodotti (ora è randomica)
-- [ ] Gestire utenti venditori e non venditori (mettere controlli alla registrazione)
-- [x] Sistemare le relationship (non funzionano le join)
+- Migliorare controlli sugli attributi tabelle
+- Fare generazione id prodotti (ora è randomica)
+- Aggiungere controllo sulla route `'/sell'` per utenti NON venditori
+- Fare pagina `'/home'`
