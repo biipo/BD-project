@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="https://matcha.mizu.sh/matcha.css">
+        <link rel="stylesheet" href="../static/css/styles2.css">
+        <link href="../static/icons/font/bootstrap-icons.css" rel="stylesheet">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
+        
+        <link rel="icon" href="../static/img/cart.gif">
+        
+        <title>Profile</title>
+    </head>
+    <body>
+        <menu>
+            <li><a href="home.html">Store</a></li>
+            <li><a href="cart.html"><i class="bi bi-cart3"></i> Cart</a></li>
+            <li>
+                <a href="#">Menu</a>
+                <menu>
+                    <li class="selected"><a href="profile.html"><i class="bi bi-person-fill"></i> Profile</a></li>
+                    <li><a href="orders.html"><i class="bi bi-box-seam"></i> Orders</a></li>
+                    <li><a href="sell.html"><i class="bi bi-cash-coin"></i> Sell</a></li>
+                    <li class="attention"><a href="#"><i class="bi bi-box-arrow-left"></i> Logout</a></li>
+                </menu>
+            </li>
+            <li class="m-0"><input type="search" placeholder="Search"></li>
+        </menu>
+        <div class="container-big">
+            <h1>Profile</h1>
+            <div class="flex">
+                <div class="px-2">
+                    <fieldset>
+                        <legend>Account</legend>
+                        <p id="username">@totti24</p>
+                        <table>
+                            <tr>
+                                <td><p class="bold muted">Name</p></td>
+                                <td><p class="">Francesco Totti</p></td>
+                            </tr>
+                            <tr>
+                                <td><p class="bold muted">E-mail</p></td>
+                                <td><p class="">francesco.totti@gov.it</p></td>
+                            </tr>
+                            <tr>
+                                <td><p class="bold muted">Type</p></td>
+                                <td><p class="">Buyer</p></td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                </div>
+                <div class="px-2">
+                    <fieldset>
+                        <legend>Addresses</legend>
+                        <div class="address">
+                            <p class="bold" id="name">Francesco Totti</p>
+                            <p id="street">Via Nizza 18</p>
+                            <p id="city">Roma, RM 00198</p>
+                            <p id="country">Italia</p>
+                        </div>
+                        <div class="address">
+                            <p class="bold" id="name">Francesco Totti</p>
+                            <p id="street">Via dei Castani 238a</p>
+                            <p id="city">Roma, RM 00171</p>
+                            <p id="country">Italia</p>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="flex">
+                <div class="px-2">
+                    test
+                </div>
+            </div> 
+        </div>
+    </body>
+</html>

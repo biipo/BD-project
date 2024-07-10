@@ -1,3 +1,6 @@
+body {
+    font-family: "Onest";
+}
 .container {
     width: 50%;
     margin: 0 auto;
@@ -22,4 +25,21 @@
 
 .col-7 {
     flex: 70%;
+}
+
+#username {
+    font-size: 20pt;
+}
+
+.address {
+    min-width: 10em;
+    border: 2px solid var(--bd-muted);
+    border-radius: var(--bd-radius);
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.address p {
+    min-width: 10em;
+    margin:0;
 }
