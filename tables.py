@@ -8,7 +8,7 @@ from exceptions import InvalidCredential
 import re # regular expressions
 
 engine = sq.create_engine('sqlite:///./data.db', echo=True)
-
+global product_id_counter
 
 class Base(DeclarativeBase):
     pass
@@ -20,7 +20,7 @@ ha la sua chiave, e poi c'è tab 2 che ha una FK che indica tab 1; in tab 1 dobb
 class User(Base, UserMixin):
     __tablename__ = 'users'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(unique=True)
     username: Mapped[str] = mapped_column()
     password: Mapped[str] = mapped_column()
@@ -61,6 +61,7 @@ class User(Base, UserMixin):
         else:
             raise InvalidCredential("Invalid password")
         # Salvataggio del hash della password
+        from app import bcrypt
         return bcrypt.generate_password_hash(password) # Salviamo l'hash della password sul database
 
     @staticmethod
@@ -100,7 +101,7 @@ class Category(Base):
 class Product(Base):
     __tablename__ = 'products'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
     brand: Mapped[str] = mapped_column(nullable=True)
     category_id: Mapped[int] = mapped_column(ForeignKey(Category.id))
@@ -110,11 +111,8 @@ class Product(Base):
     availability: Mapped[int] = mapped_column(nullable=False)
     descr: Mapped[str] = mapped_column(nullable=True)
 
-    static_id_counter = 0
 
     def __init__(self, user_id, brand, category_id, product_name, date, price, availability, descr):
-        Product.static_id_counter += 1
-        self.id = Product.static_id_counter
         self.user_id = user_id
         self.brand = brand
         self.category_id = category_id

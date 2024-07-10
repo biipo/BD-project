@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item.product_name }} - Product Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .container {
+            display: flex;
+            max-width: 1200px;
+            background-color: #1f1f1f;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+        }
+        .product-image {
+            flex: 1;
+            padding: 20px;
+        }
+        .product-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .product-details {
+            flex: 2;
+            padding: 20px;
+        }
+        .product-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .product-brand {
+            font-size: 18px;
+            color: #888888;
+            margin-bottom: 10px;
+        }
+        .product-price {
+            font-size: 20px;
+            color: #4caf50;
+            margin: 10px 0;
+        }
+        .product-availability {
+            font-size: 16px;
+            color: #ff5252;
+            margin: 10px 0;
+        }
+        .product-availability.in-stock {
+            color: #4caf50;
+        }
+        .quantity-container {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .quantity-label {
+            margin-right: 10px;
+        }
+        .quantity-input {
+            width: 50px;
+            text-align: center;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background-color: #333;
+            color: #ffffff;
+        }
+        .add-to-cart-btn {
+            display: inline-block;
+            background-color: #4caf50;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .add-to-cart-btn:hover {
+            background-color: #45a049;
+        }
+        .product-description {
+            margin-top: 20px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="product-image">
+            <img src="{{ item.image_url }}" alt="{{ item.title }}">
+        </div>
+        <div class="product-details">
+            <div class="product-title">{{ item.product_name }}</div>
+            <div class="product-brand">{{ item.brand }}</div>
+            <div class="product-price">{{ item.price }}€</div>
+            <div class="product-availability">
+                {{ item.availability }} pezzi
+            </div>
+            <div class="quantity-container">
+                <label for="quantity" class="quantity-label">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" class="quantity-input" value="1" min="1">
+            </div>
+            <a href="#" class="add-to-cart-btn">Add to Cart</a>
+            <div class="product-description"> Descrizione:<br>
+                {{ item.descr }}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
