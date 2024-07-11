@@ -38,7 +38,15 @@
                 <input class="mb-.5" name="password" type="password" placeholder="Password">
                 <button type="submit">Login</button>
             </form>
-            <p style="color:red">{{ error_login }}</p>
+            {% with errors = get_flashed_messages(category_filter=["error"]) %}
+            {% if errors != None %}
+                <ul style="color:red"><!-- serve una <ul> perché i messaggi li dobbiamo iterare con un for, ma sarà sempre 1 msg -->
+                    {% for msg in errors %}
+                        {{ msg }}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {% endwith %}
             <p>Don't have an account? <a href="#">Register</a></p>
         </div>
     </body>

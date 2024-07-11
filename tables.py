@@ -4,7 +4,7 @@ from sqlalchemy import Column, Table, ForeignKey, except_all, null
 from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped, backref
 from sqlalchemy import Integer
 from flask_login import UserMixin
-from exceptions import InvalidCredential
+from exceptions import InvalidCredential, MissingData
 import re # regular expressions
 
 engine = sq.create_engine('sqlite:///./data.db', echo=True)
@@ -94,6 +94,10 @@ class Category(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(nullable=False)
 
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+
     def __repr__(self):
         return f"{self.id} {self.name}"
 
@@ -110,17 +114,29 @@ class Product(Base):
     price: Mapped[float] = mapped_column(nullable=False)
     availability: Mapped[int] = mapped_column(nullable=False)
     descr: Mapped[str] = mapped_column(nullable=True)
+    image_filename: Mapped[str] = mapped_column(nullable=False)
 
 
-    def __init__(self, user_id, brand, category_id, product_name, date, price, availability, descr):
+    def __init__(self, user_id, brand, category_id, product_name, date, price, availability, descr, image_filename):
+        if user_id is None:
+            raise MissingData('Missing user id')
         self.user_id = user_id
         self.brand = brand
+        if category_id is None:
+            raise MissingData('Missing category id')
         self.category_id = category_id
         self.product_name = product_name
         self.date = date
+        if price is None:
+            raise MissingData('Missing price')
         self.price = price
+        if availability is None:
+            raise MissingData('Missing quantity')
         self.availability = availability
         self.descr = descr
+        if image_filename is None:
+            raise MissingData('Missing image')
+        self.image_filename = image_filename
 
     def __repr__(self):
         return f"Id:{self.id}, Venditore:{self.user_id}, Prodotto:{self.product_name}, Brand:{self.brand}, Messo in vendita: {self.date}, Prezzo:{self.price}€, Quantità in magazzino:{self.availability}, Descrizione:{self.descr}"

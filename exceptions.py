@@ -8,5 +8,13 @@ class InvalidCredential(Exception):
         self.message = message
         super().__init__(self.message)
     
-    def __repr__():
+    def __repr__(self):
+        return message
+
+class MissingData(Exception):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+    
+    def __repr__(self):
         return message
