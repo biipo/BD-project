@@ -14,116 +14,12 @@
     
     <link rel="icon" href="../static/img/cart.gif">
 
-    <title>{{ item.product_name }} - Product Details</title>
+    <title>{{ item.product_name }} : Store</title>
     <style>
-        #price {
-            font-size: 24pt;
-        }
-        #brand {
-        }
-        .quantity-container {
-        }
-        .quantity-label {
-        }
         .quantity-input {
             width: 5em;
         }
-
     </style>
-    <!--
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-        .container {
-            display: flex;
-            max-width: 1200px;
-            background-color: #1f1f1f;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            padding: 20px;
-        }
-        .product-image {
-            flex: 1;
-            padding: 20px;
-        }
-        .product-image img {
-            width: 100%;
-            height: auto;
-            border-radius: 10px;
-        }
-        .product-details {
-            flex: 2;
-            padding: 20px;
-        }
-        .product-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .product-brand {
-            font-size: 18px;
-            color: #888888;
-            margin-bottom: 10px;
-        }
-        .product-price {
-            font-size: 20px;
-            color: #4caf50;
-            margin: 10px 0;
-        }
-        .product-availability {
-            font-size: 16px;
-            color: #ff5252;
-            margin: 10px 0;
-        }
-        .product-availability.in-stock {
-            color: #4caf50;
-        }
-        .quantity-container {
-            display: flex;
-            align-items: center;
-            margin: 20px 0;
-        }
-        .quantity-label {
-            margin-right: 10px;
-        }
-        .quantity-input {
-            width: 50px;
-            text-align: center;
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #333;
-            background-color: #333;
-            color: #ffffff;
-        }
-        .add-to-cart-btn {
-            display: inline-block;
-            background-color: #4caf50;
-            color: #ffffff;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        .add-to-cart-btn:hover {
-            background-color: #45a049;
-        }
-        .product-description {
-            margin-top: 20px;
-            font-size: 16px;
-            line-height: 1.6;
-        }
-    </style>
-    -->
 </head>
 <body>
     {% include 'nav.html' %}
@@ -136,9 +32,9 @@
             <div class="col-7 m-1">
                 <div class="product-details">
                     <div id="brand" class="muted">{{ item.brand }}</div>
-                    <div id="" class="larger bold mt-1"><p class="p-.25 bg-success inline block border-r">{{ item.price }}€</p></div>
+                    <div id="" class="larger bold mt-1"><p class="py-.25 px-.5 bg-success inline block border-r">{{ item.price }}€</p></div>
                     <div class="product-availability mt-.5">
-                        <p class="{% if item.availability <=5 %} bg-severe border-r {% endif %}">{{ item.availability }} pezzi</p>
+                        <p class="{% if item.availability <=5 %} bg-severe border-r {% endif %}">{{ item.availability }} pezzi disponibili</p>
                     </div>
                     <div class="quantity-container mt-.25">
                         <label for="quantity" class="quantity-label inline block pr-.5 ">Quantity:</label>
@@ -157,30 +53,6 @@
                 </div>
             </div>
         </div>
-        <!--
-        <div class="product-image">
-            <img src="{{ url_for('uploaded_file', filename=item.image_filename)}}">
-        </div>
-        <div class="product-details">
-            <div class="product-title">{{ item.product_name }}</div>
-            <div class="product-brand">{{ item.brand }}</div>
-            <div class="product-price">{{ item.price }}€</div>
-            <div class="product-availability">
-                {{ item.availability }} pezzi
-            </div>
-            <div class="quantity-container">
-                <label for="quantity" class="quantity-label">Quantity:</label>
-                <input type="number" id="quantity" name="quantity" class="quantity-input" value="1" min="1">
-            </div>
-            <button href="#" class="" type="submit">Add to Cart</button>
-            <div class="seller-info">
-                <p class="muted">Sold by:</p><a href="#">{{seller.username}}</a>
-            </div> 
-            <div class="product-description"> Descrizione:<br>
-                {{ item.descr }}
-            </div>
-        </div>
-        -->
     </div>
 </body>
 </html>

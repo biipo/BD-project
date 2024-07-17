@@ -19,7 +19,7 @@
 - [ ] Zoom in
     - [ ] Fixare nuovo layout (è ancora bruttino)
 - [ ] Pagina home
-    - [ ] Cambiare css
+    - [x] Cambiare css
 - [ ] Template navbar
     - [ ] Indicare pagina selezionata
 

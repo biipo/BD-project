@@ -52,3 +52,15 @@ body {
 .border-r {
     border-radius: var(--bd-radius);
 }
+
+article {
+  margin: 1rem;
+  max-width: 33.3%;
+}
+
+article img {
+    padding: 1em;
+    max-width: 200px;
+    max-height: 200px;
+}
+
