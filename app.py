@@ -61,7 +61,9 @@ def home():
 
 @app.route('/product-details/<int:pid>')
 def product_details(pid):
-    return render_template('zoom_in.html', item=db_session.scalar(select(Product).where(Product.id == pid)))
+    item = db_session.scalar(select(Product).where(Product.id == pid))
+    seller = db_session.scalar(select(User).where(User.id == item.user_id))
+    return render_template('zoom_in.html', item=item, seller=seller)
 
 # Controlla se il file è di tipo corretto (foto/gif)
 def allowed_file(filename):

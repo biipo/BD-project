@@ -43,3 +43,12 @@ body {
     min-width: 10em;
     margin:0;
 }
+
+.border {
+    border: 2px solid var(--bd-muted);
+    border-radius: var(--bd-radius);
+}
+
+.border-r {
+    border-radius: var(--bd-radius);
+}

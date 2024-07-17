@@ -3,7 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://matcha.mizu.sh/matcha.css">
+    <link rel="stylesheet" href="../static/css/styles2.css">
+    <link href="../static/icons/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
+    
+    <link rel="icon" href="../static/img/cart.gif">
+
     <title>{{ item.product_name }} - Product Details</title>
+    <style>
+        #price {
+            font-size: 24pt;
+        }
+        #brand {
+        }
+        .quantity-container {
+        }
+        .quantity-label {
+        }
+        .quantity-input {
+            width: 5em;
+        }
+
+    </style>
+    <!--
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -96,9 +123,41 @@
             line-height: 1.6;
         }
     </style>
+    -->
 </head>
 <body>
-    <div class="container">
+    {% include 'nav.html' %}
+    <div class="container-big">
+        <h1>{{ item.product_name }}</h1>
+        <div class="flex">
+            <div class="col-3 m-1">
+                <img class="mw-100 mh-100" src="{{ url_for('uploaded_file', filename=item.image_filename)}}"/>
+            </div>
+            <div class="col-7 m-1">
+                <div class="product-details">
+                    <div id="brand" class="muted">{{ item.brand }}</div>
+                    <div id="" class="larger bold mt-1"><p class="p-.25 bg-success inline block border-r">{{ item.price }}€</p></div>
+                    <div class="product-availability mt-.5">
+                        <p class="{% if item.availability <=5 %} bg-severe border-r {% endif %}">{{ item.availability }} pezzi</p>
+                    </div>
+                    <div class="quantity-container mt-.25">
+                        <label for="quantity" class="quantity-label inline block pr-.5 ">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" class="quantity-input inline block" value="1" min="1" max="{{ item.availability }}">
+                    </div>
+                    <button href="#" class="" type="submit">Add to Cart</button>
+                    <div class="product-description mt-.5"> 
+                        <details open>
+                            <summary>Description</summary>
+                            <p>{{ item.descr }}<p>
+                        </details>
+                    </div>
+                    <div class="seller-info small py-.25">
+                        <p class="muted inline block">Sold by: <a href="#">{{seller.username}}</a></p>
+                    </div> 
+                </div>
+            </div>
+        </div>
+        <!--
         <div class="product-image">
             <img src="{{ url_for('uploaded_file', filename=item.image_filename)}}">
         </div>
@@ -113,11 +172,15 @@
                 <label for="quantity" class="quantity-label">Quantity:</label>
                 <input type="number" id="quantity" name="quantity" class="quantity-input" value="1" min="1">
             </div>
-            <a href="#" class="add-to-cart-btn">Add to Cart</a>
+            <button href="#" class="" type="submit">Add to Cart</button>
+            <div class="seller-info">
+                <p class="muted">Sold by:</p><a href="#">{{seller.username}}</a>
+            </div> 
             <div class="product-description"> Descrizione:<br>
                 {{ item.descr }}
             </div>
         </div>
+        -->
     </div>
 </body>
 </html>
