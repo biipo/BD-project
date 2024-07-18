@@ -1,50 +1,32 @@
-<!DOCTYPE html>
-<html data-bs-theme="dark">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        <link rel="stylesheet" href="https://matcha.mizu.sh/matcha.css">
-        <link rel="stylesheet" href="../static/css/styles2.css">
-        <link href="../static/icons/font/bootstrap-icons.css" rel="stylesheet">
-        
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
-        
-        <link rel="icon" href="../static/img/cart.gif">
-        
-        <title>Sign up</title>
-    </head>
-    <body>
-        {% include 'nav.html' %}
-        <div class="pt-.5 container">
-            <h1>Register</h1>
-            <form method="post" onsubmit="">
-                <div class="mb-.5 flex">
-                    <input class="mr-.25" type="text" name="fname" placeholder="First name">
-                    <input class="ml-.25" type="text" name="lname" placeholder="Last name">
-                </div>
-                <input class="mb-.5" type="text" name="username" placeholder="Username">
-                <input class="mb-.5" type="text" name="email" placeholder="E-mail">
-                <input class="mb-.5" type="password" name="password" placeholder="Password">
-                <input class="mb-.5" type="password" name="conf-password" placeholder="Confirm Password">
-                <select class="mb-.5" name="user_type">
-                    <option selected value="Buyer">Buyer</option>
-                    <option value="Seller">Seller</option>
-                </select>
-                <button type="submit">Sign up</button>
-            </form>
-            {% with errors = get_flashed_messages(category_filter=["error"]) %}
-            {% if errors != None %}
-                <ul style="color:red"><!-- serve una <ul> perché i messaggi li dobbiamo iterare con un for, ma sarà sempre 1 msg -->
-                    {% for msg in errors %}
-                        {{ msg }}
-                    {% endfor %}
-                </ul>
-            {% endif %}
-            {% endwith %}
-            <p class="centered">Already have an account? <a href="/login">Log in</a></p>
-        </div>
-    </body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Sign Up{% endblock %}
+{% block content %}
+    <div class="pt-.5 container">
+        <h1>Register</h1>
+        <form method="post" onsubmit="">
+            <div class="mb-.5 flex">
+                <input class="mr-.25" type="text" name="fname" placeholder="First name">
+                <input class="ml-.25" type="text" name="lname" placeholder="Last name">
+            </div>
+            <input class="mb-.5" type="text" name="username" placeholder="Username">
+            <input class="mb-.5" type="text" name="email" placeholder="E-mail">
+            <input class="mb-.5" type="password" name="password" placeholder="Password">
+            <input class="mb-.5" type="password" name="conf-password" placeholder="Confirm Password">
+            <select class="mb-.5" name="user_type">
+                <option selected value="Buyer">Buyer</option>
+                <option value="Seller">Seller</option>
+            </select>
+            <button type="submit">Sign up</button>
+        </form>
+        {% with errors = get_flashed_messages(category_filter=["error"]) %}
+        {% if errors %}
+            <ul class="flash danger"><!-- serve una <ul> perché i messaggi li dobbiamo iterare con un for, ma sarà sempre 1 msg -->
+                {% for msg in errors %}
+                    {{ msg }}
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+        <p class="centered">Already have an account? <a href="/login">Log in</a></p>
+    </div>
+{% endblock %}

@@ -27,8 +27,8 @@
 
 
 ### Back-end
-- Migliorare controlli sugli attributi tabelle
-- Fare generazione id prodotti (ora è randomica)
-- Aggiungere controllo sulla route `'/sell'` per utenti NON venditori
-- Fare pagina `'/home'`
-- Fixare registrazione
+- [ ] Migliorare controlli sugli attributi tabelle
+- [ ] Fare generazione id prodotti (ora è randomica)
+- [ ] Aggiungere controllo sulla route `'/sell'` per utenti NON venditori
+- [ ] Fare pagina `'/home'`
+- [x] Fixare registrazione

@@ -1,12 +1,10 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
-from tables import User, Product, engine, Base
+from tables import User, Product, Base, Product, User, Category
 from sqlalchemy import create_engine, select, join, update
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import sessionmaker, declarative_base
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
-from tables import Product, User, Category
-
 import datetime
 import os.path
 
@@ -28,9 +26,12 @@ login_manager.init_app(app)
 bcrypt = Bcrypt()
 bcrypt.init_app(app)
 
-# Crea il database
+# Connette al database
+engine = create_engine('sqlite:///./data.db', echo=True)
+Base = declarative_base()
 Base.metadata.create_all(engine)
-db_session = Session(engine)
+Session = sessionmaker(bind=engine)
+db_session = Session()
 
 def db_init():
     if db_session.scalars(select(Category)).all() == None:
@@ -169,11 +170,11 @@ def logout():
 def signup():
     if request.method == 'POST':
         username = request.form.get('username')
-
         password = request.form.get('password')
         conf_password = request.form.get('conf-password')
+
         if password != conf_password:
-            flash('Password and Confirmation Password do not match', 'error')
+            flash('Password and confirmation password do not match', 'error')
             return redirect(request.url)
 
         # Nel costruttore della classe User chiamiamo metodi che controllano la correttenzza dei dati e in caso lanciano un'eccezione
@@ -181,11 +182,11 @@ def signup():
         from exceptions import InvalidCredential
         try:
             new_user = User(email= request.form.get('email'),
-                            username= request.form.get('username'),
+                            username= username,
                             password= bcrypt.generate_password_hash(password),
                             name= request.form.get('fname'),
                             last_name= request.form.get('lname'),
-                            user_type= (True if request.form.get('user_type') == "Buyer" else False)) # Operatore ternario
+                            user_type= (request.form.get('user_type') == "Buyer")) # Operatore ternario
         except InvalidCredential as err:
             flash(err.message, 'error') # il primo è il messaggio che mandiamo e il secondo la tipologia del messaggio
             return redirect(request.url)

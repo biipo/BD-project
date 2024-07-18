@@ -1,40 +1,22 @@
-<!DOCTYPE html>
-<html data-bs-theme="dark">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
-
-        <link rel="stylesheet" href="https://matcha.mizu.sh/matcha.css">
-        <link rel="stylesheet" href="../static/css/styles2.css">
-        <link href="../static/icons/font/bootstrap-icons.css" rel="stylesheet">
-
-        <link rel="icon" href="../static/img/cart.gif">
-        
-        <title>Login</title>
-    </head>
-    <body>
-        {% include 'nav.html' %}
-        <div class="pt-.5 container">
-            <h1>Login</h1>
-            <form method="post" onsubmit="">
-                <input class="mb-.5" name="email" type="text" placeholder="Email">
-                <input class="mb-.5" name="password" type="password" placeholder="Password">
-                <button type="submit">Log in</button>
-            </form>
-            {% with errors = get_flashed_messages(category_filter=["error"]) %}
-            {% if errors != None %}
-                <ul style="color:red"><!-- serve una <ul> perché i messaggi li dobbiamo iterare con un for, ma sarà sempre 1 msg -->
-                    {% for msg in errors %}
-                        {{ msg }}
-                    {% endfor %}
-                </ul>
-            {% endif %}
-            {% endwith %}
-            <p class="centered">Don't have an account? <a href="/signup">Sign up</a></p>
-        </div>
-    </body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+    <div class="pt-.5 container">
+        <h1>Login</h1>
+        <form method="post" onsubmit="">
+            <input class="mb-.5" name="email" type="text" placeholder="Email">
+            <input class="mb-.5" name="password" type="password" placeholder="Password">
+            <button type="submit">Log in</button>
+        </form>
+        {% with errors = get_flashed_messages(category_filter=["error"]) %}
+        {% if errors %}
+            <ul class="flash danger"><!-- serve una <ul> perché i messaggi li dobbiamo iterare con un for, ma sarà sempre 1 msg -->
+                {% for msg in errors %}
+                    {{ msg }}
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+        <p class="centered">Don't have an account? <a href="/signup">Sign up</a></p>
+    </div>
+{% endblock %}

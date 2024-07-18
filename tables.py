@@ -28,8 +28,6 @@ class User(Base, UserMixin):
     last_name: Mapped[str] = mapped_column(nullable=True)
     user_type: Mapped[bool] = mapped_column()
 
-    static_id_counter = 0
-
     @staticmethod
     def __email_checker(email: str):
         pat_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
@@ -74,9 +72,6 @@ class User(Base, UserMixin):
         return name, lastname
 
     def __init__(self, email, username, password, name, last_name, user_type):
-        # Per fare in modo che la variabile sia statica dobbiamo usarla chiamando la classe e NON 'self.'
-        User.static_id_counter += 1
-        self.id = User.static_id_counter
         self.email = self.__email_checker(email)
         self.username = self.__username_checker(username)
         self.password = self.__password_checker(password)
