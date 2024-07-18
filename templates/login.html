@@ -17,26 +17,13 @@
         <title>Login</title>
     </head>
     <body>
-        <menu>
-            <li><a href="#">Store</a></li>
-            <li><a href="#"><i class="bi bi-cart3"></i> Cart</a></li>
-            <li>
-                <a href="#">Menu</a>
-                <menu>
-                    <li><a href="#"><i class="bi bi-person-fill"></i> Profile</a></li>
-                    <li><a href="#"><i class="bi bi-box-seam"></i> Orders</a></li>
-                    <li><a href="#"><i class="bi bi-cash-coin"></i> Sell</a></li>
-                    <li class="attention"><a href="#"><i class="bi bi-box-arrow-left"></i> Logout</a></li>
-                </menu>
-            </li>
-            <li class="m-0"><input type="search" placeholder="Search"></li>
-        </menu>
+        {% include 'nav.html' %}
         <div class="pt-.5 container">
             <h1>Login</h1>
             <form method="post" onsubmit="">
                 <input class="mb-.5" name="email" type="text" placeholder="Email">
                 <input class="mb-.5" name="password" type="password" placeholder="Password">
-                <button type="submit">Login</button>
+                <button type="submit">Log in</button>
             </form>
             {% with errors = get_flashed_messages(category_filter=["error"]) %}
             {% if errors != None %}
@@ -47,7 +34,7 @@
                 </ul>
             {% endif %}
             {% endwith %}
-            <p>Don't have an account? <a href="#">Register</a></p>
+            <p class="centered">Don't have an account? <a href="/signup">Sign up</a></p>
         </div>
     </body>
 </html>

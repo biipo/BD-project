@@ -22,7 +22,7 @@ class User(Base, UserMixin):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(unique=True)
-    username: Mapped[str] = mapped_column()
+    username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str] = mapped_column()
     name: Mapped[str] = mapped_column()
     last_name: Mapped[str] = mapped_column(nullable=True)
@@ -47,7 +47,7 @@ class User(Base, UserMixin):
     def __password_checker(password: str):
         lower, upper, digit, special = 0, 0, 0, 0
         if(len(password) >= 8):
-            for c in password:
+            for c in str(password):
                 if c.islower():
                     lower += 1
                 if c.isupper():

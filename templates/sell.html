@@ -17,65 +17,52 @@
         <title>Sell</title>
     </head>
     <body>
-        <menu>
-            <li><a href="#">Store</a></li>
-            <li><a href="#"><i class="bi bi-cart3"></i> Cart</a></li>
-            <li>
-                <a href="#">Menu</a>
-                <menu>
-                    <li><a href="#"><i class="bi bi-person-fill"></i> Profile</a></li>
-                    <li><a href="#"><i class="bi bi-box-seam"></i> Orders</a></li>
-                    <li class="selected"><a href="#"><i class="bi bi-cash-coin"></i> Sell</a></li>
-                    <li class="attention"><a href="#"><i class="bi bi-box-arrow-left"></i> Logout</a></li>
-                </menu>
-            </li>
-            <li class="m-0"><input type="search" placeholder="Search"></li>
-        </menu>
+        {% include 'nav.html' %}
         <div class="container-big">
             <h1>Sell a product</h1>
-            <div class="flex">
-                <form method="post" onsubmit="" enctype="multipart/form-data">
+            <form method="post" onsubmit="" enctype="multipart/form-data">
+                <div class="flex">
                     <div class="col-3 m-1">
                         <img class="mw-100 mh-100" src="../static/img/300x300.svg"/>
                         <input type="file" name="image_file">
                     </div>
                     <div class="col-7 m-1">
-                            <fieldset>
-                                <legend>Details</legend>
-                                <div class="mb-.5 flex">
-                                    <input title="Product name" class="mr-.25" type="text" name="name" placeholder="Product name">
-                                    <input title="Brand" class="ml-.25" type="text" name="brand" placeholder="Brand">
-                                </div>
-                                <select class="mb-.5" name="category">
-                                    <option selected disabled>Product type</option>
-                                    <option value="1">Arts</option>
-                                    <option value="2">Personal Care</option>
-                                    <option value="3">Electronics</option>
-                                    <option value="4">Music</option>
-                                    <option value="5">Sports</option>
-                                    <option value="6">Movies & TV</option>
-                                    <option value="7">Software</option>
-                                    <option value="8">Games</option>
-                                    <option value="9">House</option>
-                                    <option value="10">DIY</option>
-                                </select>
-                                <input class="mb-.5" title="Price (€)" type="number" min="1" step="any" name="price" placeholder="Price (€)">
-                                <input class="mb-.5" title="Availability" type="number" min="1" step="any" name="availability" placeholder="Quantity">
-                                <textarea class="mb-.5" title="Description" name="description" placeholder="Description"></textarea>
-                                <button type="submit" value="Upload">Sell</button>
-                                {% with errors = get_flashed_messages(category_filter=["error"]) %}
-                                {% if errors != None %}
-                                    <ul style="color:red"><!-- serve una <ul> perché i messaggi li dobbiamo iterare con un for, ma sarà sempre 1 msg -->
-                                        {% for msg in errors %}
-                                            {{ msg }}
-                                        {% endfor %}
-                                    </ul>
-                                {% endif %}
-                                {% endwith %}
-                            </fieldset>
-                </form>
+                        <fieldset>
+                            <legend>Details</legend>
+                            <div class="mb-.5 flex">
+                                <input title="Product name" class="mr-.25" type="text" name="name" placeholder="Product name">
+                                <input title="Brand" class="ml-.25" type="text" name="brand" placeholder="Brand">
+                            </div>
+                            <select class="mb-.5" name="category">
+                                <option selected disabled>Product type</option>
+                                <option value="1">Arts</option>
+                                <option value="2">Personal Care</option>
+                                <option value="3">Electronics</option>
+                                <option value="4">Music</option>
+                                <option value="5">Sports</option>
+                                <option value="6">Movies & TV</option>
+                                <option value="7">Software</option>
+                                <option value="8">Games</option>
+                                <option value="9">House</option>
+                                <option value="10">DIY</option>
+                            </select>
+                            <input class="mb-.5" title="Price (€)" type="number" min="1" step="any" name="price" placeholder="Price (€)">
+                            <input class="mb-.5" title="Availability" type="number" min="1" step="any" name="availability" placeholder="Quantity">
+                            <textarea class="mb-.5" title="Description" name="description" placeholder="Description"></textarea>
+                            <button type="submit" value="Upload">Sell</button>
+                            {% with errors = get_flashed_messages(category_filter=["error"]) %}
+                            {% if errors != None %}
+                                <ul style="color:red"><!-- serve una <ul> perché i messaggi li dobbiamo iterare con un for, ma sarà sempre 1 msg -->
+                                    {% for msg in errors %}
+                                        {{ msg }}
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            {% endwith %}
+                        </fieldset>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </body>
 </html>

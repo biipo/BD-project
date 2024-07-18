@@ -14,24 +14,10 @@
         
         <link rel="icon" href="../static/img/cart.gif">
         
-        <title>Register</title>
+        <title>Sign up</title>
     </head>
     <body>
-        <menu>
-            <li><a href="#">Store</a></li>
-            <li><a href="#"><i class="bi bi-cart3"></i> Cart</a></li>
-            <li>
-                <a href="#">Menu</a>
-                <menu>
-                    <li><a href="#"><i class="bi bi-person-fill"></i> Profile</a></li>
-                    <li><a href="#"><i class="bi bi-box-seam"></i> Orders</a></li>
-                    <li><a href="#"><i class="bi bi-cash-coin"></i> Sell</a></li>
-                    <li class="attention"><a href="#"><i class="bi bi-box-arrow-left"></i> Logout</a></li>
-                </menu>
-            </li>
-            <li class="m-0"><input type="search" placeholder="Search"></li>
-        </menu>
-        <center>
+        {% include 'nav.html' %}
         <div class="pt-.5 container">
             <h1>Register</h1>
             <form method="post" onsubmit="">
@@ -47,7 +33,7 @@
                     <option selected value="Buyer">Buyer</option>
                     <option value="Seller">Seller</option>
                 </select>
-                <button type="submit">Login</button>
+                <button type="submit">Sign up</button>
             </form>
             {% with errors = get_flashed_messages(category_filter=["error"]) %}
             {% if errors != None %}
@@ -58,8 +44,7 @@
                 </ul>
             {% endif %}
             {% endwith %}
-            <p>Already have an account? <a href="#">Login</a></p>
+            <p class="centered">Already have an account? <a href="/login">Log in</a></p>
         </div>
-        </center>
     </body>
 </html>

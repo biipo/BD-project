@@ -21,6 +21,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Configurazioni per il login manager
 app.secret_key = 'jfweerjwi239marameo54:_f,,asd190ud'
 login_manager = LoginManager()
+login_manager.login_view = 'login'
 login_manager.init_app(app)
 
 # Usato per l'hash sulle password
@@ -119,9 +120,17 @@ def load_user(user_id):
     return db_session.scalar(select(User).where(User.id == int(user_id))) # Dovrebbe ritornare 'None' se l'ID non è valido
 
 @app.route('/profile')
-# @login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
+@login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
 def profile():
+    #if not current_user.is_authenticated:
+    #    return redirect(url_for("login"))
     return render_template('profile.html')
+
+@app.route('/user/<username>')
+def user(username):
+    user = db_session.scalar(select(User).where(User.username == str(username)))
+    return render_template('user.html', user=user)
+
 
 # route del login
 @app.route('/login', methods=['GET', 'POST'])
@@ -173,7 +182,7 @@ def signup():
         try:
             new_user = User(email= request.form.get('email'),
                             username= request.form.get('username'),
-                            password= password,
+                            password= bcrypt.generate_password_hash(password),
                             name= request.form.get('fname'),
                             last_name= request.form.get('lname'),
                             user_type= (True if request.form.get('user_type') == "Buyer" else False)) # Operatore ternario

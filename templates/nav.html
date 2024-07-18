@@ -1,13 +1,15 @@
 <menu>
-    <li><a href="#">Store</a></li>
-    <li><a href="#"><i class="bi bi-cart3"></i> Cart</a></li>
+    <li><a href="/home">Store</a></li>
+    <li><a href="/cart"><i class="bi bi-cart3"></i> Cart</a></li>
     <li>
         <a href="#">Menu</a>
         <menu>
-            <li><a href="#"><i class="bi bi-person-fill"></i> Profile</a></li>
-            <li><a href="#"><i class="bi bi-box-seam"></i> Orders</a></li>
-            <li class=""><a href="#"><i class="bi bi-cash-coin"></i> Sell</a></li>
-            <li class="attention"><a href="#"><i class="bi bi-box-arrow-left"></i> Logout</a></li>
+            <li class="{% if request.path == "profile" %} selected {% endif %}"><a href="/profile"><i class="bi bi-person-fill"></i> Profile</a></li>
+            <li><a href="/orders"><i class="bi bi-box-seam"></i> Orders</a></li>
+            <li><a href="/sell"><i class="bi bi-cash-coin"></i> Sell</a></li>
+            {% if current_user.is_authenticated %}
+                <li class="attention"><a href="/logout"><i class="bi bi-box-arrow-left"></i> Logout</a></li>
+            {% endif %}
         </menu>
     </li>
     <li class="m-0"><input type="search" placeholder="Search"></li>

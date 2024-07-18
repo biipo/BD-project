@@ -7,21 +7,23 @@
 ## Todo
 
 ### Front-end
-- [ ] Creare sezione venditore con ordini inviati e annunci creati
 - [ ] Notifiche per stato ordini
     - [x] Creare sezione notifiche
 - [ ] Se stato ordine completato, rendere possibile inserimento recensione
-- [ ] Pagina profilo
+- [ ] Pagina profilo (`profile.html`)
     - [ ] Form modifica dati personali
     - [ ] Form aggiunta indirizzi
     - [ ] Link a pagina recensioni fatte (ricevute se venditore)
-- [ ] Pagina vendita
-- [ ] Zoom in
+    - [ ] Statistiche venditore (se venditore)
+- [ ] Pagina profilo altrui (`user.html`)
+- [ ] Pagina vendita (`sell.html`)
+- [ ] Zoom in (`zoom_in.html`)
     - [ ] Fixare nuovo layout (è ancora bruttino)
-- [ ] Pagina home
+- [ ] Pagina home (`home.html`)
     - [x] Cambiare css
-- [ ] Template navbar
+- [ ] Template navbar (`nav.html`)
     - [ ] Indicare pagina selezionata
+- [ ] Passare a template jinja per bene (extends, block, ecc.)
 
 
 ### Back-end
@@ -29,3 +31,4 @@
 - Fare generazione id prodotti (ora è randomica)
 - Aggiungere controllo sulla route `'/sell'` per utenti NON venditori
 - Fare pagina `'/home'`
+- Fixare registrazione

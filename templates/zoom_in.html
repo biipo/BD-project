@@ -34,7 +34,7 @@
                     <div id="brand" class="muted">{{ item.brand }}</div>
                     <div id="" class="larger bold mt-1"><p class="py-.25 px-.5 bg-success inline block border-r">{{ item.price }}€</p></div>
                     <div class="product-availability mt-.5">
-                        <p class="{% if item.availability <=5 %} bg-severe border-r {% endif %}">{{ item.availability }} pezzi disponibili</p>
+                        <p class="{% if item.availability <=5 %} bg-severe border-r p-.25 {% endif %} inline block">{{ item.availability }} pezzi disponibili</p>
                     </div>
                     <div class="quantity-container mt-.25">
                         <label for="quantity" class="quantity-label inline block pr-.5 ">Quantity:</label>
