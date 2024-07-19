@@ -1,28 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="https://matcha.mizu.sh/matcha.css">
-    <link rel="stylesheet" href="../static/css/styles2.css">
-    <link href="../static/icons/font/bootstrap-icons.css" rel="stylesheet">
-
-    <link rel="icon" href="../static/img/cart.gif">
-    <title>Product Listing</title>
-</head>
-<body>
-    {% include 'nav.html' %}
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
     <div class="flex wrap">
         {% for item in items %}
         <article>
             <header>
                 <h1><a class="flex default" href="{{ url_for('product_details', pid=item.id)}}">{{ item.product_name }}</a></h1>
             </header>
-            <a class="flex" href="{{ url_for('product_details', pid=item.id)}}"><img src="{{ url_for('uploaded_file', filename=item.image_filename)}}" /></a>
+            <a class="flex" href="{{ url_for('product_details', pid=item.id)}}">
+                <img class="" src="{{ url_for('uploaded_file', filename=item.image_filename)}}" />
+            </a>
             <footer>
                 <p class="small muted">{{ item.brand }}</p>
                 <p class="bold larger py-.25 px-.5 bg-success inline block border-r">{{ item.price }}€</p>
@@ -30,5 +17,4 @@
         </article>
         {% endfor %}
     </div>
-</body>
-</html>
+{% endblock %}

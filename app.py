@@ -121,10 +121,8 @@ def load_user(user_id):
     return db_session.scalar(select(User).where(User.id == int(user_id))) # Dovrebbe ritornare 'None' se l'ID non è valido
 
 @app.route('/profile')
-@login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
+# @login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
 def profile():
-    #if not current_user.is_authenticated:
-    #    return redirect(url_for("login"))
     return render_template('profile.html')
 
 @app.route('/user/<username>')
@@ -146,11 +144,12 @@ def login():
         if usr == None: # Utente non trovato
             flash('Wrong credentials', 'error')
             return redirect(request.url) # Ritenta il login
-
+        
         # Controllo della password; nel database abbiamo memorizzato l'hash quindi facciamo l'hash di quella inserita
         # e controlliamo che sia uguale
         if bcrypt.check_password_hash(usr.password, password_form):
             login_user(usr)
+            print(current_user.get_id())
             return redirect(url_for('home'))
         else:
             flash('Wrong credentials', 'error')
@@ -183,7 +182,7 @@ def signup():
         try:
             new_user = User(email= request.form.get('email'),
                             username= username,
-                            password= bcrypt.generate_password_hash(password),
+                            password= password,
                             name= request.form.get('fname'),
                             last_name= request.form.get('lname'),
                             user_type= (request.form.get('user_type') == "Buyer")) # Operatore ternario
