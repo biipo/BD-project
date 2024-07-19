@@ -23,7 +23,7 @@
     - [x] Cambiare css
 - [ ] Template navbar (`nav.html`)
     - [ ] Indicare pagina selezionata
-- [ ] Passare a template jinja per bene (extends, block, ecc.)
+- [x] Passare a template jinja per bene (extends, block, ecc.)
 
 
 ### Back-end
