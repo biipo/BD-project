@@ -26,7 +26,7 @@ class User(Base, UserMixin):
     password: Mapped[str] = mapped_column()
     name: Mapped[str] = mapped_column()
     last_name: Mapped[str] = mapped_column(nullable=True)
-    user_type: Mapped[bool] = mapped_column()
+    user_type: Mapped[bool] = mapped_column() # True se venditore
 
     @staticmethod
     def __email_checker(email: str):
@@ -77,6 +77,9 @@ class User(Base, UserMixin):
         self.password = self.__password_checker(password)
         self.name, self.last_name = self.__name_lastname_checker(name, last_name)
         self.user_type = user_type
+    
+    def is_seller():
+        return self.user_type
 
 
     def __repr__(self):

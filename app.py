@@ -12,7 +12,7 @@ import os.path
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 # Per upload file immagini prodotti
-UPLOAD_FOLDER = './.upload/product_image'
+UPLOAD_FOLDER = './.upload/product_image' # In questa cartella vengono salvate le immagini dei prodotti
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -74,7 +74,7 @@ def allowed_file(filename):
 
 # route per aggiunta di un nuovo prodotto
 @app.route('/sell', methods=['GET', 'POST'])
-# @login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
+@login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
 def sell():
     if request.method == 'POST': # Sono stati inseriti i dati di un prodotto, lo memorizziamo
             if 'image_file' not in request.files:
@@ -92,7 +92,7 @@ def sell():
                 
                 from exceptions import MissingData
                 try:
-                    product = Product(user_id=1,  # prende l'utente attualmente loggato (current_user)
+                    product = Product(user_id=current_user,  # prende l'utente attualmente loggato (current_user)
                                     brand=request.form.get('brand'),
                                     category_id=request.form.get('category'),
                                     product_name=request.form.get('name'),
@@ -102,11 +102,8 @@ def sell():
                                     descr=request.form.get('description'),
                                     image_filename=file.filename)
                 except MissingData as err:
-                    if(err.message == 'Missing vendor'):
-                        pass
-                    else:
-                        flash(err.message, 'error')
-                        return redirect(request.url)
+                    flash(err.message, 'error')
+                    return redirect(request.url)
                 db_session.add(product)
                 db_session.commit()
                 return redirect(url_for('home')) # Reindirizza alla pagina di tutti i prodotti in vendita
@@ -121,7 +118,7 @@ def load_user(user_id):
     return db_session.scalar(select(User).where(User.id == int(user_id))) # Dovrebbe ritornare 'None' se l'ID non è valido
 
 @app.route('/profile')
-# @login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
+@login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
 def profile():
     user = db_session.scalar(select(User).where(User.id == int(current_user.get_id())))
     addrs = db_session.scalar(select(Address).where(Address.user_id == int(current_user.get_id())))
@@ -151,7 +148,7 @@ def login():
         # e controlliamo che sia uguale
         if bcrypt.check_password_hash(usr.password, password_form):
             login_user(usr)
-            print(current_user.get_id())
+            # print(current_user.get_id())
             return redirect(url_for('home'))
         else:
             flash('Wrong credentials', 'error')
@@ -187,7 +184,7 @@ def signup():
                             password= password,
                             name= request.form.get('fname'),
                             last_name= request.form.get('lname'),
-                            user_type= (request.form.get('user_type') == "Buyer")) # Operatore ternario
+                            user_type= (request.form.get('user_type') == "Buyer"))
         except InvalidCredential as err:
             flash(err.message, 'error') # il primo è il messaggio che mandiamo e il secondo la tipologia del messaggio
             return redirect(request.url)
