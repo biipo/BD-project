@@ -143,11 +143,33 @@ class Address(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id, ondelete='CASCADE'))
     active: Mapped[bool]
-    state: Mapped[str]
-    province: Mapped[str]
+    first_name: Mapped[bool]
+    last_name: Mapped[bool]
+    street: Mapped[str]
+    postcode: Mapped[str]
+    state: Mapped[str] 
+    province: Mapped[str] 
+
+    def __init__(self, id, user_id, active, first_name, last_name, street, postcode, state, province):
+        if id is None:
+            raise MissingData('Missing id')
+        self.id = id
+        if user_id is None:
+            raise MissingData('Missing user_id')
+        if None in (active, first_name, last_name, street, postcode, state, province):
+            raise MissingData('Missing not null attribute')
+        self.user_id = user_id
+        self.active = active
+        self.active = active
+        self.first_name = first_name
+        self.last_name = last_name
+        self.street = street
+        self.postcode = postcode
+        self.state = state
+        self.province = province
 
     def __repr__(self):
-        return f"{self.id} {self.user_id} {self.active} {self.state} {self:province}"
+        return f"{self.id} {self.user_id} {self.active} {self.first_name} {self.last_name} {self.street} {self.postcode} {self.state} {self:province}"
 
 
 class Cart(Base):

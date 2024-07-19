@@ -32,3 +32,4 @@
 - [ ] Aggiungere controllo sulla route `'/sell'` per utenti NON venditori
 - [ ] Fare pagina `'/home'`
 - [x] Fixare registrazione
+- [ ] Applicare cambiamenti alla struttura della tabella addresses (non capisco come farlo)

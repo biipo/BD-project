@@ -1,5 +1,5 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
-from tables import User, Product, Base, Product, User, Category
+from tables import User, Product, Base, Product, User, Category, Address
 from sqlalchemy import create_engine, select, join, update
 from sqlalchemy.orm import sessionmaker, declarative_base
 from flask_sqlalchemy import SQLAlchemy
@@ -123,7 +123,9 @@ def load_user(user_id):
 @app.route('/profile')
 # @login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
 def profile():
-    return render_template('profile.html')
+    user = db_session.scalar(select(User).where(User.id == int(current_user.get_id())))
+    addrs = db_session.scalar(select(Address).where(Address.user_id == int(current_user.get_id())))
+    return render_template('profile.html', user=user, addrs=addrs)
 
 @app.route('/user/<username>')
 def user(username):
