@@ -1,5 +1,5 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
-from tables import User, Product, Base, Product, User, Category, Address
+from tables import User, Product, Base, Product, User, Category, Address, Order
 from sqlalchemy import create_engine, select, join, update
 from sqlalchemy.orm import sessionmaker, declarative_base
 from flask_sqlalchemy import SQLAlchemy
@@ -129,6 +129,21 @@ def user(username):
     user = db_session.scalar(select(User).where(User.username == str(username)))
     return render_template('user.html', user=user)
 
+
+@app.route('/orders')
+def orders():
+    user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
+
+    # Se utente non venditore
+    if not user.type:
+        orders = db_session.scalar(select(Order).where(Order.user_id))
+        for order in orders:
+            if not orders[order]:
+                orders[order] = [] 
+
+            # TODO: Per ogni ordine, assegno a orders[order] la lista di prodotti dell'ordine
+
+    return render_template('orders.html', orders=orders)
 
 # route del login
 @app.route('/login', methods=['GET', 'POST'])
