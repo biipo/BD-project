@@ -130,12 +130,16 @@ def user(username):
     return render_template('user.html', user=user)
 
 @app.route('/orders')
+@login_required
 def orders():
     user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
-    orders = db_session.scalars(select(Order).where(Order.user_id))
+    orders = db_session.scalars(select(Order).where(Order.user_id == current_user.get_id()))
     
     # Se utente non venditore
-    return render_template('orders.html', orders=orders)
+    if not user.is_seller():
+        return render_template('orders.html', orders=orders)
+    else:
+        return redirect(url_for('orders'))
 
 # route del login
 @app.route('/login', methods=['GET', 'POST'])

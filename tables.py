@@ -79,8 +79,9 @@ class User(Base, UserMixin):
         self.name, self.last_name = self.__name_lastname_checker(name, last_name)
         self.user_type = user_type
     
-    def is_seller():
-        return self.user_type
+    # TODO: fare sì che user_type sia == True per i venditori, invece che False 
+    def is_seller(self):
+        return not self.user_type
 
 
     def __repr__(self):

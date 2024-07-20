@@ -19,7 +19,8 @@
                 <th class=""></th>
                 <th>Qty</th>
                 <th>Product name</th>
-                <th>Price (€)</th>
+                <th>Unit price (€)</th>
+                <th>Amount (€)</th>
             </tr>
         {% for ord_prod in order.products %}
         {% with prod = ord_prod.product %}
@@ -28,11 +29,13 @@
                 <td>{{ord_prod.quantity}}</td>
                 <td><a href="/product-details/{{prod.id}}" class="default">{{prod.product_name}}</a></td>
                 <td>{{prod.price}}</td>
+                <td>{{prod.price * ord_prod.quantity}}</td>
             </tr>
         {% endwith %}
         {% endfor %}
-            <tr class="bold">
+            <tr class="bold larger">
                 <th></th>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td class="success bg-success">{{order.price}}</td>
