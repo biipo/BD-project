@@ -129,7 +129,7 @@ def user(username):
     user = db_session.scalar(select(User).where(User.username == str(username)))
     return render_template('user.html', user=user)
 
-
+'''
 @app.route('/orders')
 def orders():
     user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
@@ -144,6 +144,7 @@ def orders():
             # TODO: Per ogni ordine, assegno a orders[order] la lista di prodotti dell'ordine
 
     return render_template('orders.html', orders=orders)
+'''
 
 # route del login
 @app.route('/login', methods=['GET', 'POST'])
