@@ -115,7 +115,8 @@ class Product(Base):
     descr: Mapped[str] = mapped_column(nullable=True)
     image_filename: Mapped[str] = mapped_column(nullable=False)
 
-    carts: Mapped[List['CartProducts']] = relationship(back_populates='cart')
+    carts: Mapped[List['CartProducts']] = relationship(back_populates='product')
+    orders: Mapped[List['OrderProducts']] = relationship(back_populates='product')
 
     def __init__(self, user_id, brand, category_id, product_name, date, price, availability, descr, image_filename):
         if user_id is None:
@@ -192,7 +193,7 @@ class Cart(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
 
-    products: Mapped[List[CartProducts]] = relationship(back_populates='cart')
+    products: Mapped[List['CartProducts']] = relationship(back_populates='cart')
 
     def __repr__(self):
         return f"{self.id} {self.user_id}"
@@ -200,7 +201,7 @@ class Cart(Base):
 class OrderProducts(Base):
     __tablename__ = 'order_product'
     
-    order_id: Mapped[int] = mapped_column(ForeignKey('carts.id'), primary_key=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'), primary_key=True)
     product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), primary_key=True)
     quantity: Mapped[int]
 
