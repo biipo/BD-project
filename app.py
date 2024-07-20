@@ -59,7 +59,6 @@ def uploaded_file(filename):
 
 @app.route('/home')
 def home():
-    db_init()
     return render_template('home.html' , items=(db_session.scalars(select(Product)).all()))
 
 @app.route('/product-details/<int:pid>')
