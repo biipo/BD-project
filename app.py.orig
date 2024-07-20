@@ -1,7 +1,11 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
-from tables import User, Product, Base, Product, User, Category, Address
+<<<<<<< HEAD
+from tables import User, Product, Base, Product, User, Category, Address, Order
+=======
+from tables import engine, User, Product, Base, Product, User, Category, Address
+>>>>>>> association
 from sqlalchemy import create_engine, select, join, update
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
