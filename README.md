@@ -28,8 +28,10 @@
 
 ### Back-end
 - [ ] Migliorare controlli sugli attributi tabelle
-- [ ] Fare generazione id prodotti (ora è randomica)
+- [x] Fare generazione id prodotti (ora è randomica)
 - [ ] Aggiungere controllo sulla route `'/sell'` per utenti NON venditori
-- [ ] Fare pagina `'/home'`
+- [x] Fare pagina `'/home'`
 - [x] Fixare registrazione
 - [ ] Applicare cambiamenti alla struttura della tabella addresses (non capisco come farlo)
+##### Cart
+- [ ] Fixare aggiunta di un prodotto al carrello quando questo è già presente (sommiamo le quantità)

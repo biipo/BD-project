@@ -1,5 +1,5 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
-from tables import User, Product, Base, Product, User, Category, Address
+from tables import User, Product, Base, Product, User, Category, Address, Cart, CartProduct
 from sqlalchemy import create_engine, select, join, update
 from sqlalchemy.orm import sessionmaker, declarative_base
 from flask_sqlalchemy import SQLAlchemy
@@ -28,7 +28,7 @@ bcrypt.init_app(app)
 
 # Connette al database
 engine = create_engine('sqlite:///./data.db', echo=True)
-Base = declarative_base()
+# Base = declarative_base()
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 db_session = Session()
@@ -58,14 +58,32 @@ def uploaded_file(filename):
 
 @app.route('/home')
 def home():
-    db_init()
+    # db_init()
     return render_template('home.html' , items=(db_session.scalars(select(Product)).all()))
 
-@app.route('/product-details/<int:pid>')
+@app.route('/product-details/<int:pid>', methods=['GET', 'POST'])
 def product_details(pid):
-    item = db_session.scalar(select(Product).where(Product.id == pid))
-    seller = db_session.scalar(select(User).where(User.id == item.user_id))
-    return render_template('zoom_in.html', item=item, seller=seller)
+    if request.method == 'GET':
+        item = db_session.scalar(select(Product).where(Product.id == pid))
+        seller = db_session.scalar(select(User).where(User.id == item.user_id))
+        return render_template('zoom_in.html', item=item, seller=seller)
+    else:
+        if current_user.is_authenticated:
+            order_quantity = request.form.get('quantity')
+            item = db_session.scalar(select(Product).where(Product.id == pid))
+
+            # Controllo se esiste già il carrello prima di crearlo
+            cart = db_session.scalar(select(Cart).where(Cart.user_id == current_user.get_id()))
+            if cart == None:
+                cart = Cart(current_user.get_id()) # Creiamo un nuovo carrello per questo utente, quando viene fatto l'ordine questo carrello viene distrutto
+                db_session.add(cart)
+                db_session.commit()
+            cart.products_list.append(CartProduct(item, order_quantity)) # Aggiungiamo alla lista di elementi del carello il prodotto che sta vedendo
+
+            return redirect(url_for('cart'))
+        else:
+            flash('Login is required to place orders', 'error')
+            return redirect(url_for('login'))
 
 # Controlla se il file è di tipo corretto (foto/gif)
 def allowed_file(filename):
@@ -92,7 +110,7 @@ def sell():
                 
                 from exceptions import MissingData
                 try:
-                    product = Product(user_id=current_user,  # prende l'utente attualmente loggato (current_user)
+                    product = Product(user_id=current_user.get_id(),  # prende l'utente attualmente loggato (current_user)
                                     brand=request.form.get('brand'),
                                     category_id=request.form.get('category'),
                                     product_name=request.form.get('name'),
@@ -128,6 +146,13 @@ def profile():
 def user(username):
     user = db_session.scalar(select(User).where(User.username == str(username)))
     return render_template('user.html', user=user)
+
+@app.route('/cart')
+@login_required
+def cart():
+    # La query ritorna una lista di elementi CartProduct
+    prod = db_session.scalar(select(Cart).where(Cart.id == int(current_user.get_id()))) # Il carrello per un utente è sempre 1
+    return render_template('cart.html', cart_items=prod.products_list)
 
 
 # route del login

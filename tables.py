@@ -7,8 +7,7 @@ from flask_login import UserMixin
 from exceptions import InvalidCredential, MissingData
 import re # regular expressions
 
-engine = sq.create_engine('sqlite:///./data.db', echo=True)
-global product_id_counter
+# engine = sq.create_engine('sqlite:///./data.db', echo=True)
 
 class Base(DeclarativeBase):
     pass
@@ -178,21 +177,41 @@ class Address(Base):
 class Cart(Base):
     __tablename__ = 'carts'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
+    products_list = relationship('CartProduct', cascade="all, delete-orphan", backref="carts") # Lista di oggetti CartProducts
+
+    def __init__(self, user_id):
+        self.user_id = user_id
 
     def __repr__(self):
-        return f"{self.id} {self.user_id}"
+        return f"{self.id} {self.user_id} {self.products_list}"
 
 
 # Tabella intermedia m:m
-cart_product = Table(
-    'cart_products',
-    Base.metadata,
-    Column('cart_id', ForeignKey(Cart.id), primary_key=True),
-    Column('product_id', ForeignKey(Product.id), primary_key=True),
-    Column('quantity', Integer, nullable=False),
-)
+# cart_product = Table(
+#     'cart_products',
+#     Base.metadata,
+#     Column('cart_id', ForeignKey(Cart.id), primary_key=True),
+#     Column('product_id', ForeignKey(Product.id), primary_key=True),
+#     Column('quantity', Integer, nullable=False),
+# )
+
+class CartProduct(Base):
+    __tablename__ = 'cart_products'
+    cart_id: Mapped[int] = mapped_column(ForeignKey(Cart.id), primary_key=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey(Product.id), primary_key=True)
+    quantity: Mapped[int] = mapped_column(nullable=False)
+
+    product = relationship(Product, lazy='joined')
+
+    def __init__(self, product, quantity):
+        self.product = product
+        self.quantity = quantity
+
+    def __repr__(self):
+        return f"{self.cart_id}, {self.product_id}, {self.product}"
+    
 
 
 class Order(Base):
@@ -263,14 +282,14 @@ Address.user_fk = relationship(User, back_populates='addresses_fk')  # Serve per
 User.addresses_fk = relationship(Address, back_populates='user_fk', cascade='all, delete, save-update')
 
 # Relazione tra utenti e i loro rispettivi carrelli
-Cart.user_fk = relationship(User, back_populates='cart_fk', cascade='all, delete, save-update')
-User.cart_fk = relationship(Cart, back_populates='user_fk', cascade='all, delete, save-update')
+# Cart.user_fk = relationship(User, back_populates='cart_fk', cascade='all, delete, save-update')
+# User.cart_fk = relationship(Cart, back_populates='user_fk', cascade='all, delete, save-update')
 
 # Relazione tra carrello e prodotti
-Cart.product_fk = relationship(Product, secondary=cart_product, back_populates='cart_fk',
-                               cascade='all, delete, save-update')
-Product.cart_fk = relationship(Cart, secondary=cart_product, back_populates='product_fk',
-                               cascade='all, delete, save-update')
+# Cart.product_fk = relationship(Product, secondary=cart_product, back_populates='cart_fk',
+#                                cascade='all, delete, save-update')
+# Product.cart_fk = relationship(Cart, secondary=cart_product, back_populates='product_fk',
+#                                cascade='all, delete, save-update')
 
 # Relazione tra utente e i suoi ordini
 Order.user_fk = relationship(User, back_populates='order_fk', cascade='all, delete, save-update')
