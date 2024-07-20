@@ -5,6 +5,7 @@ from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped,
 from sqlalchemy import Integer
 from flask_login import UserMixin
 from exceptions import InvalidCredential, MissingData
+from typing import List
 import re # regular expressions
 
 engine = sq.create_engine('sqlite:///./data.db', echo=True)
@@ -174,6 +175,14 @@ class Address(Base):
     def __repr__(self):
         return f"{self.id} {self.user_id} {self.active} {self.first_name} {self.last_name} {self.street} {self.postcode} {self.state} {self:province}"
 
+class CartProducts(Base):
+    __tablename__ = 'cart_product'
+    
+    cart_id: Mapped[int] = mapped_column(ForeignKey('carts.id'), primary_key=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), primary_key=True)
+    quantity: Mapped[int]
+
+    product: Mapped['Product'] = relationship()
 
 class Cart(Base):
     __tablename__ = 'carts'
@@ -181,19 +190,10 @@ class Cart(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
 
+    products: Mapped[List[CartProducts]] = relationship()
+
     def __repr__(self):
         return f"{self.id} {self.user_id}"
-
-
-# Tabella intermedia m:m
-cart_product = Table(
-    'cart_products',
-    Base.metadata,
-    Column('cart_id', ForeignKey(Cart.id), primary_key=True),
-    Column('product_id', ForeignKey(Product.id), primary_key=True),
-    Column('quantity', Integer, nullable=False),
-)
-
 
 class Order(Base):
     __tablename__ = 'orders'
