@@ -1,5 +1,5 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
-from tables import engine, User, Product, Base, Product, User, Category, Address, Cart, CartProduct
+from tables import engine, User, Product, Base, Product, User, Category, Address, Cart, CartProducts
 from sqlalchemy import create_engine, select, join, update
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from flask_sqlalchemy import SQLAlchemy
@@ -76,7 +76,7 @@ def product_details(pid):
                 cart = Cart(current_user.get_id()) # Creiamo un nuovo carrello per questo utente, quando viene fatto l'ordine questo carrello viene distrutto
                 db_session.add(cart)
                 db_session.commit()
-            cart.products_list.append(CartProduct(item, order_quantity)) # Aggiungiamo alla lista di elementi del carello il prodotto che sta vedendo
+            cart.products.append(CartProducts(item, order_quantity, cart)) # Aggiungiamo alla lista di elementi del carello il prodotto che sta vedendo
 
             return redirect(url_for('cart'))
         else:
@@ -150,7 +150,9 @@ def user(username):
 def cart():
     # La query ritorna una lista di elementi CartProduct
     prod = db_session.scalar(select(Cart).where(Cart.id == int(current_user.get_id()))) # Il carrello per un utente è sempre 1
-    return render_template('cart.html', cart_items=prod.products_list)
+    for item in prod.products:
+        print(item.product.product_name)
+    return render_template('cart.html', cart_items=prod.products)
 
 '''
 @app.route('/orders')
