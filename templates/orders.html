@@ -22,7 +22,8 @@
                 {% endif %}
             {% endwith %}
         </summary>
-        <table> 
+        <div class='receipt-container'>
+        <table class="receipt" style="max-width: 100%"> 
             <tr>
                 <th class=""></th>
                 <th>Qty</th>
@@ -35,32 +36,32 @@
             <tr>
                 <th>{{loop.index}}</th>
                 <td>{{ord_prod.quantity}}</td>
-                <td><a href="/product-details/{{prod.id}}" class="default">{{prod.product_name}}</a></td>
+                <td><a href="/product-details/{{prod.id}}" title="{{prod.product_name}}" class="default">{{prod.product_name}}</a></td>
                 <td>{{prod.price}}</td>
                 <td>{{prod.price * ord_prod.quantity}}</td>
             </tr>
         {% endwith %}
         {% endfor %}
-            <tr class="bold larger">
+            <tr class="larger">
                 <th></th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td class="success bg-success">{{order.price}}</td>
+                <td colspan="3"></td>
+                <td class="bold success bg-success">{{order.price}}</td>
             </tr>
             <caption class="italic">
                     {{order.date.strftime("%d/%m/%Y, %H:%M")}}
             </caption>
         </table>
+        </div>
         <div id="order-info">
             <p><b>Order status</b>: {{order.status}}</p>
             <p><b>Sent to</b>:</p>
-            <div class="address" style="max-width: 75%">
+            <div class="address mx-.5" style="max-width: 75%">
                 <p class="bold" id="name">{{order.address_obj.first_name}} {{order.address_obj.last_name}}</p>
                 <p id="street">{{order.address_obj.street}}</p>
                 <p id="city">{{order.address_obj.province}} {{order.address_obj.postcode}}</p>
                 <p id="country">{{order.address_obj.state}}</p>
             </div>
+            <p class="mt-1"><b>Payment method</b>: {{order.payment_method}}</p>
         </div>
     </details>
     {% endfor %}

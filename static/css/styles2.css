@@ -64,3 +64,14 @@ article img {
     max-height: 200px;
 }
 
+.receipt {
+    max-width: 100%;
+}
+
+.receipt td
+{
+    max-width: 20rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

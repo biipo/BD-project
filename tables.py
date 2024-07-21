@@ -154,6 +154,7 @@ class Address(Base):
     last_name: Mapped[str]
     street: Mapped[str]
     postcode: Mapped[str]
+    #city: Mapped[str]
     state: Mapped[str] 
     province: Mapped[str] 
 
@@ -219,7 +220,8 @@ class Order(Base):
     address: Mapped[int] = mapped_column(ForeignKey(Address.id))
     payment_method: Mapped[str]
     status: Mapped[str]
-
+    
+    # Rename address_obj to address and address to address_id later
     address_obj = relationship('Address')
     products: Mapped[List['OrderProducts']] = relationship(back_populates='order')
 
