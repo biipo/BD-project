@@ -133,11 +133,12 @@ def user(username):
 @login_required
 def orders():
     user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
-    orders = db_session.scalars(select(Order).where(Order.user_id == current_user.get_id()))
+    orders = db_session.scalars(select(Order, Address).where(Order.user_id == current_user.get_id()))
     
     # Se utente non venditore
+    curr_time = datetime.datetime.now()
     if not user.is_seller():
-        return render_template('orders.html', orders=orders)
+        return render_template('orders.html', orders=orders, now=curr_time)
     else:
         return redirect(url_for('orders'))
 

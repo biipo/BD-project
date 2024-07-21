@@ -13,7 +13,15 @@
             {% elif order.status == 'Sent' %}
                 <i class="attention bi bi-send-fill"></i>
             {% endif %}
-            <b>Order No. {{order.id}}</b> ({{order.date.strftime("%d %B %Y")}}) </summary>
+            <b>Order No. {{order.id}}</b> 
+            {% with t_passed = (now - order.date) %}
+                {% if t_passed.days == 0 %}
+                    ({{(t_passed.total_seconds()//3600)|int}} hour{{'s' if (t_passed.total_seconds()//3600)>1}} ago)
+                {% else %}
+                    ({{(now - order.date).days}} day{{'s' if t_passed.days>1}} ago)
+                {% endif %}
+            {% endwith %}
+        </summary>
         <table> 
             <tr>
                 <th class=""></th>
@@ -44,6 +52,16 @@
                     {{order.date.strftime("%d/%m/%Y, %H:%M")}}
             </caption>
         </table>
+        <div id="order-info">
+            <p><b>Order status</b>: {{order.status}}</p>
+            <p><b>Sent to</b>:</p>
+            <div class="address" style="max-width: 75%">
+                <p class="bold" id="name">{{order.address_obj.first_name}} {{order.address_obj.last_name}}</p>
+                <p id="street">{{order.address_obj.street}}</p>
+                <p id="city">{{order.address_obj.province}} {{order.address_obj.postcode}}</p>
+                <p id="country">{{order.address_obj.state}}</p>
+            </div>
+        </div>
     </details>
     {% endfor %}
 </div>

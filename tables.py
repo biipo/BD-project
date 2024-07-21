@@ -150,8 +150,8 @@ class Address(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id, ondelete='CASCADE'))
     active: Mapped[bool]
-    first_name: Mapped[bool]
-    last_name: Mapped[bool]
+    first_name: Mapped[str]
+    last_name: Mapped[str]
     street: Mapped[str]
     postcode: Mapped[str]
     state: Mapped[str] 
@@ -176,7 +176,7 @@ class Address(Base):
         self.province = province
 
     def __repr__(self):
-        return f"{self.id} {self.user_id} {self.active} {self.first_name} {self.last_name} {self.street} {self.postcode} {self.state} {self:province}"
+        return f"{self.id} {self.user_id} {self.active} {self.first_name} {self.last_name} {self.street} {self.postcode} {self.state} {self.province}"
 
 class CartProducts(Base):
     __tablename__ = 'cart_product'
@@ -220,6 +220,7 @@ class Order(Base):
     payment_method: Mapped[str]
     status: Mapped[str]
 
+    address_obj = relationship('Address')
     products: Mapped[List['OrderProducts']] = relationship(back_populates='order')
 
     def __repr__(self):
