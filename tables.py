@@ -5,6 +5,7 @@ from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped,
 from sqlalchemy import Integer
 from flask_login import UserMixin
 from exceptions import InvalidCredential, MissingData
+from typing import List
 import re # regular expressions
 
 # engine = sq.create_engine('sqlite:///./data.db', echo=True)
@@ -113,6 +114,8 @@ class Product(Base):
     descr: Mapped[str] = mapped_column(nullable=True)
     image_filename: Mapped[str] = mapped_column(nullable=False)
 
+    carts: Mapped[List['CartProducts']] = relationship(back_populates='product')
+    orders: Mapped[List['OrderProducts']] = relationship(back_populates='product')
 
     def __init__(self, user_id, brand, category_id, product_name, date, price, availability, descr, image_filename):
         if user_id is None:
@@ -173,46 +176,42 @@ class Address(Base):
     def __repr__(self):
         return f"{self.id} {self.user_id} {self.active} {self.first_name} {self.last_name} {self.street} {self.postcode} {self.state} {self:province}"
 
+class CartProducts(Base):
+    __tablename__ = 'cart_product'
+    
+    cart_id: Mapped[int] = mapped_column(ForeignKey('carts.id'), primary_key=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), primary_key=True)
+    quantity: Mapped[int]
+
+    product: Mapped['Product'] = relationship(back_populates='carts')
+    cart: Mapped['Cart'] = relationship(back_populates='products')
 
 class Cart(Base):
     __tablename__ = 'carts'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
-    products_list = relationship('CartProduct', cascade="all, delete-orphan", backref="carts") # Lista di oggetti CartProducts
 
     def __init__(self, user_id):
         self.user_id = user_id
 
-    def __repr__(self):
-        return f"{self.id} {self.user_id} {self.products_list}"
-
-
-# Tabella intermedia m:m
-# cart_product = Table(
-#     'cart_products',
-#     Base.metadata,
-#     Column('cart_id', ForeignKey(Cart.id), primary_key=True),
-#     Column('product_id', ForeignKey(Product.id), primary_key=True),
-#     Column('quantity', Integer, nullable=False),
-# )
-
-class CartProduct(Base):
-    __tablename__ = 'cart_products'
-    cart_id: Mapped[int] = mapped_column(ForeignKey(Cart.id), primary_key=True)
-    product_id: Mapped[int] = mapped_column(ForeignKey(Product.id), primary_key=True)
-    quantity: Mapped[int] = mapped_column(nullable=False)
-
-    product = relationship(Product, lazy='joined')
-
-    def __init__(self, product, quantity):
-        self.product = product
-        self.quantity = quantity
+    products: Mapped[List['CartProducts']] = relationship(back_populates='cart')
 
     def __repr__(self):
-        return f"{self.cart_id}, {self.product_id}, {self.product}"
+        return f"{self.id} {self.user_id}"
+
+class OrderProducts(Base):
+    __tablename__ = 'order_product'
+    
+    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'), primary_key=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), primary_key=True)
+    quantity: Mapped[int]
+
     
 
+    product: Mapped['Product'] = relationship(back_populates='orders')
+    order: Mapped['Order'] = relationship(back_populates='products')
+>>>>>>> a44ca6f1aa731b627a554e0e3267e76a0b38071b
 
 class Order(Base):
     __tablename__ = 'orders'
@@ -221,23 +220,14 @@ class Order(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
     date: Mapped[datetime]
     price: Mapped[float]
-    address: Mapped[int]
+    address: Mapped[int] = mapped_column(ForeignKey(Address.id))
     payment_method: Mapped[str]
     status: Mapped[str]
 
+    products: Mapped[List['OrderProducts']] = relationship(back_populates='order')
+
     def __repr__(self):
         return f"{self.id} {self.user_id} {self.date} {self.price} {self.address} {self.payment_method} {self.status}"
-
-
-# Tabella intermedia m:m
-order_product = Table(
-    'order_products',
-    Base.metadata,
-    Column('order_id', ForeignKey(Order.id), primary_key=True),
-    Column('product_id', ForeignKey(Product.id), primary_key=True),
-    Column('quantity', Integer, nullable=False),
-)
-
 
 class Tag(Base):
     __tablename__ = 'tags'
@@ -277,6 +267,10 @@ class Review(Base):
 Product.user_fk = relationship(User, back_populates='product_fk')  # , cascade='all, delete, save-update'
 User.product_fk = relationship(Product, back_populates='user_fk', order_by=Product.id)
 
+# Relazione tra address e ordine
+Order.address_fk = relationship(Address, back_populates='order_fk')
+Address.order_fk = relationship(Order, back_populates='address_fk', order_by=Order.id)
+
 # Relazione tra indirizzi e utenti
 Address.user_fk = relationship(User, back_populates='addresses_fk')  # Serve per collegare la ForeignKey
 User.addresses_fk = relationship(Address, back_populates='user_fk', cascade='all, delete, save-update')
@@ -296,10 +290,10 @@ Order.user_fk = relationship(User, back_populates='order_fk', cascade='all, dele
 User.order_fk = relationship(Order, back_populates='user_fk', cascade='all, delete, save-update')
 
 # Relazione tra ordini e prodotti nell'ordine
-Order.product_fk = relationship(Product, secondary=order_product, back_populates='order_fk',
-                                cascade='all, delete, save-update')
-Product.order_fk = relationship(Order, secondary=order_product, back_populates='product_fk',
-                                cascade='all, delete, save-update')
+#Order.product_fk = relationship(Product, secondary=order_product, back_populates='order_fk',
+#                                cascade='all, delete, save-update')
+#Product.order_fk = relationship(Order, secondary=order_product, back_populates='product_fk',
+#                                cascade='all, delete, save-update')
 
 # Relazione tra prodotti e categorie a cui appartengono
 Category.product_fk = relationship(Product, back_populates='category_fk', cascade='all, delete, save-update')

@@ -1,7 +1,7 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
-from tables import User, Product, Base, Product, User, Category, Address, Cart, CartProduct
+from tables import engine, User, Product, Base, Product, User, Category, Address, Cart, CartProduct
 from sqlalchemy import create_engine, select, join, update
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
@@ -27,13 +27,12 @@ bcrypt = Bcrypt()
 bcrypt.init_app(app)
 
 # Connette al database
-engine = create_engine('sqlite:///./data.db', echo=True)
-# Base = declarative_base()
 Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
-db_session = Session()
+#Session = sessionmaker(bind=engine)
+db_session = Session(engine)
 
 def db_init():
+    '''
     if db_session.scalars(select(Category)).all() == None:
         db_session.add_all([ Category(id=1, name='Arts'),
                              Category(id=2, name='Personal Care'),
@@ -46,7 +45,7 @@ def db_init():
                              Category(id=9, name='House'),
                              Category(id=10, name='DIY') ])
         db_session.commit()
-
+    '''
 
 @app.route('/')
 def start():
@@ -58,7 +57,6 @@ def uploaded_file(filename):
 
 @app.route('/home')
 def home():
-    # db_init()
     return render_template('home.html' , items=(db_session.scalars(select(Product)).all()))
 
 @app.route('/product-details/<int:pid>', methods=['GET', 'POST'])
@@ -154,6 +152,22 @@ def cart():
     prod = db_session.scalar(select(Cart).where(Cart.id == int(current_user.get_id()))) # Il carrello per un utente è sempre 1
     return render_template('cart.html', cart_items=prod.products_list)
 
+'''
+@app.route('/orders')
+def orders():
+    user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
+
+    # Se utente non venditore
+    if not user.type:
+        orders = db_session.scalar(select(Order).where(Order.user_id))
+        for order in orders:
+            if not orders[order]:
+                orders[order] = [] 
+
+            # TODO: Per ogni ordine, assegno a orders[order] la lista di prodotti dell'ordine
+
+    return render_template('orders.html', orders=orders)
+'''
 
 # route del login
 @app.route('/login', methods=['GET', 'POST'])
