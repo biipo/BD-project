@@ -8,7 +8,7 @@ from exceptions import InvalidCredential, MissingData
 from typing import List
 import re # regular expressions
 
-# engine = sq.create_engine('sqlite:///./data.db', echo=True)
+engine = sq.create_engine('sqlite:///./data.db', echo=True)
 
 class Base(DeclarativeBase):
     pass
@@ -193,16 +193,23 @@ class CartProducts(Base):
     product: Mapped['Product'] = relationship(back_populates='carts')
     cart: Mapped['Cart'] = relationship(back_populates='products')
 
+    def __init__(self, product, quantity, cart):
+        self.product = product
+        self.product_id = product.id
+        self.cart = cart
+        self.cart_id = cart.id
+        self.quantity = quantity
+
 class Cart(Base):
     __tablename__ = 'carts'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), unique=True) # Un utente ha un solo carrello per volta
+
+    products: Mapped[List['CartProducts']] = relationship(back_populates='cart')
 
     def __init__(self, user_id):
         self.user_id = user_id
-
-    products: Mapped[List['CartProducts']] = relationship(back_populates='cart')
 
     def __repr__(self):
         return f"{self.id} {self.user_id}"
@@ -213,9 +220,7 @@ class OrderProducts(Base):
     order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'), primary_key=True)
     product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), primary_key=True)
     quantity: Mapped[int]
-
     
-
     product: Mapped['Product'] = relationship(back_populates='orders')
     order: Mapped['Order'] = relationship(back_populates='products')
 
