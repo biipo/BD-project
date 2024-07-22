@@ -118,6 +118,7 @@ class Product(Base):
 
     carts: Mapped[List['CartProducts']] = relationship(back_populates='product')
     orders: Mapped[List['OrderProducts']] = relationship(back_populates='product')
+    seller: Mapped['User'] = relationship('User')
 
     def __init__(self, user_id, brand, category_id, product_name, date, price, availability, descr, image_filename):
         if user_id is None:

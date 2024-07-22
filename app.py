@@ -1,7 +1,7 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
-from tables import engine, User, Product, Base, Product, User, Category, Address, Order
-from sqlalchemy import create_engine, select, join, update
-from sqlalchemy.orm import sessionmaker, Session, declarative_base
+from tables import engine, User, Product, Base, Product, User, Category, Address, Order, OrderProducts
+from sqlalchemy import create_engine, select, join, update, func
+from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
@@ -133,14 +133,21 @@ def user(username):
 @login_required
 def orders():
     user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
-    orders = db_session.scalars(select(Order, Address).where(Order.user_id == current_user.get_id()))
     
     # Se utente non venditore
     curr_time = datetime.datetime.now()
     if not user.is_seller():
+        orders = db_session.scalars(select(Order, Address).where(Order.user_id == current_user.get_id()))
         return render_template('orders.html', orders=orders, now=curr_time)
     else:
-        return redirect(url_for('orders'))
+        orders = (
+            db_session.query(Order) # Add price calculation with sum()
+            .join(OrderProducts, Order.id==OrderProducts.order_id)
+            .join(Product, OrderProducts.product_id==Product.id)
+            .filter(Product.seller == user)
+            .options(contains_eager(Order.products))
+        ).all()
+        return render_template('orders_sold.html', orders=orders, now=curr_time)
 
 # route del login
 @app.route('/login', methods=['GET', 'POST'])
