@@ -129,25 +129,48 @@ def user(username):
     user = db_session.scalar(select(User).where(User.username == str(username)))
     return render_template('user.html', user=user)
 
-@app.route('/orders')
+@app.route('/orders', methods=['GET', 'POST'])
 @login_required
 def orders():
     user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
-    
-    # Se utente non venditore
     curr_time = datetime.datetime.now()
-    if not user.is_seller():
-        orders = db_session.scalars(select(Order, Address).where(Order.user_id == current_user.get_id()))
-        return render_template('orders.html', orders=orders, now=curr_time)
+
+    if request.method == 'GET':
+        # Se utente non venditore
+        if not user.is_seller():
+            orders = db_session.scalars(select(Order, Address).where(Order.user_id == current_user.get_id()))
+            return render_template('orders.html', orders=orders, now=curr_time)
+
+        else:
+            print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            orders = (
+                db_session.scalars(
+                    select(Order, func.sum(Order.price).label('test')) # Add price calculation with func.sum()
+                    .join(OrderProducts, Order.id==OrderProducts.order_id)
+                    .join(Product, OrderProducts.product_id==Product.id)
+                    .filter(Product.seller == user)
+                    .options(contains_eager(Order.products))
+                ).unique()
+            ).all()
+
+            # Until I figure out how to query with func.sum()
+            totals = {}
+            for o in orders:
+                totals[o.id] = sum((op.product.price * op.quantity) for op in o.products)
+            print(totals)
+
+            return render_template('orders_sold.html', orders=orders, totals=totals, now=curr_time)
+    
     else:
-        orders = (
-            db_session.query(Order) # Add price calculation with sum()
-            .join(OrderProducts, Order.id==OrderProducts.order_id)
-            .join(Product, OrderProducts.product_id==Product.id)
-            .filter(Product.seller == user)
-            .options(contains_eager(Order.products))
-        ).all()
-        return render_template('orders_sold.html', orders=orders, now=curr_time)
+        new_status = request.form.get('new-status')
+        order_id = request.form.get('order-id')
+        print(new_status)
+        
+        if not new_status or new_status not in ['Received', 'Sent', 'In transit', 'Processing']:
+            return redirect(url_for('orders'))
+        
+        order = db_session.scalar() 
+        
 
 # route del login
 @app.route('/login', methods=['GET', 'POST'])

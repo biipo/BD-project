@@ -2,7 +2,7 @@
 {% block title %}Orders{% endblock %}
 {% block content %}
 <div class="container-big">
-    <h1>Your orders</h1>
+    <h1>Orders for you</h1>
     {% for order in orders %}
     <details>
         <summary>
@@ -45,16 +45,29 @@
             <tr class="larger">
                 <th></th>
                 <td colspan="3"></td>
-                <td class="bold success bg-success">{{order.price}}</td>
+                <td class="bold success bg-success">{{totals[order.id]}}</td>
             </tr>
             <caption class="italic">
-                    {{order.date.strftime("%d/%m/%Y, %H:%M")}}
+                {{order.date.strftime("%d/%m/%Y, %H:%M")}}
             </caption>
         </table>
         </div>
         <div id="order-info">
             <p><b>Order status</b>: {{order.status}}</p>
-            <p><b>Sent to</b>:</p>
+            <div id="new-status-container" class="mb-1" style="width:50%">
+                <form method="post">
+                    <input type="hidden" name="order-id" value="{{order.id}}"/>
+                    <select class="mb-.5" name="new-status">
+                        <option selected disabled>New status</option>
+                        {% for status in ['Sent', 'In transit', 'Processing', 'Received'] %}
+                            <option value="{{status}}">{{status}}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">Update</button>
+                </form>
+            </div>
+
+            <p><b>Sen{{'t' if order.status != 'Awaiting shipment' else 'd'}} to</b>:</p>
             <div class="address mx-.5" style="max-width: 75%">
                 <p class="bold" id="name">{{order.address_obj.first_name}} {{order.address_obj.last_name}}</p>
                 <p id="street">{{order.address_obj.street}}</p>
