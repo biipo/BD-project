@@ -1,7 +1,7 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
-from tables import engine, User, Product, Base, Product, User, Category, Address, Cart, CartProduct
-from sqlalchemy import create_engine, select, join, update
-from sqlalchemy.orm import sessionmaker, Session, declarative_base
+from tables import engine, User, Product, Base, Product, User, Category, Address, Cart, CartProduct, Order, OrderProducts
+from sqlalchemy import create_engine, select, join, update, func
+from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
@@ -27,6 +27,8 @@ bcrypt = Bcrypt()
 bcrypt.init_app(app)
 
 # Connette al database
+#engine = create_engine('sqlite:///./data.db', echo=True)
+#Base = declarative_base()
 Base.metadata.create_all(engine)
 #Session = sessionmaker(bind=engine)
 db_session = Session(engine)
@@ -153,21 +155,45 @@ def cart():
     return render_template('cart.html', cart_items=prod.products_list)
 
 '''
-@app.route('/orders')
+@app.route('/orders', methods=['GET', 'POST'])
 def orders():
     user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
+    curr_time = datetime.datetime.now()
 
-    # Se utente non venditore
-    if not user.type:
-        orders = db_session.scalar(select(Order).where(Order.user_id))
-        for order in orders:
-            if not orders[order]:
-                orders[order] = [] 
+    if request.method == 'GET':
+        # Se utente non venditore
+        if not user.is_seller():
+            orders = db_session.scalars(select(Order, Address).where(Order.user_id == current_user.get_id()))
+            return render_template('orders.html', orders=orders, now=curr_time)
 
-            # TODO: Per ogni ordine, assegno a orders[order] la lista di prodotti dell'ordine
+        else:
+            orders = db_session.scalars(
+                select(Order)
+                .join(OrderProducts)
+                .join(Product)
+                .filter(Product.seller == user)
+            )
+            return render_template('orders_sold.html', orders=orders, now=curr_time)
+    
+    else:
+        new_status = request.form.get('new-status')
+        order_id = request.form.get('order-id')
 
-    return render_template('orders.html', orders=orders)
-'''
+        # If new status valid
+        if not new_status or new_status not in ['Received', 'Sent', 'Processing', 'Cancelled']:
+            return redirect(url_for('orders'))
+        
+        # Query for order with given id and sold by current user
+        order = db_session.scalar(select(Order).join(OrderProducts).join(Product).filter(Order.id == order_id).filter(Product.seller == user))
+        if order is None:
+            return redirect(url_for('orders'))
+       
+        # If order status new and not received or cancelled
+        if order.status not in [new_status, 'Received', 'Cancelled']:
+            order.status = new_status
+            db_session.commit()
+
+        return redirect(url_for('orders'))
 
 # route del login
 @app.route('/login', methods=['GET', 'POST'])

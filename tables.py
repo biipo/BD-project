@@ -78,8 +78,9 @@ class User(Base, UserMixin):
         self.name, self.last_name = self.__name_lastname_checker(name, last_name)
         self.user_type = user_type
     
-    def is_seller():
-        return self.user_type
+    # TODO: fare sì che user_type sia == True per i venditori, invece che False 
+    def is_seller(self):
+        return not self.user_type
 
 
     def __repr__(self):
@@ -116,6 +117,7 @@ class Product(Base):
 
     carts: Mapped[List['CartProducts']] = relationship(back_populates='product')
     orders: Mapped[List['OrderProducts']] = relationship(back_populates='product')
+    seller: Mapped['User'] = relationship('User')
 
     def __init__(self, user_id, brand, category_id, product_name, date, price, availability, descr, image_filename):
         if user_id is None:
@@ -148,10 +150,11 @@ class Address(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id, ondelete='CASCADE'))
     active: Mapped[bool]
-    first_name: Mapped[bool]
-    last_name: Mapped[bool]
+    first_name: Mapped[str]
+    last_name: Mapped[str]
     street: Mapped[str]
     postcode: Mapped[str]
+    #city: Mapped[str]
     state: Mapped[str] 
     province: Mapped[str] 
 
@@ -174,7 +177,7 @@ class Address(Base):
         self.province = province
 
     def __repr__(self):
-        return f"{self.id} {self.user_id} {self.active} {self.first_name} {self.last_name} {self.street} {self.postcode} {self.state} {self:province}"
+        return f"{self.id} {self.user_id} {self.active} {self.first_name} {self.last_name} {self.street} {self.postcode} {self.state} {self.province}"
 
 class CartProducts(Base):
     __tablename__ = 'cart_product'
@@ -223,7 +226,9 @@ class Order(Base):
     address: Mapped[int] = mapped_column(ForeignKey(Address.id))
     payment_method: Mapped[str]
     status: Mapped[str]
-
+    
+    # Rename address_obj to address and address to address_id later
+    address_obj = relationship('Address')
     products: Mapped[List['OrderProducts']] = relationship(back_populates='order')
 
     def __repr__(self):

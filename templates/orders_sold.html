@@ -2,7 +2,7 @@
 {% block title %}Orders{% endblock %}
 {% block content %}
 <div class="container-big">
-    <h1>Your orders</h1>
+    <h1>Orders for you</h1>
     {% for order in orders %}
     <details>
         <summary>
@@ -15,7 +15,7 @@
             {% elif order.status == 'Cancelled' %}
                 <i class="severe bi bi-x-circle-fill"></i>
             {% endif %}
-            <b>Order No. {{order.id}}</b>
+            <b>Order No. {{order.id}}</b> 
             {% with t_passed = (now - order.date) %}
                 {% if t_passed.days == 0 %}
                     ({{(t_passed.total_seconds()//3600)|int}} hour{{'s' if (t_passed.total_seconds()//3600)>1}} ago)
@@ -50,14 +50,26 @@
                 <td class="bold success bg-success">{{order.price}}</td>
             </tr>
             <caption class="italic">
-                    {{order.date.strftime("%d/%m/%Y, %H:%M")}}
+                {{order.date.strftime("%d/%m/%Y, %H:%M")}}
             </caption>
         </table>
         </div>
         <div id="order-info">
             <p><b>Order status</b>: {{order.status}}</p>
-            <p><b>Seller</b>: <a href="#">{{order.products[0].product.seller.username}}</a></p>
-            <p><b>Sent to</b>:</p>
+            <div id="new-status-container" class="mb-1 mx-.5" style="width:50%">
+                <form method="post">
+                    <input type="hidden" name="order-id" class="inline block" value="{{order.id}}"/>
+                    <select name="new-status" class="inline block" style="width:70%">
+                        <option selected disabled>New status</option>
+                        {% for status in ['Sent', 'Processing', 'Received', 'Cancelled'] %}
+                            <option value="{{status}}">{{status}}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="inline block" style="width:25%">Update</button>
+                </form>
+            </div>
+
+            <p><b>Sen{{'t' if order.status != 'Awaiting shipment' else 'd'}} to</b>:</p>
             <div class="address mx-.5" style="max-width: 75%">
                 <p class="bold" id="name">{{order.address_obj.first_name}} {{order.address_obj.last_name}}</p>
                 <p id="street">{{order.address_obj.street}}</p>
