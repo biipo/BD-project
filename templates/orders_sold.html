@@ -12,6 +12,8 @@
                 <i class="attention bi bi-three-dots"></i>
             {% elif order.status == 'Sent' %}
                 <i class="attention bi bi-send-fill"></i>
+            {% elif order.status == 'Cancelled' %}
+                <i class="severe bi bi-x-circle-fill"></i>
             {% endif %}
             <b>Order No. {{order.id}}</b> 
             {% with t_passed = (now - order.date) %}
@@ -45,7 +47,7 @@
             <tr class="larger">
                 <th></th>
                 <td colspan="3"></td>
-                <td class="bold success bg-success">{{totals[order.id]}}</td>
+                <td class="bold success bg-success">{{order.price}}</td>
             </tr>
             <caption class="italic">
                 {{order.date.strftime("%d/%m/%Y, %H:%M")}}
@@ -54,16 +56,16 @@
         </div>
         <div id="order-info">
             <p><b>Order status</b>: {{order.status}}</p>
-            <div id="new-status-container" class="mb-1" style="width:50%">
+            <div id="new-status-container" class="mb-1 mx-.5" style="width:50%">
                 <form method="post">
-                    <input type="hidden" name="order-id" value="{{order.id}}"/>
-                    <select class="mb-.5" name="new-status">
+                    <input type="hidden" name="order-id" class="inline block" value="{{order.id}}"/>
+                    <select name="new-status" class="inline block" style="width:70%">
                         <option selected disabled>New status</option>
-                        {% for status in ['Sent', 'In transit', 'Processing', 'Received'] %}
+                        {% for status in ['Sent', 'Processing', 'Received', 'Cancelled'] %}
                             <option value="{{status}}">{{status}}</option>
                         {% endfor %}
                     </select>
-                    <button type="submit">Update</button>
+                    <button type="submit" class="inline block" style="width:25%">Update</button>
                 </form>
             </div>
 

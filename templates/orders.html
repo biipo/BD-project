@@ -12,8 +12,10 @@
                 <i class="attention bi bi-three-dots"></i>
             {% elif order.status == 'Sent' %}
                 <i class="attention bi bi-send-fill"></i>
+            {% elif order.status == 'Cancelled' %}
+                <i class="severe bi bi-x-circle-fill"></i>
             {% endif %}
-            <b>Order No. {{order.id}}</b> 
+            <b>Order No. {{order.id}}</b>
             {% with t_passed = (now - order.date) %}
                 {% if t_passed.days == 0 %}
                     ({{(t_passed.total_seconds()//3600)|int}} hour{{'s' if (t_passed.total_seconds()//3600)>1}} ago)
@@ -54,6 +56,7 @@
         </div>
         <div id="order-info">
             <p><b>Order status</b>: {{order.status}}</p>
+            <p><b>Seller</b>: <a href="#">{{order.products[0].product.seller.username}}</a></p>
             <p><b>Sent to</b>:</p>
             <div class="address mx-.5" style="max-width: 75%">
                 <p class="bold" id="name">{{order.address_obj.first_name}} {{order.address_obj.last_name}}</p>

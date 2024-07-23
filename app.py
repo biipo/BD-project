@@ -142,35 +142,33 @@ def orders():
             return render_template('orders.html', orders=orders, now=curr_time)
 
         else:
-            print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            orders = (
-                db_session.scalars(
-                    select(Order, func.sum(Order.price).label('test')) # Add price calculation with func.sum()
-                    .join(OrderProducts, Order.id==OrderProducts.order_id)
-                    .join(Product, OrderProducts.product_id==Product.id)
-                    .filter(Product.seller == user)
-                    .options(contains_eager(Order.products))
-                ).unique()
-            ).all()
-
-            # Until I figure out how to query with func.sum()
-            totals = {}
-            for o in orders:
-                totals[o.id] = sum((op.product.price * op.quantity) for op in o.products)
-            print(totals)
-
-            return render_template('orders_sold.html', orders=orders, totals=totals, now=curr_time)
+            orders = db_session.scalars(
+                select(Order)
+                .join(OrderProducts)
+                .join(Product)
+                .filter(Product.seller == user)
+            )
+            return render_template('orders_sold.html', orders=orders, now=curr_time)
     
     else:
         new_status = request.form.get('new-status')
         order_id = request.form.get('order-id')
-        print(new_status)
-        
-        if not new_status or new_status not in ['Received', 'Sent', 'In transit', 'Processing']:
+
+        # If new status valid
+        if not new_status or new_status not in ['Received', 'Sent', 'Processing', 'Cancelled']:
             return redirect(url_for('orders'))
         
-        order = db_session.scalar() 
-        
+        # Query for order with given id and sold by current user
+        order = db_session.scalar(select(Order).join(OrderProducts).join(Product).filter(Order.id == order_id).filter(Product.seller == user))
+        if order is None:
+            return redirect(url_for('orders'))
+       
+        # If order status new and not received or cancelled
+        if order.status not in [new_status, 'Received', 'Cancelled']:
+            order.status = new_status
+            db_session.commit()
+
+        return redirect(url_for('orders'))
 
 # route del login
 @app.route('/login', methods=['GET', 'POST'])
