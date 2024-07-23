@@ -1,5 +1,5 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
-from tables import engine, User, Product, Base, Product, User, Category, Address, Cart, CartProduct, Order, OrderProducts
+from tables import User, Product, Base, Product, User, Category, Address, Cart, CartProducts, Order, OrderProducts
 from sqlalchemy import create_engine, select, join, update, func
 from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager
 from flask_sqlalchemy import SQLAlchemy
@@ -27,7 +27,7 @@ bcrypt = Bcrypt()
 bcrypt.init_app(app)
 
 # Connette al database
-#engine = create_engine('sqlite:///./data.db', echo=True)
+engine = create_engine('sqlite:///./data.db', echo=True)
 #Base = declarative_base()
 Base.metadata.create_all(engine)
 #Session = sessionmaker(bind=engine)
@@ -154,8 +154,8 @@ def cart():
     prod = db_session.scalar(select(Cart).where(Cart.id == int(current_user.get_id()))) # Il carrello per un utente è sempre 1
     return render_template('cart.html', cart_items=prod.products_list)
 
-'''
 @app.route('/orders', methods=['GET', 'POST'])
+@login_required
 def orders():
     user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
     curr_time = datetime.datetime.now()
@@ -215,6 +215,7 @@ def login():
             login_user(usr)
             # print(current_user.get_id())
             return redirect(url_for('home'))
+
         else:
             flash('Wrong credentials', 'error')
             return redirect(request.url) # Ritenta il login

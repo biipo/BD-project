@@ -214,7 +214,6 @@ class OrderProducts(Base):
 
     product: Mapped['Product'] = relationship(back_populates='orders')
     order: Mapped['Order'] = relationship(back_populates='products')
->>>>>>> a44ca6f1aa731b627a554e0e3267e76a0b38071b
 
 class Order(Base):
     __tablename__ = 'orders'
