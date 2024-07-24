@@ -214,6 +214,9 @@ def login():
         if bcrypt.check_password_hash(usr.password, password_form):
             login_user(usr)
             # print(current_user.get_id())
+            if request.args.get('next'):
+                return redirect(request.args.get('next'))
+
             return redirect(url_for('home'))
 
         else:
