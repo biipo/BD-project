@@ -4,7 +4,7 @@ from sqlalchemy import Column, Table, ForeignKey, except_all, null
 from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped, backref
 from sqlalchemy import Integer
 from flask_login import UserMixin
-from exceptions import InvalidCredential, MissingData, InvalidDataType
+from exceptions import InvalidCredential, MissingData
 from typing import List
 import re # regular expressions
 

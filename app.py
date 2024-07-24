@@ -7,7 +7,7 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 import datetime
 import os.path
-from exceptions import InvalidCredential, InvalidDataType, MissingData
+from exceptions import InvalidCredential, MissingData
 
 # Creazione app flask
 app = Flask(__name__, template_folder='templates', static_folder='static')
