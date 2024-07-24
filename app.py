@@ -29,7 +29,6 @@ bcrypt.init_app(app)
 
 # Connette al database
 engine = create_engine('sqlite:///./data.db', echo=True)
-#Base = declarative_base()
 Base.metadata.create_all(engine)
 #Session = sessionmaker(bind=engine)
 db_session = Session(engine)
@@ -72,20 +71,16 @@ def product_details(pid):
         if current_user.is_authenticated:
             order_quantity = int(request.form.get('quantity'))
             item = db_session.scalar(select(Product).where(Product.id == pid))
-            try:
-                new_cart_item = CartProducts(item, order_quantity, current_user)
+            new_cart_item = CartProducts(item, order_quantity, current_user)
 
-                # Controllo se esiste già il carrello prima di crearlo
-                existing = db_session.scalar(select(CartProducts)
-                                        .where(CartProducts.product_id == new_cart_item.product_id and CartProducts.user_id == new_cart_item.user_id))
-                if existing != None: # già esiste allora aggiungiamo la quantità (questa viene controllata al momento dell'ordine)
-                    existing.quantity += order_quantity
-                else:
-                    db_session.add(new_cart_item)
-                db_session.commit()
-            except InvalidDataType as err:
-                print(err)
-
+            # Controllo se esiste già il carrello prima di crearlo
+            existing = db_session.scalar(select(CartProducts)
+                                    .where(CartProducts.product_id == new_cart_item.product_id and CartProducts.user_id == new_cart_item.user_id))
+            if existing != None: # già esiste allora aggiungiamo la quantità (questa viene controllata al momento dell'ordine)
+                existing.quantity += order_quantity
+            else:
+                db_session.add(new_cart_item)
+            db_session.commit()
 
             return redirect(url_for('cart'))
         else:
@@ -258,7 +253,6 @@ def signup():
 
         # Nel costruttore della classe User chiamiamo metodi che controllano la correttenzza dei dati e in caso lanciano un'eccezione
         # con un messaggio specifico, che prendiamo nel catch e stampiamo a schermo
-        from exceptions import InvalidCredential
         try:
             new_user = User(email= request.form.get('email'),
                             username= username,

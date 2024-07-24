@@ -198,28 +198,7 @@ class CartProducts(Base):
         self.product_id = product.id
         self.user = user
         self.user_id = user.id
-        if type(quantity) is int:
-            self.quantity = int(quantity)
-        else:
-            raise InvalidDataType("CartProduct creation: quantity wasn't a INT")
-
-# class Cart(Base):
-#     __tablename__ = 'carts'
-
-#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-#     user_id: Mapped[int] = mapped_column(ForeignKey(User.id), unique=True) # Un utente ha un solo carrello per volta
-
-#     products: Mapped[List['CartProducts']] = relationship(back_populates='carts')
-
-#     def __init__(self, user_id, product_list: list):
-#         if type(user_id) is int and type(product_list) is list:
-#             self.user_id = user_id
-#             self.products = product_list
-#         else:
-#             raise InvalidDataType("Cart creation: user id wasn't a INT or the product list wasn't a list")
-
-#     def __repr__(self):
-#         return f"{self.id} {self.user_id}"
+        self.quantity = quantity
 
 class OrderProducts(Base):
     __tablename__ = 'order_product'
