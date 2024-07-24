@@ -27,6 +27,10 @@ body {
     flex: 70%;
 }
 
+.col-5 {
+    flex: 70%;
+}
+
 #username {
     font-size: 20pt;
 }
@@ -37,6 +41,7 @@ body {
     border-radius: var(--bd-radius);
     padding: 10px;
     margin-bottom: 10px;
+    display: flex;
 }
 
 .address p {
@@ -74,4 +79,11 @@ article img {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.address-actions {
+    margin-left: auto;
+    button {
+        width: 100%;
+    }
 }

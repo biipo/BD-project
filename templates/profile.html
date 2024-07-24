@@ -4,7 +4,7 @@
 <div class="container-big">
     <h1>Profile</h1>
     <div class="flex">
-        <div class="px-2">
+        <div class="col-5">
             <fieldset>
                 <legend>Account</legend>
                 <p id="username">{{user.username}}</p>
@@ -32,24 +32,49 @@
                 </table>
             </fieldset>
         </div>
-        <div class="px-2">
-            <fieldset>
-                <legend>Addresses</legend>
-                {% for addr in addrs %}
-                <div class="address">
-                    <p class="bold" id="name">Nome Cognome</p>
-                    <p id="street">lol</p>
-                    <p id="city">{{addr.province}}</p>
-                    <p id="country">{{addr.state}}</p>
-                </div>
-                {% endfor %}
-            </fieldset>
+        <div class="col-5">
         </div>
     </div>
     <div class="flex">
-        <div class="px-2">
-            test
+        <div class="col-7">
+            <fieldset>
+                <legend>Addresses</legend>
+                {% for addr in user.addresses %}
+                <div class="address">
+                    <div class="address-data" style="max-width: 80%">
+                        <input type="hidden" value="{{addr.id}}" />
+                        <p class="bold" id="name">{{addr.first_name}} {{addr.last_name}}</p>
+                        <p id="street">{{addr.street}}</p>
+                        <!-- Enable after adding city to DB structure <p id="city">{# addr.city #}</p> -->
+                        <p id="province">{{addr.province}} {{addr.postcode}}</p>
+                        <p id="country">{{addr.state}}</p>
+                    </div>
+                    <div class="address-actions"> 
+                        <form method="post" class="p-.5 bg-default">
+                            <input type="hidden" value="{{addr.id}}" name="delete-id" />
+                            <button type="submit" class="danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                <form method="post">
+                    <div class="flex">
+                        <input name="fname" type="text" placeholder="First name" class="mr-.25" />
+                        <input name="lname" type="text" placeholder="Last name" class="ml-.25" />
+                    </div>
+                    <input name="street" type="text" placeholder="Street" />
+                    <input name="province" type="text" placeholder="Province" />
+                    <div class="flex">
+                        <input name="city" type="text" placeholder="City" class="mr-.25" />
+                        <input name="post-code" type="text" placeholder="Post code" class="ml-.25" />
+                    </div>
+                    <input name="state" type="text" placeholder="State" />
+                    <button type="submit" style="width:25%">Add</button>
+                </form>
+            </fieldset>
         </div>
-    </div> 
+        <div class="col-3">
+        </div>
+    </div>
 </div>
 {% endblock %}

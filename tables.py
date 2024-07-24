@@ -27,6 +27,8 @@ class User(Base, UserMixin):
     name: Mapped[str] = mapped_column()
     last_name: Mapped[str] = mapped_column(nullable=True)
     user_type: Mapped[bool] = mapped_column() # True se venditore
+    
+    addresses: Mapped[List['Address']] = relationship(back_populates='user')
 
     @staticmethod
     def __email_checker(email: str):
@@ -157,6 +159,8 @@ class Address(Base):
     #city: Mapped[str]
     state: Mapped[str] 
     province: Mapped[str] 
+    
+    user = relationship('User')
 
     def __init__(self, id, user_id, active, first_name, last_name, street, postcode, state, province):
         if id is None:
