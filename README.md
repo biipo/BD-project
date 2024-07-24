@@ -24,6 +24,7 @@
 - [ ] Template navbar (`nav.html`)
     - [ ] Indicare pagina selezionata
 - [x] Passare a template jinja per bene (extends, block, ecc.)
+- [ ] Migliorare visualizzazione carrello
 
 
 ### Back-end
@@ -32,7 +33,8 @@
 - [x] Fare pagina `'/home'`
 - [x] Fixare registrazione
 - [ ] Applicare cambiamenti alla struttura della tabella addresses (non capisco come farlo)
-- [ ] Fixare aggiunta di un prodotto al carrello quando questo è già presente (sommiamo le quantità e non deve superare disponibilità prodotto)
+- [x] Fixare aggiunta di un prodotto al carrello quando questo è già presente (sommiamo le quantità e non deve superare disponibilità prodotto)
         (controllo disponibilità al momento della creazione dell'ordine o all'aggiunta al carrello?? Caso in cui abbiamo più utenti che fanno l'acquisto)
-- [ ] Il carello quando aggiungi qualcosa mostra l'ultimo oggetto 2 volte, ma se aggiorni la pagina lo mostra correttamente (Da sistemare :/)
+- [x] Il carello quando aggiungi qualcosa mostra l'ultimo oggetto 2 volte, ma se aggiorni la pagina lo mostra correttamente (Da sistemare :/)
 - [x] Applicare cambiamenti alla struttura della tabella addresses (non capisco come farlo)
+- [ ] Implementare parte avvio ordine

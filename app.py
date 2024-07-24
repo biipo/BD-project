@@ -1,12 +1,13 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
-from tables import User, Product, Base, Product, User, Category, Address, Cart, CartProducts, Order, OrderProducts
-from sqlalchemy import create_engine, select, join, update, func
+from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts
+from sqlalchemy import create_engine, select, join, update, func, delete
 from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 import datetime
 import os.path
+from exceptions import InvalidCredential, InvalidDataType, MissingData
 
 # Creazione app flask
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -69,16 +70,22 @@ def product_details(pid):
         return render_template('zoom_in.html', item=item, seller=seller)
     else:
         if current_user.is_authenticated:
-            order_quantity = request.form.get('quantity')
+            order_quantity = int(request.form.get('quantity'))
             item = db_session.scalar(select(Product).where(Product.id == pid))
+            try:
+                new_cart_item = CartProducts(item, order_quantity, current_user)
 
-            # Controllo se esiste già il carrello prima di crearlo
-            cart = db_session.scalar(select(Cart).where(Cart.user_id == current_user.get_id()))
-            if cart == None:
-                cart = Cart(current_user.get_id()) # Creiamo un nuovo carrello per questo utente, quando viene fatto l'ordine questo carrello viene distrutto
-                db_session.add(cart)
+                # Controllo se esiste già il carrello prima di crearlo
+                existing = db_session.scalar(select(CartProducts)
+                                        .where(CartProducts.product_id == new_cart_item.product_id and CartProducts.user_id == new_cart_item.user_id))
+                if existing != None: # già esiste allora aggiungiamo la quantità (questa viene controllata al momento dell'ordine)
+                    existing.quantity += order_quantity
+                else:
+                    db_session.add(new_cart_item)
                 db_session.commit()
-            cart.products.append(CartProducts(item, order_quantity, cart)) # Aggiungiamo alla lista di elementi del carello il prodotto che sta vedendo
+            except InvalidDataType as err:
+                print(err)
+
 
             return redirect(url_for('cart'))
         else:
@@ -112,11 +119,11 @@ def sell():
                 try:
                     product = Product(user_id=current_user.get_id(),  # prende l'utente attualmente loggato (current_user)
                                     brand=request.form.get('brand'),
-                                    category_id=request.form.get('category'),
+                                    category_id=int(request.form.get('category')),
                                     product_name=request.form.get('name'),
                                     date=datetime.datetime.now(),
-                                    price=request.form.get('price'),
-                                    availability=request.form.get('availability'),
+                                    price=float(request.form.get('price')),
+                                    availability=int(request.form.get('availability')),
                                     descr=request.form.get('description'),
                                     image_filename=file.filename)
                 except MissingData as err:
@@ -147,14 +154,17 @@ def user(username):
     user = db_session.scalar(select(User).where(User.username == str(username)))
     return render_template('user.html', user=user)
 
-@app.route('/cart')
+@app.route('/cart' , methods=['GET', 'POST'])
 @login_required
 def cart():
-    # La query ritorna una lista di elementi CartProduct
-    prod = db_session.scalar(select(Cart).where(Cart.id == int(current_user.get_id()))) # Il carrello per un utente è sempre 1
-    for item in prod.products:
-        print(item.product.product_name)
-    return render_template('cart.html', cart_items=prod.products)
+    if request.method == 'GET':
+        # La query ritorna una lista di elementi CartProduct
+        products = db_session.scalars(select(CartProducts).where(CartProducts.user_id == int(current_user.get_id()))).all()
+        return render_template('cart.html', cart_items=products)
+    else:
+        if request.form.get('clear_cart') == 'clear':
+            db_session.execute(delete(CartProducts).where(CartProducts.user_id == current_user.get_id()))
+            return redirect(url_for('cart'))
 
 @app.route('/orders', methods=['GET', 'POST'])
 @login_required
@@ -255,7 +265,7 @@ def signup():
                             password= password,
                             name= request.form.get('fname'),
                             last_name= request.form.get('lname'),
-                            user_type= (request.form.get('user_type') == "Buyer"))
+                            user_type= (request.form.get('user_type') == "Seller"))
         except InvalidCredential as err:
             flash(err.message, 'error') # il primo è il messaggio che mandiamo e il secondo la tipologia del messaggio
             return redirect(request.url)

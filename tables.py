@@ -4,7 +4,7 @@ from sqlalchemy import Column, Table, ForeignKey, except_all, null
 from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped, backref
 from sqlalchemy import Integer
 from flask_login import UserMixin
-from exceptions import InvalidCredential, MissingData
+from exceptions import InvalidCredential, MissingData, InvalidDataType
 from typing import List
 import re # regular expressions
 
@@ -29,6 +29,7 @@ class User(Base, UserMixin):
     user_type: Mapped[bool] = mapped_column() # True se venditore
     
     addresses: Mapped[List['Address']] = relationship(back_populates='user')
+    cart_products: Mapped[List['CartProducts']] = relationship(back_populates='user')
 
     @staticmethod
     def __email_checker(email: str):
@@ -80,9 +81,8 @@ class User(Base, UserMixin):
         self.name, self.last_name = self.__name_lastname_checker(name, last_name)
         self.user_type = user_type
     
-    # TODO: fare sì che user_type sia == True per i venditori, invece che False 
     def is_seller(self):
-        return not self.user_type
+        return  self.user_type
 
 
     def __repr__(self):
@@ -117,7 +117,7 @@ class Product(Base):
     descr: Mapped[str] = mapped_column(nullable=True)
     image_filename: Mapped[str] = mapped_column(nullable=False)
 
-    carts: Mapped[List['CartProducts']] = relationship(back_populates='product')
+    cart_product: Mapped[List['CartProducts']] = relationship(back_populates='product')
     orders: Mapped[List['OrderProducts']] = relationship(back_populates='product')
     seller: Mapped['User'] = relationship('User')
 
@@ -186,33 +186,40 @@ class Address(Base):
 class CartProducts(Base):
     __tablename__ = 'cart_product'
     
-    cart_id: Mapped[int] = mapped_column(ForeignKey('carts.id'), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), primary_key=True)
     product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), primary_key=True)
     quantity: Mapped[int]
 
-    product: Mapped['Product'] = relationship(back_populates='carts')
-    cart: Mapped['Cart'] = relationship(back_populates='products')
+    product: Mapped['Product'] = relationship(back_populates='cart_product')
+    user: Mapped['User'] = relationship(back_populates='cart_products')
 
-    def __init__(self, product, quantity, cart):
+    def __init__(self, product, quantity, user):
         self.product = product
         self.product_id = product.id
-        self.cart = cart
-        self.cart_id = cart.id
-        self.quantity = quantity
+        self.user = user
+        self.user_id = user.id
+        if type(quantity) is int:
+            self.quantity = int(quantity)
+        else:
+            raise InvalidDataType("CartProduct creation: quantity wasn't a INT")
 
-class Cart(Base):
-    __tablename__ = 'carts'
+# class Cart(Base):
+#     __tablename__ = 'carts'
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), unique=True) # Un utente ha un solo carrello per volta
+#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+#     user_id: Mapped[int] = mapped_column(ForeignKey(User.id), unique=True) # Un utente ha un solo carrello per volta
 
-    products: Mapped[List['CartProducts']] = relationship(back_populates='cart')
+#     products: Mapped[List['CartProducts']] = relationship(back_populates='carts')
 
-    def __init__(self, user_id):
-        self.user_id = user_id
+#     def __init__(self, user_id, product_list: list):
+#         if type(user_id) is int and type(product_list) is list:
+#             self.user_id = user_id
+#             self.products = product_list
+#         else:
+#             raise InvalidDataType("Cart creation: user id wasn't a INT or the product list wasn't a list")
 
-    def __repr__(self):
-        return f"{self.id} {self.user_id}"
+#     def __repr__(self):
+#         return f"{self.id} {self.user_id}"
 
 class OrderProducts(Base):
     __tablename__ = 'order_product'

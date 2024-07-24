@@ -6,4 +6,8 @@
             <li>{{ item.product.product_name }}, amount: {{ item.quantity }}</li>
         {% endfor %}
     </ul>
+    <form method="post" onsubmit="">
+        <button name="clear_cart" class="btn btn-attention" type="submit" value="clear">Clear Cart</button>
+        <button name="place_order" class="btn btn-attention" type="submit">Order</button>
+    </form>
 {% endblock %}
