@@ -46,7 +46,7 @@
             <fieldset>
                 <legend>Addresses</legend>
                 {% for addr in user.addresses %}
-                <div class="address">
+                <div class="address flex">
                     <div class="address-data" style="max-width: 80%">
                         <input type="hidden" value="{{addr.id}}" />
                         <p class="bold" id="name">{{addr.first_name}} {{addr.last_name}}</p>

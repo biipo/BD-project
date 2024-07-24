@@ -163,7 +163,7 @@ def orders():
     if request.method == 'GET':
         # Se utente non venditore
         if not user.is_seller():
-            orders = db_session.scalars(select(Order, Address).where(Order.user_id == current_user.get_id()))
+            orders = db_session.scalars(select(Order).filter(Order.user_id == current_user.get_id()).order_by(Order.date.desc()))
             return render_template('orders.html', orders=orders, now=curr_time)
 
         else:

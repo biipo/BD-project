@@ -41,7 +41,6 @@ body {
     border-radius: var(--bd-radius);
     padding: 10px;
     margin-bottom: 10px;
-    display: flex;
 }
 
 .address p {
