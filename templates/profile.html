@@ -7,29 +7,35 @@
         <div class="col-5">
             <fieldset>
                 <legend>Account</legend>
-                <p id="username">{{user.username}}</p>
-                <table>
-                    <tr>
-                        <td><p class="bold muted">Name</p></td>
-                        <td><p class="">{{user.name}} {{user.last_name}}</p></td>
-                    </tr>
-                    <tr>
-                        <td><p class="bold muted">E-mail</p></td>
-                        <td><p class="">{{user.email}}</p></td>
-                    </tr>
-                    <tr>
-                        <td><p class="bold muted">Type</p></td>
-                        <td>
-                            <p class="">
-                                {% if user.user_type == 0 %}
-                                    Seller
-                                {% else %}
-                                    Buyer
-                                {% endif %}
-                            </p>
-                        </td>
-                    </tr>
-                </table>
+                <div>
+                    <p id="username">{{user.username}}</p>
+                    <form method="post" class="bg-default p-.25">
+                        <table>
+                            <tr>
+                                <td><p class="bold muted">Name</p></td>
+                                <td style="width:80%">
+                                    <div class="flex">
+                                        <input type="text" name="info-fname" class="mr-.25" value="{{user.name}}" style="width:50%" />
+                                        <input type="text" name="info-lname" class="ml-.25" value="{{user.last_name}}" style="width:50%" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><p class="bold muted">E-mail</p></td>
+                                <td><input type="text" name="info-email" value="{{user.email}}" /></td>
+                            </tr>
+                            <tr>
+                                <td><p class="bold muted">Type</p></td>
+                                <td>
+                                    <p class="">
+                                    {{ 'Seller' if user.is_seller() else 'Buyer' }}
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                        <button style="width:25%" type="submit">Update</button>
+                    </form>
+                </div>
             </fieldset>
         </div>
         <div class="col-5">
@@ -57,20 +63,23 @@
                     </div>
                 </div>
                 {% endfor %}
-                <form method="post">
-                    <div class="flex">
-                        <input name="fname" type="text" placeholder="First name" class="mr-.25" />
-                        <input name="lname" type="text" placeholder="Last name" class="ml-.25" />
-                    </div>
-                    <input name="street" type="text" placeholder="Street" />
-                    <input name="province" type="text" placeholder="Province" />
-                    <div class="flex">
-                        <input name="city" type="text" placeholder="City" class="mr-.25" />
-                        <input name="post-code" type="text" placeholder="Post code" class="ml-.25" />
-                    </div>
-                    <input name="state" type="text" placeholder="State" />
-                    <button type="submit" style="width:25%">Add</button>
-                </form>
+                <details class="bg-muted">
+                    <summary class="default">Add new address</summary>
+                    <form method="post">
+                        <div class="flex">
+                            <input name="fname" type="text" placeholder="First name" class="mr-.25" />
+                            <input name="lname" type="text" placeholder="Last name" class="ml-.25" />
+                        </div>
+                        <input name="street" type="text" placeholder="Street" />
+                        <input name="province" type="text" placeholder="Province" />
+                        <div class="flex">
+                            <input name="city" type="text" placeholder="City" class="mr-.25" />
+                            <input name="post-code" type="text" placeholder="Post code" class="ml-.25" />
+                        </div>
+                        <input name="state" type="text" placeholder="State" />
+                        <button type="submit" style="width:25%">Add</button>
+                    </form>
+                </details>
             </fieldset>
         </div>
         <div class="col-3">
