@@ -1,4 +1,5 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
+from sqlalchemy.engine import url
 from tables import User, Product, Base, Product, User, Category, Address, Cart, CartProducts, Order, OrderProducts
 from sqlalchemy import create_engine, select, join, update, func
 from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager
@@ -135,12 +136,52 @@ def sell():
 def load_user(user_id):
     return db_session.scalar(select(User).where(User.id == int(user_id))) # Dovrebbe ritornare 'None' se l'ID non è valido
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
 def profile():
-    user = db_session.scalar(select(User).where(User.id == int(current_user.get_id())))
-    addrs = db_session.scalar(select(Address).where(Address.user_id == int(current_user.get_id())))
-    return render_template('profile.html', user=user, addrs=addrs)
+
+    if request.method == 'GET':
+        user = db_session.scalar(select(User).filter(User.id == current_user.get_id()))
+        addrs = db_session.scalar(select(Address).where(Address.user_id == int(current_user.get_id())))
+
+        return render_template('profile.html', user=user, addrs=addrs)
+    
+    else:
+        if request.form.get('info-update') is not None:
+            user = db_session.scalar(select(User).filter(User.id == current_user.get_id()))
+            user.name = request.form.get('info-fname')
+            user.last_name = request.form.get('info-lname')
+            user.email = request.form.get('info-email')
+            db_session.commit()
+        
+        elif request.form.get('address-delete') is not None:
+            db_session.delete(db_session.scalar(select(Address).filter(Address.id == request.form.get('address-id'))))
+            db_session.commit()
+            
+        elif request.form.get('address-set-active') is not None:
+            curr_active = db_session.scalar(select(Address).filter(Address.user_id == current_user.get_id()).filter(Address.active == True))
+            if not curr_active.id == request.form.get('address-id'):
+                curr_active.active = False
+                db_session.scalar(select(Address).filter(Address.id == request.form.get('address-id'))).active = True
+                db_session.commit()
+
+        elif request.form.get('address-add') is not None:
+            new_address = Address(
+                user_id=current_user.get_id(),
+                active=False,
+                first_name=request.form.get('fname'),
+                last_name=request.form.get('lname'),
+                street=request.form.get('street'),
+                postcode=request.form.get('post-code'),
+                state=request.form.get('state'),
+                #city=request.form.get('city'),
+                province=request.form.get('province')
+            )
+            db_session.add(new_address)
+            db_session.commit()
+        
+        return redirect(url_for('profile'))
+
 
 @app.route('/user/<username>')
 def user(username):

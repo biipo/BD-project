@@ -33,7 +33,7 @@
                                 </td>
                             </tr>
                         </table>
-                        <button style="width:25%" type="submit">Update</button>
+                        <button style="width:25%" type="submit" name="info-update">Update</button>
                     </form>
                 </div>
             </fieldset>
@@ -46,7 +46,7 @@
             <fieldset>
                 <legend>Addresses</legend>
                 {% for addr in user.addresses %}
-                <div class="address flex">
+                <div class="address flex" style="{{'border:2px solid var(--default)' if addr.active}}" >
                     <div class="address-data" style="max-width: 80%">
                         <input type="hidden" value="{{addr.id}}" />
                         <p class="bold" id="name">{{addr.first_name}} {{addr.last_name}}</p>
@@ -57,8 +57,9 @@
                     </div>
                     <div class="address-actions"> 
                         <form method="post" class="p-.5 bg-default">
-                            <input type="hidden" value="{{addr.id}}" name="delete-id" />
-                            <button type="submit" class="danger">Delete</button>
+                            <input type="hidden" value="{{addr.id}}" name="address-id" />
+                            <button type="submit" class="danger" name="address-delete">Delete</button>
+                            <button type="submit" name="address-set-active" {{'disabled' if addr.active}}>Set active</button>
                         </form>
                     </div>
                 </div>
@@ -77,7 +78,7 @@
                             <input name="post-code" type="text" placeholder="Post code" class="ml-.25" />
                         </div>
                         <input name="state" type="text" placeholder="State" />
-                        <button type="submit" style="width:25%">Add</button>
+                        <button type="submit" style="width:25%" name="address-add">Add</button>
                     </form>
                 </details>
             </fieldset>

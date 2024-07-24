@@ -149,7 +149,7 @@ class Product(Base):
 class Address(Base):
     __tablename__ = 'addresses'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id, ondelete='CASCADE'))
     active: Mapped[bool]
     first_name: Mapped[str]
@@ -162,13 +162,10 @@ class Address(Base):
     
     user = relationship('User')
 
-    def __init__(self, id, user_id, active, first_name, last_name, street, postcode, state, province):
-        if id is None:
-            raise MissingData('Missing id')
-        self.id = id
+    def __init__(self, user_id, active, first_name, last_name, street, postcode, state, province):
         if user_id is None:
             raise MissingData('Missing user_id')
-        if None in (active, first_name, last_name, street, postcode, state, province):
+        if None in (first_name, last_name, street, postcode, state, province):
             raise MissingData('Missing not null attribute')
         self.user_id = user_id
         self.active = active
