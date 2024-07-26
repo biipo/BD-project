@@ -1,6 +1,6 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
 from sqlalchemy.engine import url
-from tables import User, Product, Base, Product, User, Category, Address, Cart, CartProducts, Order, OrderProducts
+from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts
 from sqlalchemy import create_engine, select, join, update, func
 from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager
 from flask_sqlalchemy import SQLAlchemy
