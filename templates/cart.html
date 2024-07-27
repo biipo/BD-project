@@ -1,13 +1,25 @@
 {% extends 'base.html' %}
 {% block title %}Cart{% endblock %}
 {% block content %}
-    <ul>
+    <div class="container-big">
         {% for item in cart_items %}
-            <li>{{ item.product.product_name }}, amount: {{ item.quantity }}</li>
+            <form method="post" class="border p-1">
+                <input type="hidden" value="{{item.product_id}}" />
+                <div class="flex">
+                    <div class="col-7">
+                        <p class="larger"><a class="default" href="/product-details/{{item.product.id}}">{{item.product.product_name}}</a></p>
+                        <p><b>Qty</b>: {{item.quantity}}</p>
+                    </div>
+                    <div>
+                        <p class="py-.25 px-.5 bg-success border-r">{{ item.product.price }}€</p>
+                        <button class="danger" type="submit" name="delete-item"><i class="bi bi-trash-fill"></i></button>
+                    </div>
+                </div>
+            </form>
         {% endfor %}
-    </ul>
-    <form method="post" onsubmit="">
-        <button name="clear_cart" class="btn btn-attention" type="submit" value="clear">Clear Cart</button>
-        <button name="place_order" class="btn btn-attention" type="submit">Order</button>
-    </form>
+        <form method="post" onsubmit="">
+            <button name="clear_cart" class="danger" type="submit" value="clear">Clear Cart</button>
+            <button name="place_order" class="" type="submit">Order</button>
+        </form>
+    </div>
 {% endblock %}
