@@ -92,15 +92,30 @@ class User(Base, UserMixin):
 class Category(Base):
     __tablename__ = 'categories'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(nullable=False)
 
-    def __init__(self, id, name):
-        self.id = id
+    # sub_categories_list: Mapped[List['SubCategory']] = relationship(back_populates='category')
+
+    def __init__(self, name):
         self.name = name
 
     def __repr__(self):
         return f"{self.id} {self.name}"
+
+# class SubCategory(Base):
+#     __tablename__ = 'sub_categories'
+
+#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+#     category_id: Mapped[int] = mapped_column(ForeignKey(Category.id), nullable=False)
+#     name: Mapped[str] = mapped_column(nullable=False)
+
+#     category: Mapped['Category'] = relationship(back_populates='sub_categories_list')
+
+#     def __init__(self, category, name):
+#         self.category = category
+#         self.category_id = category.id
+#         self.name = name
 
 
 class Product(Base):
@@ -108,7 +123,7 @@ class Product(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
-    brand: Mapped[str] = mapped_column(nullable=True)
+    # brand: Mapped[str] = mapped_column(nullable=True)
     category_id: Mapped[int] = mapped_column(ForeignKey(Category.id))
     product_name: Mapped[str] = mapped_column(nullable=False)
     date: Mapped[datetime] = mapped_column(nullable=True)
@@ -120,12 +135,12 @@ class Product(Base):
     cart_product: Mapped[List['CartProducts']] = relationship(back_populates='product')
     orders: Mapped[List['OrderProducts']] = relationship(back_populates='product')
     seller: Mapped['User'] = relationship('User')
+    tags: Mapped[List['SubTagProduct']] = relationship(back_populates='product')
 
-    def __init__(self, user_id, brand, category_id, product_name, date, price, availability, descr, image_filename):
+    def __init__(self, user_id, category_id, product_name, date, price, availability, descr, image_filename):
         if user_id is None:
             raise MissingData('Missing user id')
         self.user_id = user_id
-        self.brand = brand
         if category_id is None:
             raise MissingData('Missing category id')
         self.category_id = category_id
@@ -231,21 +246,46 @@ class Order(Base):
 class Tag(Base):
     __tablename__ = 'tags'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(nullable=False)
 
-    def __repr__(self):
-        return f"{self.id} {self.name}"
+    sub_tags_list: Mapped[List['SubTag']] = relationship(back_populates='tag')
 
+    def __init__(self, name):
+        self.name = name
+
+class SubTag(Base):
+    __tablename__ = 'sub_tags'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    tag_id: Mapped[int] = mapped_column(ForeignKey(Tag.id), nullable=False)
+    value: Mapped[str] = mapped_column(nullable=False)
+
+    tag: Mapped['Tag'] = relationship(back_populates='sub_tags_list')
+    products: Mapped[List['SubTagProduct']] = relationship(back_populates='sub_tag')
+
+    def __init__(self, tag, value):
+        if tag == None or value == None:
+            raise MissingData('SubTag: missing tag reference or value of sub-tag')
+        self.tag = tag
+        self.tag_id = tag.id
+        self.value = value
 
 # Tabella intermedia m:m
-tag_product = Table(
-    'tag_products',
-    Base.metadata,
-    Column('tag_id', ForeignKey(Tag.id), primary_key=True),
-    Column('product_id', ForeignKey(Product.id), primary_key=True),
-)
+class SubTagProduct(Base):
+    __tablename__ = 'sub_tag_products'
 
+    tag_id: Mapped[int] = mapped_column(ForeignKey(SubTag.id), primary_key=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey(Product.id), primary_key=True)
+
+    sub_tag: Mapped['SubTag'] = relationship(back_populates='products')
+    product: Mapped['Product'] = relationship(back_populates='tags')
+
+    def __init__(self, sub_tag, product):
+        self.sub_tag = sub_tag
+        self.product = product
+        self.tag_id = sub_tag.id
+        self.product_id = product.id
 
 class Review(Base):
     __tablename__ = 'reviews'
@@ -258,56 +298,3 @@ class Review(Base):
     def __repr__(self):
         return f"{self.id} {self.product_id} {self.user_id} {self.review}"
 
-
-# ---------------------------------------------------------------------------------------------------------------------------
-# Relationship per le foreign key
-
-# Relazine tra venditore e prodotti in vendita
-Product.user_fk = relationship(User, back_populates='product_fk')  # , cascade='all, delete, save-update'
-User.product_fk = relationship(Product, back_populates='user_fk', order_by=Product.id)
-
-# Relazione tra address e ordine
-Order.address_fk = relationship(Address, back_populates='order_fk')
-Address.order_fk = relationship(Order, back_populates='address_fk', order_by=Order.id)
-
-# Relazione tra indirizzi e utenti
-Address.user_fk = relationship(User, back_populates='addresses_fk')  # Serve per collegare la ForeignKey
-User.addresses_fk = relationship(Address, back_populates='user_fk', cascade='all, delete, save-update')
-
-# Relazione tra utenti e i loro rispettivi carrelli
-# Cart.user_fk = relationship(User, back_populates='cart_fk', cascade='all, delete, save-update')
-# User.cart_fk = relationship(Cart, back_populates='user_fk', cascade='all, delete, save-update')
-
-# Relazione tra carrello e prodotti
-# Cart.product_fk = relationship(Product, secondary=cart_product, back_populates='cart_fk',
-#                                cascade='all, delete, save-update')
-# Product.cart_fk = relationship(Cart, secondary=cart_product, back_populates='product_fk',
-#                                cascade='all, delete, save-update')
-
-# Relazione tra utente e i suoi ordini
-Order.user_fk = relationship(User, back_populates='order_fk', cascade='all, delete, save-update')
-User.order_fk = relationship(Order, back_populates='user_fk', cascade='all, delete, save-update')
-
-# Relazione tra ordini e prodotti nell'ordine
-#Order.product_fk = relationship(Product, secondary=order_product, back_populates='order_fk',
-#                                cascade='all, delete, save-update')
-#Product.order_fk = relationship(Order, secondary=order_product, back_populates='product_fk',
-#                                cascade='all, delete, save-update')
-
-# Relazione tra prodotti e categorie a cui appartengono
-Category.product_fk = relationship(Product, back_populates='category_fk', cascade='all, delete, save-update')
-Product.category_fk = relationship(Category, back_populates='product_fk', cascade='all, delete, save-update')
-
-# Relazione tra tag e prodotti con intermedia tag_product
-Tag.product_fk = relationship(Product, secondary=tag_product, back_populates='tag_fk',
-                              cascade='all, delete, save-update')
-Product.tag_fk = relationship(Tag, secondary=tag_product, back_populates='product_fk',
-                              cascade='all, delete, save-update')
-
-# Relazione tra prodotti e recensioni
-Product.review_fk = relationship(Review, back_populates='product_fk', cascade='all, delete, save-update')
-Review.product_fk = relationship(Product, back_populates='review_fk', cascade='all, delete, save-update')
-
-# Relazione tra recensioni e utenti
-Review.user_fk = relationship(User, back_populates='review_fk', cascade='all, delete, save-update')
-User.review_fk = relationship(Review, back_populates='user_fk', cascade='all, delete, save-update')
