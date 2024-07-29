@@ -69,22 +69,36 @@ def product_details(pid):
         item = db_session.scalar(select(Product).where(Product.id == pid))
         seller = db_session.scalar(select(User).where(User.id == item.user_id))
         return render_template('zoom_in.html', item=item, seller=seller)
+
     else:
         if current_user.is_authenticated:
             order_quantity = int(request.form.get('quantity'))
             item = db_session.scalar(select(Product).where(Product.id == pid))
-            new_cart_item = CartProducts(item, order_quantity, current_user)
+            
 
-            # Controllo se esiste già il carrello prima di crearlo
-            existing = db_session.scalar(select(CartProducts)
-                                    .where(CartProducts.product_id == new_cart_item.product_id and CartProducts.user_id == new_cart_item.user_id))
-            if existing != None: # già esiste allora aggiungiamo la quantità (questa viene controllata al momento dell'ordine)
+            if order_quantity <= item.availability:
+                new_cart_item = CartProducts(item, order_quantity, current_user)
+            else:
+                flash('Invalid quantity selected', 'error')
+                return redirect(url_for('product_details', pid=item.id))
+
+            # Controllo se esiste già l'elemento nel carrello prima di crearlo
+            existing = db_session.scalar(
+                select(CartProducts)
+                .filter(CartProducts.product_id == new_cart_item.product_id)
+                .filter(CartProducts.user_id == new_cart_item.user_id)
+            )
+
+            # Se già esiste aggiungiamo la quantità
+            if existing is not None:
                 existing.quantity += order_quantity
             else:
                 db_session.add(new_cart_item)
+
             db_session.commit()
 
             return redirect(url_for('cart'))
+
         else:
             flash('Login is required to place orders', 'error')
             return redirect(url_for('login'))
