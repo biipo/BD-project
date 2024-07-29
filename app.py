@@ -1,5 +1,5 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
-from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, SubTag, SubTagProduct
+from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, TagProduct, TagGroup
 from sqlalchemy import create_engine, select, join, update, func, delete
 from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager
 from flask_sqlalchemy import SQLAlchemy
@@ -34,18 +34,6 @@ Base.metadata.create_all(engine)
 db_session = Session(engine)
 
 def db_init():
-    categories = [
-        Category(name='Arts'),
-        Category(name='Personal Care'),
-        Category(name='Electronics'),
-        Category(name='Music'),
-        Category(name='Sports'),
-        Category(name='Movies & TV'),
-        Category(name='Software'),
-        Category(name='Games'),
-        Category(name='House'),
-        Category(name='DIY')
-    ]
     '''
     sub_categories = [
         SubCategory(categories[0], 'Painting Supplies'),
@@ -108,37 +96,35 @@ def db_init():
         SubCategory(categories[9], 'Crafting Tools'),
         SubCategory(categories[9], 'Garden & Outdoor')
     ]
-
     '''
-    tags = [ Tag(name='Dimensions'),
-             Tag(name='Color'),
-             Tag(name='Brand')
-            ]
-    sub_tags = [ SubTag(tag=tags[0], value='small'),
-                 SubTag(tag=tags[0], value='medium'),
-                 SubTag(tag=tags[0], value='big')
-                ]
+    if db_session.scalar(select(Category)) is None:
+        db_session.add_all([ Category(name='Arts'),
+                            Category(name='Personal Care'),
+                            Category(name='Electronics'),
+                            Category(name='Music'),
+                            Category(name='Sports'),
+                            Category(name='Movies & TV'),
+                            Category(name='Software'),
+                            Category(name='Games'),
+                            Category(name='House'),
+                            Category(name='DIY')
+                            ])
+        db_session.commit()
 
-    db_session.add_all([ Category(name='Arts'),
-                         Category(name='Personal Care'),
-                         Category(name='Electronics'),
-                         Category(name='Music'),
-                         Category(name='Sports'),
-                         Category(name='Movies & TV'),
-                         Category(name='Software'),
-                         Category(name='Games'),
-                         Category(name='House'),
-                         Category(name='DIY'),
-                         Tag(name='Dimensions'),
-                         Tag(name='Color'),
-                         Tag(name='Brand'),
-                         SubTag(tag=tags[0], value=str('small')),
-                         SubTag(tag=tags[0], value='medium'),
-                         SubTag(tag=tags[0], value='big')])
-    # db_session.add(categories)
-    # db_session.add(tags)
-    # db_session.add(sub_tags)
-    db_session.commit()
+    dim = TagGroup(name='Dimensions')
+    if db_session.scalar(select(TagGroup)) is None:
+        db_session.add_all([ TagGroup(name='Color'),
+                             TagGroup(name='Brand'),
+                             dim
+                             ])
+        db_session.commit()
+
+    if db_session.scalar(select(Tag)) is None:
+        db_session.add_all([ Tag(value='small', tag_group=dim),
+                             Tag(value='medium', tag_group=dim),
+                             Tag(value='big', tag_group=dim)
+                            ])
+        db_session.commit()
     
 
 @app.route('/')
@@ -215,19 +201,27 @@ def sell():
                                       availability=int(request.form.get('availability')),
                                       descr=request.form.get('description'),
                                       image_filename=file.filename)
-                    dim_sub_tag = SubTag(db_session.scalar(select(Tag).where(Tag.name == 'Dimensions')), str(dimensions))
-                    col_sub_tag = SubTag(db_session.scalar(select(Tag).where(Tag.name == 'Color')), str(color))
-                    brand_sub_tag = SubTag(db_session.scalar(select(Tag).where(Tag.name == 'Brand')), str(brand))
+
+                    # Seleziona l'oggetto tag corrispondente al valore della dimensione scelta dal venditore, trattandosi
+                    # della dimensione abbiamo imposto 3 grandezze che esistono già nel database quindi sicuramente non va aggiunta
+                    prod_dim = TagProduct(db_session.scalar(select(Tag).where(Tag.value == str(dimensions))), product)
+
+                    color_db = db_session.scalar(select(Tag).where(Tag.value == str(color)))
+                    if  color_db == None: # Se il colore del prodotto è nuovo lo aggiungiamo
+                        color_db = Tag(str(color), db_session.scalar(select(TagGroup).where(TagGroup.name == 'Color')))
+                    prod_color = TagProduct(color_db , product)
+
+                    brand_db = db_session.scalar(select(Tag).where(Tag.value == str(brand)))
+                    if  brand_db  == None: # Se il brand del prodotto è nuovo
+                        brand_db = Tag(str(brand), db_session.scalar(select(TagGroup).where(TagGroup.name == 'Brand')))
+                    prod_brand = TagProduct(brand_db , product)
                 except MissingData as err:
                     flash(err.message, 'error')
                     return redirect(request.url)
-                
-                dim_tag_interm = SubTagProduct(dim_sub_tag, product)
-                col_tag_interm = SubTagProduct(col_sub_tag , product)
-                brand_tag_interm = SubTagProduct(brand_sub_tag , product)
-                product.tags.append([dim_tag_interm, col_tag_interm, brand_tag_interm])
 
-                db_session.add_all([dim_tag_interm, col_tag_interm, brand_tag_interm, product])
+                product.tags.extend([prod_dim , prod_color , prod_brand]) # Aggiunge i tag relativi al prodotto
+
+                db_session.add(product)
                 db_session.commit()
                 return redirect(url_for('home')) # Reindirizza alla pagina di tutti i prodotti in vendita
             else:

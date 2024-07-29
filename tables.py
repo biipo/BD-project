@@ -135,7 +135,7 @@ class Product(Base):
     cart_product: Mapped[List['CartProducts']] = relationship(back_populates='product')
     orders: Mapped[List['OrderProducts']] = relationship(back_populates='product')
     seller: Mapped['User'] = relationship('User')
-    tags: Mapped[List['SubTagProduct']] = relationship(back_populates='product')
+    tags: Mapped[List['TagProduct']] = relationship(back_populates='product')
 
     def __init__(self, user_id, category_id, product_name, date, price, availability, descr, image_filename):
         if user_id is None:
@@ -156,9 +156,6 @@ class Product(Base):
         if image_filename is None:
             raise MissingData('Missing image')
         self.image_filename = image_filename
-
-    def __repr__(self):
-        return f"Id:{self.id}, Venditore:{self.user_id}, Prodotto:{self.product_name}, Brand:{self.brand}, Messo in vendita: {self.date}, Prezzo:{self.price}€, Quantità in magazzino:{self.availability}, Descrizione:{self.descr}"
 
 
 class Address(Base):
@@ -243,48 +240,50 @@ class Order(Base):
     def __repr__(self):
         return f"{self.id} {self.user_id} {self.date} {self.price} {self.address} {self.payment_method} {self.status}"
 
-class Tag(Base):
-    __tablename__ = 'tags'
+class TagGroup(Base):
+    # Tabella con relazione (TagGroup)1:m(Tag), che serve per riconoscere di che categoria è il tag (dimensione, colore o brand)
+    __tablename__ = 'tag_group'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(nullable=False)
+    name: Mapped[str] = mapped_column(nullable=False, unique=True)
 
-    sub_tags_list: Mapped[List['SubTag']] = relationship(back_populates='tag')
+    tag_list: Mapped[List['Tag']] = relationship(back_populates='tag_group')
 
     def __init__(self, name):
         self.name = name
 
-class SubTag(Base):
-    __tablename__ = 'sub_tags'
+class Tag(Base):
+    __tablename__ = 'tags'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    tag_id: Mapped[int] = mapped_column(ForeignKey(Tag.id), nullable=False)
-    value: Mapped[str] = mapped_column(nullable=False)
+    value: Mapped[str] = mapped_column(nullable=False, unique=True)
 
-    tag: Mapped['Tag'] = relationship(back_populates='sub_tags_list')
-    products: Mapped[List['SubTagProduct']] = relationship(back_populates='sub_tag')
+    tag_group_id: Mapped[int] = mapped_column(ForeignKey(TagGroup.id))
+    tag_group: Mapped['TagGroup'] = relationship(back_populates='tag_list')
 
-    def __init__(self, tag, value):
-        if tag == None or value == None:
-            raise MissingData('SubTag: missing tag reference or value of sub-tag')
-        self.tag = tag
-        self.tag_id = tag.id
+    products: Mapped[List['TagProduct']] = relationship(back_populates='tag')
+
+    def __init__(self, value, tag_group):
+        if value is None or tag_group is None:
+            raise MissingData('Missing dimensions, color or brand of the product')
         self.value = value
+        self.tag_group = tag_group
+        self.tag_group_id = tag_group.id
 
 # Tabella intermedia m:m
-class SubTagProduct(Base):
-    __tablename__ = 'sub_tag_products'
+class TagProduct(Base):
+    __tablename__ = 'tag_products'
 
-    tag_id: Mapped[int] = mapped_column(ForeignKey(SubTag.id), primary_key=True)
+    tag_id: Mapped[int] = mapped_column(ForeignKey(Tag.id), primary_key=True)
     product_id: Mapped[int] = mapped_column(ForeignKey(Product.id), primary_key=True)
 
-    sub_tag: Mapped['SubTag'] = relationship(back_populates='products')
+    tag: Mapped['Tag'] = relationship(back_populates='products')
     product: Mapped['Product'] = relationship(back_populates='tags')
 
-    def __init__(self, sub_tag, product):
-        self.sub_tag = sub_tag
+    def __init__(self, tag, product):
+        self.tag = tag
         self.product = product
-        self.tag_id = sub_tag.id
+        self.tag_id = tag.id
         self.product_id = product.id
 
 class Review(Base):
