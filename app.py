@@ -197,10 +197,22 @@ def cart():
     if request.method == 'GET':
         # La query ritorna una lista di elementi CartProduct
         products = db_session.scalars(select(CartProducts).where(CartProducts.user_id == int(current_user.get_id()))).all()
-        return render_template('cart.html', cart_items=products)
+        total = sum(p.quantity * p.product.price for p in products)
+        return render_template('cart.html', cart_items=products, total=total)
     else:
-        if request.form.get('clear_cart') == 'clear':
+        if request.form.get('clear-cart') is not None:
             db_session.execute(delete(CartProducts).where(CartProducts.user_id == current_user.get_id()))
+            return redirect(url_for('cart'))
+        
+        elif request.form.get('delete-item') is not None:
+            db_session.delete(
+                    db_session.scalar(
+                        select(CartProducts)
+                        .filter(CartProducts.product_id == request.form.get('item-id'))
+                        .filter(CartProducts.user_id == current_user.get_id())
+                    )
+            )
+            db_session.commit()
             return redirect(url_for('cart'))
 
 @app.route('/orders', methods=['GET', 'POST'])
