@@ -9,7 +9,17 @@
         </div>
         <div class="col-7 m-1">
             <div class="product-details">
-                <div id="brand" class="muted">{{ item.brand }}</div>
+                {% for tag in item.tags %}
+                    {% if tag.tag.tag_group.name == 'Dimensions' %}
+                        <div id="brand" class="muted">Dimensions: {{ tag.tag.value }}</div>
+                    {% endif %}
+                    {% if tag.tag.tag_group.name == 'Color' %}
+                        <div id="brand" class="muted">Color: {{ tag.tag.value }}</div>
+                    {% endif %}
+                    {% if tag.tag.tag_group.name == 'Brand' %}
+                        <div id="brand" class="muted">Brand: {{ tag.tag.value }}</div>
+                    {% endif %}
+                {% endfor %}
                 <div id="" class="larger bold mt-1"><p class="py-.25 px-.5 bg-success inline block border-r">{{ item.price }}€</p></div>
                 <div class="product-availability mt-.5">
                     <p class="{% if item.availability <=5 %} bg-severe border-r p-.25 {% endif %} inline block">{{ item.availability }} pezzi disponibili</p>

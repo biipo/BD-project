@@ -1,7 +1,7 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
 from sqlalchemy.engine import url
-from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts
-from sqlalchemy import create_engine, select, join, update, func
+from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, TagProduct, TagGroup
+from sqlalchemy import create_engine, select, join, update, func, delete
 from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -37,22 +37,101 @@ db_session = Session(engine)
 
 def db_init():
     '''
-    if db_session.scalars(select(Category)).all() == None:
-        db_session.add_all([ Category(id=1, name='Arts'),
-                             Category(id=2, name='Personal Care'),
-                             Category(id=3, name='Eletronics'),
-                             Category(id=4, name='Music'),
-                             Category(id=5, name='Sports'),
-                             Category(id=6, name='Movies & TV'),
-                             Category(id=7, name='Software'),
-                             Category(id=8, name='Games'),
-                             Category(id=9, name='House'),
-                             Category(id=10, name='DIY') ])
-        db_session.commit()
+    sub_categories = [
+        SubCategory(categories[0], 'Painting Supplies'),
+        SubCategory(categories[0], 'Drawing Tools'),
+        SubCategory(categories[0], 'Sculpture Materials'),
+        SubCategory(categories[0], 'Craft Kits'),
+        SubCategory(categories[0], 'Art Books'),
+        
+        SubCategory(categories[1], 'Skincare'),
+        SubCategory(categories[1], 'Haircare'),
+        SubCategory(categories[1], 'Oral Care'),
+        SubCategory(categories[1], 'Fragrances'),
+        SubCategory(categories[1], 'Personal Hygiene'),
+        
+        SubCategory(categories[2], 'Smartphones'),
+        SubCategory(categories[2], 'Laptops'),
+        SubCategory(categories[2], 'Home Appliances'),
+        SubCategory(categories[2], 'Wearable Technology'),
+        SubCategory(categories[2], 'Audio & Video'),
+        
+        SubCategory(categories[3], 'Instruments'),
+        SubCategory(categories[3], 'Sheet Music'),
+        SubCategory(categories[3], 'Music Accessories'),
+        SubCategory(categories[3], 'Recording Equipment'),
+        SubCategory(categories[3], 'CDs & Vinyl Records'),
+        
+        SubCategory(categories[4], 'Fitness Equipment'),
+        SubCategory(categories[4], 'Team Sports Gear'),
+        SubCategory(categories[4], 'Outdoor Recreation'),
+        SubCategory(categories[4], 'Sportswear'),
+        SubCategory(categories[4], 'Athletic Footwear'),
+        
+        SubCategory(categories[5], 'DVDs & Blu-rays'),
+        SubCategory(categories[5], 'Streaming Devices'),
+        SubCategory(categories[5], 'TV Accessories'),
+        SubCategory(categories[5], 'Collectibles & Memorabilia'),
+        SubCategory(categories[5], 'Movie Posters'),
+        
+        SubCategory(categories[6], 'Operating Systems'),
+        SubCategory(categories[6], 'Productivity Software'),
+        SubCategory(categories[6], 'Security Software'),
+        SubCategory(categories[6], 'Creative Software'),
+        SubCategory(categories[6], 'Educational Software'),
+        
+        SubCategory(categories[7], 'Video Games'),
+        SubCategory(categories[7], 'Board Games'),
+        SubCategory(categories[7], 'Card Games'),
+        SubCategory(categories[7], 'Gaming Accessories'),
+        SubCategory(categories[7], 'Puzzles'),
+        
+        SubCategory(categories[8], 'Furniture'),
+        SubCategory(categories[8], 'Kitchenware'),
+        SubCategory(categories[8], 'Bedding & Linens'),
+        SubCategory(categories[8], 'Home Decor'),
+        SubCategory(categories[8], 'Cleaning Supplies'),
+        
+        SubCategory(categories[9], 'Tools'),
+        SubCategory(categories[9], 'Building Materials'),
+        SubCategory(categories[9], 'Paint & Supplies'),
+        SubCategory(categories[9], 'Crafting Tools'),
+        SubCategory(categories[9], 'Garden & Outdoor')
+    ]
     '''
+    if db_session.scalar(select(Category)) is None:
+        db_session.add_all([ Category(name='Arts'),
+                            Category(name='Personal Care'),
+                            Category(name='Electronics'),
+                            Category(name='Music'),
+                            Category(name='Sports'),
+                            Category(name='Movies & TV'),
+                            Category(name='Software'),
+                            Category(name='Games'),
+                            Category(name='House'),
+                            Category(name='DIY')
+                            ])
+        db_session.commit()
+
+    dim = TagGroup(name='Dimensions')
+    if db_session.scalar(select(TagGroup)) is None:
+        db_session.add_all([ TagGroup(name='Color'),
+                             TagGroup(name='Brand'),
+                             dim
+                             ])
+        db_session.commit()
+
+    if db_session.scalar(select(Tag)) is None:
+        db_session.add_all([ Tag(value='small', tag_group=dim),
+                             Tag(value='medium', tag_group=dim),
+                             Tag(value='big', tag_group=dim)
+                            ])
+        db_session.commit()
+    
 
 @app.route('/')
 def start():
+    db_init()
     return redirect(url_for('home'))
 
 @app.route('/uploads/<filename>')
@@ -125,21 +204,39 @@ def sell():
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(path)
+                dimensions = request.form.get('dimensions')
+                color = request.form.get('color')
+                brand = request.form.get('brand')
                 
-                from exceptions import MissingData
                 try:
                     product = Product(user_id=current_user.get_id(),  # prende l'utente attualmente loggato (current_user)
-                                    brand=request.form.get('brand'),
-                                    category_id=int(request.form.get('category')),
-                                    product_name=request.form.get('name'),
-                                    date=datetime.datetime.now(),
-                                    price=float(request.form.get('price')),
-                                    availability=int(request.form.get('availability')),
-                                    descr=request.form.get('description'),
-                                    image_filename=file.filename)
+                                      category_id=int(request.form.get('category')),
+                                      product_name=request.form.get('name'),
+                                      date=datetime.datetime.now(),
+                                      price=float(request.form.get('price')),
+                                      availability=int(request.form.get('availability')),
+                                      descr=request.form.get('description'),
+                                      image_filename=file.filename)
+
+                    # Seleziona l'oggetto tag corrispondente al valore della dimensione scelta dal venditore, trattandosi
+                    # della dimensione abbiamo imposto 3 grandezze che esistono già nel database quindi sicuramente non va aggiunta
+                    prod_dim = TagProduct(db_session.scalar(select(Tag).where(Tag.value == str(dimensions))), product)
+
+                    color_db = db_session.scalar(select(Tag).where(Tag.value == str(color)))
+                    if  color_db == None: # Se il colore del prodotto è nuovo lo aggiungiamo
+                        color_db = Tag(str(color), db_session.scalar(select(TagGroup).where(TagGroup.name == 'Color')))
+                    prod_color = TagProduct(color_db , product)
+
+                    brand_db = db_session.scalar(select(Tag).where(Tag.value == str(brand)))
+                    if  brand_db  == None: # Se il brand del prodotto è nuovo
+                        brand_db = Tag(str(brand), db_session.scalar(select(TagGroup).where(TagGroup.name == 'Brand')))
+                    prod_brand = TagProduct(brand_db , product)
                 except MissingData as err:
                     flash(err.message, 'error')
                     return redirect(request.url)
+
+                product.tags.extend([prod_dim , prod_color , prod_brand]) # Aggiunge i tag relativi al prodotto
+
                 db_session.add(product)
                 db_session.commit()
                 return redirect(url_for('home')) # Reindirizza alla pagina di tutti i prodotti in vendita
