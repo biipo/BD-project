@@ -154,7 +154,7 @@ def product_details(pid):
             order_quantity = int(request.form.get('quantity'))
             item = db_session.scalar(select(Product).where(Product.id == pid))
             
-
+            # Check server-side disponibilità
             if order_quantity <= item.availability:
                 new_cart_item = CartProducts(item, order_quantity, current_user)
             else:
@@ -192,57 +192,57 @@ def allowed_file(filename):
 @login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
 def sell():
     if request.method == 'POST': # Sono stati inseriti i dati di un prodotto, lo memorizziamo
-            if 'image_file' not in request.files:
-                flash('No file attached', 'error')
+        if 'image_file' not in request.files:
+            flash('No file attached', 'error')
+            return redirect(request.url)
+        file = request.files['image_file']
+        if file.filename == '':
+            flash('No selected file', 'error')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            # filename = secure_filename(file.filename)
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+            path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+            file.save(path)
+            dimensions = request.form.get('dimensions')
+            color = request.form.get('color')
+            brand = request.form.get('brand')
+            
+            try:
+                product = Product(user_id=current_user.get_id(),  # prende l'utente attualmente loggato (current_user)
+                                  category_id=int(request.form.get('category')),
+                                  product_name=request.form.get('name'),
+                                  date=datetime.datetime.now(),
+                                  price=float(request.form.get('price')),
+                                  availability=int(request.form.get('availability')),
+                                  descr=request.form.get('description'),
+                                  image_filename=file.filename)
+
+                # Seleziona l'oggetto tag corrispondente al valore della dimensione scelta dal venditore, trattandosi
+                # della dimensione abbiamo imposto 3 grandezze che esistono già nel database quindi sicuramente non va aggiunta
+                prod_dim = TagProduct(db_session.scalar(select(Tag).where(Tag.value == str(dimensions))), product)
+
+                color_db = db_session.scalar(select(Tag).where(Tag.value == str(color)))
+                if  color_db == None: # Se il colore del prodotto è nuovo lo aggiungiamo
+                    color_db = Tag(str(color), db_session.scalar(select(TagGroup).where(TagGroup.name == 'Color')))
+                prod_color = TagProduct(color_db , product)
+
+                brand_db = db_session.scalar(select(Tag).where(Tag.value == str(brand)))
+                if  brand_db  == None: # Se il brand del prodotto è nuovo
+                    brand_db = Tag(str(brand), db_session.scalar(select(TagGroup).where(TagGroup.name == 'Brand')))
+                prod_brand = TagProduct(brand_db , product)
+            except MissingData as err:
+                flash(err.message, 'error')
                 return redirect(request.url)
-            file = request.files['image_file']
-            if file.filename == '':
-                flash('No selected file', 'error')
-                return redirect(request.url)
-            if file and allowed_file(file.filename):
-                # filename = secure_filename(file.filename)
-                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-                path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-                file.save(path)
-                dimensions = request.form.get('dimensions')
-                color = request.form.get('color')
-                brand = request.form.get('brand')
-                
-                try:
-                    product = Product(user_id=current_user.get_id(),  # prende l'utente attualmente loggato (current_user)
-                                      category_id=int(request.form.get('category')),
-                                      product_name=request.form.get('name'),
-                                      date=datetime.datetime.now(),
-                                      price=float(request.form.get('price')),
-                                      availability=int(request.form.get('availability')),
-                                      descr=request.form.get('description'),
-                                      image_filename=file.filename)
 
-                    # Seleziona l'oggetto tag corrispondente al valore della dimensione scelta dal venditore, trattandosi
-                    # della dimensione abbiamo imposto 3 grandezze che esistono già nel database quindi sicuramente non va aggiunta
-                    prod_dim = TagProduct(db_session.scalar(select(Tag).where(Tag.value == str(dimensions))), product)
+            product.tags.extend([prod_dim , prod_color , prod_brand]) # Aggiunge i tag relativi al prodotto
 
-                    color_db = db_session.scalar(select(Tag).where(Tag.value == str(color)))
-                    if  color_db == None: # Se il colore del prodotto è nuovo lo aggiungiamo
-                        color_db = Tag(str(color), db_session.scalar(select(TagGroup).where(TagGroup.name == 'Color')))
-                    prod_color = TagProduct(color_db , product)
-
-                    brand_db = db_session.scalar(select(Tag).where(Tag.value == str(brand)))
-                    if  brand_db  == None: # Se il brand del prodotto è nuovo
-                        brand_db = Tag(str(brand), db_session.scalar(select(TagGroup).where(TagGroup.name == 'Brand')))
-                    prod_brand = TagProduct(brand_db , product)
-                except MissingData as err:
-                    flash(err.message, 'error')
-                    return redirect(request.url)
-
-                product.tags.extend([prod_dim , prod_color , prod_brand]) # Aggiunge i tag relativi al prodotto
-
-                db_session.add(product)
-                db_session.commit()
-                return redirect(url_for('home')) # Reindirizza alla pagina di tutti i prodotti in vendita
-            else:
-                flash('Invalid file type', 'error')
-                return redirect(request.url)
+            db_session.add(product)
+            db_session.commit()
+            return redirect(url_for('home')) # Reindirizza alla pagina di tutti i prodotti in vendita
+        else:
+            flash('Invalid file type', 'error')
+            return redirect(request.url)
     else: # Renderizziamo la pagina in cui dovrà inserire i dettagli del prodotto
         return render_template('sell.html')
 
@@ -280,9 +280,10 @@ def profile():
                 db_session.commit()
 
         elif request.form.get('address-add') is not None:
+            active = (db_session.scalar(select(Address).filter(Address.user_id == current_user.get_id()).filter(Address.active == True)) is None)
             new_address = Address(
                 user_id=current_user.get_id(),
-                active=False,
+                active=active,
                 first_name=request.form.get('fname'),
                 last_name=request.form.get('lname'),
                 street=request.form.get('street'),
@@ -302,6 +303,9 @@ def user(username):
     user = db_session.scalar(select(User).where(User.username == str(username)))
     return render_template('user.html', user=user)
 
+def clear_cart(user_id):
+    db_session.execute(delete(CartProducts).where(CartProducts.user_id == user_id))
+
 @app.route('/cart' , methods=['GET', 'POST'])
 @login_required
 def cart():
@@ -310,21 +314,64 @@ def cart():
         products = db_session.scalars(select(CartProducts).where(CartProducts.user_id == int(current_user.get_id()))).all()
         total = sum(p.quantity * p.product.price for p in products)
         return render_template('cart.html', cart_items=products, total=total)
+
     else:
         if request.form.get('clear-cart') is not None:
-            db_session.execute(delete(CartProducts).where(CartProducts.user_id == current_user.get_id()))
+            clear_cart(current_user.get_id())
             return redirect(url_for('cart'))
         
         elif request.form.get('delete-item') is not None:
             db_session.delete(
-                    db_session.scalar(
-                        select(CartProducts)
-                        .filter(CartProducts.product_id == request.form.get('item-id'))
-                        .filter(CartProducts.user_id == current_user.get_id())
-                    )
+                db_session.scalar(
+                    select(CartProducts)
+                    .filter(CartProducts.product_id == request.form.get('item-id'))
+                    .filter(CartProducts.user_id == current_user.get_id())
+                )
             )
             db_session.commit()
             return redirect(url_for('cart'))
+        
+        elif request.form.get('place-order') is not None:
+            # Aggiungere pagamento
+            products = db_session.scalars(select(CartProducts).join(Product).where(CartProducts.user_id == int(current_user.get_id()))).all()
+
+            sellers_orders = {}
+            for p in products:
+                if p.quantity > p.product.availability:
+                    break
+
+                seller_id = p.product.user_id
+                if seller_id not in sellers_orders.keys():
+                    new_order = Order(
+                        user_id = current_user.get_id(),
+                        date = datetime.datetime.now(),
+                        price = p.quantity * p.product.price,
+                        address = db_session.scalar(
+                            select(Address.id)
+                            .filter(Address.user_id == current_user.get_id())
+                            .filter(Address.active == True)
+                        ),
+                        payment_method = 'PayPal',
+                        status = 'Paid',
+                    )
+                    db_session.add(new_order)
+                    db_session.flush()
+                    sellers_orders[seller_id] = new_order
+                
+                else:
+                    sellers_orders[seller_id].price += (p.quantity * p.product.price)
+
+                new_order_product = OrderProducts(
+                    order_id = sellers_orders[seller_id].id,
+                    product_id = p.product_id,
+                    quantity = p.quantity,
+                )
+                db_session.add(new_order_product)
+
+            db_session.commit()
+            clear_cart(current_user.get_id())
+            return redirect(url_for('cart'))
+             
 
 @app.route('/orders', methods=['GET', 'POST'])
 @login_required

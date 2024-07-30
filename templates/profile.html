@@ -7,84 +7,83 @@
         <div class="col-5">
             <fieldset>
                 <legend>Account</legend>
-                <div>
-                    <p id="username">{{user.username}}</p>
-                    <form method="post" class="bg-default p-.25">
-                        <table>
-                            <tr>
-                                <td><p class="bold muted">Name</p></td>
-                                <td style="width:80%">
-                                    <div class="flex">
-                                        <input type="text" name="info-fname" class="mr-.25" value="{{user.name}}" style="width:50%" />
-                                        <input type="text" name="info-lname" class="ml-.25" value="{{user.last_name}}" style="width:50%" />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><p class="bold muted">E-mail</p></td>
-                                <td><input type="text" name="info-email" value="{{user.email}}" /></td>
-                            </tr>
-                            <tr>
-                                <td><p class="bold muted">Type</p></td>
-                                <td>
-                                    <p class="">
-                                    {{ 'Seller' if user.is_seller() else 'Buyer' }}
-                                    </p>
-                                </td>
-                            </tr>
-                        </table>
-                        <button style="width:25%" type="submit" name="info-update">Update</button>
-                    </form>
-                </div>
-            </fieldset>
-        </div>
-        <div class="col-5">
-        </div>
+            <div>
+                <p id="username">{{user.username}}</p>
+                <form method="post" class="bg-default p-.25">
+                    <table>
+                        <tr>
+                            <td><p class="bold muted">Name</p></td>
+                            <td style="width:80%">
+                                <div class="flex">
+                                    <input type="text" name="info-fname" class="mr-.25" value="{{user.name}}" style="width:50%" />
+                                    <input type="text" name="info-lname" class="ml-.25" value="{{user.last_name}}" style="width:50%" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><p class="bold muted">E-mail</p></td>
+                            <td><input type="text" name="info-email" value="{{user.email}}" /></td>
+                        </tr>
+                        <tr>
+                            <td><p class="bold muted">Type</p></td>
+                            <td>
+                                <p class="">
+                                {{ 'Seller' if user.is_seller() else 'Buyer' }}
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    <button style="width:25%" type="submit" name="info-update">Update</button>
+                </form>
+            </div>
+        </fieldset>
     </div>
-    <div class="flex">
-        <div class="col-7">
-            <fieldset>
-                <legend>Addresses</legend>
-                {% for addr in user.addresses %}
-                <div class="address flex" style="{{'border:2px solid var(--default)' if addr.active}}" >
-                    <div class="address-data" style="max-width: 80%">
-                        <input type="hidden" value="{{addr.id}}" />
-                        <p class="bold" id="name">{{addr.first_name}} {{addr.last_name}}</p>
-                        <p id="street">{{addr.street}}</p>
-                        <!-- Enable after adding city to DB structure <p id="city">{# addr.city #}</p> -->
-                        <p id="province">{{addr.province}} {{addr.postcode}}</p>
-                        <p id="country">{{addr.state}}</p>
-                    </div>
-                    <div class="address-actions"> 
-                        <form method="post" class="p-.5 bg-default">
-                            <input type="hidden" value="{{addr.id}}" name="address-id" />
-                            <button type="submit" class="danger" name="address-delete">Delete</button>
-                            <button type="submit" name="address-set-active" {{'disabled' if addr.active}}>Set active</button>
-                        </form>
-                    </div>
+    <div class="col-5">
+    </div>
+</div>
+<div class="flex">
+    <div class="col-7">
+        <fieldset>
+            <legend>Addresses</legend>
+            {% for addr in user.addresses %}
+            <div class="address flex" style="{{'border:2px solid var(--default)' if addr.active}}" >
+                <div class="address-data" style="max-width: 80%">
+                    <input type="hidden" value="{{addr.id}}" />
+                    <p class="bold" id="name">{{addr.first_name}} {{addr.last_name}}</p>
+                    <p id="street">{{addr.street}}</p>
+                    <!-- Enable after adding city to DB structure <p id="city">{# addr.city #}</p> -->
+                    <p id="province">{{addr.province}} {{addr.postcode}}</p>
+                    <p id="country">{{addr.state}}</p>
                 </div>
-                {% endfor %}
-                <details class="bg-muted">
-                    <summary class="default">Add new address</summary>
-                    <form method="post">
-                        <div class="flex">
-                            <input name="fname" type="text" placeholder="First name" class="mr-.25" />
-                            <input name="lname" type="text" placeholder="Last name" class="ml-.25" />
-                        </div>
-                        <input name="street" type="text" placeholder="Street" />
-                        <input name="province" type="text" placeholder="Province" />
-                        <div class="flex">
-                            <input name="city" type="text" placeholder="City" class="mr-.25" />
-                            <input name="post-code" type="text" placeholder="Post code" class="ml-.25" />
-                        </div>
-                        <input name="state" type="text" placeholder="State" />
-                        <button type="submit" style="width:25%" name="address-add">Add</button>
+                <div class="address-actions"> 
+                    <form method="post" class="p-.5 bg-default">
+                        <input type="hidden" value="{{addr.id}}" name="address-id" />
+                        <button type="submit" class="danger" name="address-delete">Delete</button>
+                        <button type="submit" name="address-set-active" {{'disabled' if addr.active}}>Set active</button>
                     </form>
-                </details>
-            </fieldset>
-        </div>
-        <div class="col-3">
-        </div>
+                </div>
+            </div>
+            {% endfor %}
+            <details class="bg-muted">
+                <summary class="default">Add new address</summary>
+                <form method="post">
+                    <div class="flex">
+                        <input name="fname" type="text" placeholder="First name" class="mr-.25" />
+                        <input name="lname" type="text" placeholder="Last name" class="ml-.25" />
+                    </div>
+                    <input name="street" type="text" placeholder="Street" />
+                    <input name="province" type="text" placeholder="Province" />
+                    <div class="flex">
+                        <input name="city" type="text" placeholder="City" class="mr-.25" />
+                        <input name="post-code" type="text" placeholder="Post code" class="ml-.25" />
+                    </div>
+                    <input name="state" type="text" placeholder="State" />
+                    <button type="submit" style="width:25%" name="address-add">Add</button>
+                </form>
+            </details>
+        </fieldset>
+    </div>
+    <div class="col-3">
     </div>
 </div>
 {% endblock %}
