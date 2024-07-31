@@ -192,6 +192,9 @@ def allowed_file(filename):
 @app.route('/sell', methods=['GET', 'POST'])
 @login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
 def sell():
+    if not current_user.is_seller():
+        return redirect(url_for('home'))
+
     if request.method == 'POST': # Sono stati inseriti i dati di un prodotto, lo memorizziamo
         if 'image_file' not in request.files:
             flash('No file attached', 'error')
