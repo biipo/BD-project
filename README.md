@@ -27,7 +27,7 @@
 - [x] Passare a template jinja per bene (extends, block, ecc.)
 - [x] Migliorare visualizzazione carrello
 - [ ] Aggiungere form con metodo di pagamento all'ordine
-
+- [ ] Aggiungere form recensioni visibile se ordinato e confermato ricevuto
 
 ### Back-end
 - [ ] Migliorare controlli sugli attributi tabelle
@@ -40,3 +40,4 @@
 - [x] Il carello quando aggiungi qualcosa mostra l'ultimo oggetto 2 volte, ma se aggiorni la pagina lo mostra correttamente (Da sistemare :/)
 - [x] Applicare cambiamenti alla struttura della tabella addresses (non capisco come farlo)
 - [x] Implementare parte avvio ordine
+- [ ] Aggiungere booleano `confirmed` alla tabella ordini per confermare ordine quando `state` settato a ricevuto da venditore

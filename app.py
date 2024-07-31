@@ -147,7 +147,8 @@ def product_details(pid):
     if request.method == 'GET':
         item = db_session.scalar(select(Product).filter(Product.id == pid))
         #seller = db_session.scalar(select(User).where(User.id == item.user_id))
-        return render_template('zoom_in.html', item=item)
+        rating = sum(r.stars for r in item.reviews) / len(item.reviews)
+        return render_template('zoom_in.html', item=item, rating=rating)
 
     else:
         if current_user.is_authenticated:

@@ -11,18 +11,28 @@
             <div class="product-details">
                 {% for tag in item.tags %}
                     {% if tag.tag.tag_group.name == 'Dimensions' %}
-                        <div id="brand" class="muted">Dimensions: {{ tag.tag.value }}</div>
+                        <div id="brand" class="muted"><b>Dimensions</b>: {{ tag.tag.value }}</div>
                     {% endif %}
                     {% if tag.tag.tag_group.name == 'Color' %}
-                        <div id="brand" class="muted">Color: {{ tag.tag.value }}</div>
+                        <div id="brand" class="muted"><b>Color</b>: {{ tag.tag.value }}</div>
                     {% endif %}
                     {% if tag.tag.tag_group.name == 'Brand' %}
-                        <div id="brand" class="muted">Brand: {{ tag.tag.value }}</div>
+                    <div id="brand" class="muted"><b>Brand</b>: {{ tag.tag.value }}</div>
                     {% endif %}
                 {% endfor %}
                 <div id="" class="larger bold mt-1"><p class="py-.25 px-.5 bg-success inline block border-r">{{ item.price }}€</p></div>
                 <div class="product-availability mt-.5">
                     <p class="{% if item.availability <=5 %} bg-severe border-r p-.25 {% endif %} inline block">{{ item.availability }} pezzi disponibili</p>
+                </div>
+                <div id="rating" class="mt-.5">
+                    <p class="inline block my-0">{{rating}}</p>
+                    <div id= "stars-container" class="inline block">
+                        <div class="flex attention">
+                            {% for _ in range(rating | int) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                            {% for _ in range(5-rating | int) %}<i class="bi bi-star"></i>{% endfor %}
+                        </div>
+                    </div>
+                    <p class="inline block my-0"><a href="#reviews">{{item.reviews | length}} reviews</a></p>
                 </div>
                 <form class="mt-.5" method="post" onsubmit="">
                     <div class="quantity-container mt-.25">
@@ -34,7 +44,7 @@
                 <div class="product-description mt-.5"> 
                     <details open>
                         <summary>Description</summary>
-                        <p>{{ item.descr }}<p>
+                        <p>{{ item.descr }}</p>
                     </details>
                 </div>
                 <div class="seller-info small py-.25">
@@ -43,14 +53,22 @@
             </div>
         </div>
     </div>
-    <div>
+    <div id="reviews">
         <h2>Recensioni</h2>
         {% if not item.reviews %}
             <p class="muted">There are no reviews for this product...</p>
         {% else %}
             {% for review in item.reviews %}
                 <details open>
-                    <summary>{{review.user.username}} - {% for _ in range(review.stars) %}<i class="bi bi-star-fill"></i>{% endfor %} </summary>
+                    <summary style="text-decoration:none">
+                        <p class="my-0 inline block">{{review.user.username}} -</p>
+                        <div class="inline block">
+                            <div class="flex attention">
+                                {% for _ in range(review.stars) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                                {% for _ in range(5-rating | int) %}<i class="bi bi-star"></i>{% endfor %}
+                            </div>
+                        </div>
+                    </summary>
                     {{review.review}}
                 </details>
             {% endfor %}
