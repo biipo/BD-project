@@ -25,7 +25,9 @@
 - [x] Template navbar (`nav.html`)
     - [x] Indicare pagina selezionata
 - [x] Passare a template jinja per bene (extends, block, ecc.)
-- [x] Migliorare visualizzazione carrello
+- [ ] Carrello
+    - [x] Migliorare visualizzazione carrello
+    - [ ] Modificare eliminazione prodotti dal carrello per una certa quantità (es. se un prodotto sono 5 elementi di poterne togliere 2)
 - [ ] Aggiungere form con metodo di pagamento all'ordine
 - [ ] Aggiungere form recensioni visibile se ordinato e confermato ricevuto
 
