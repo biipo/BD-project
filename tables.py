@@ -1,6 +1,6 @@
 import sqlalchemy as sq
 from datetime import datetime
-from sqlalchemy import Column, Table, ForeignKey, except_all, null
+from sqlalchemy import CheckConstraint, Column, Table, ForeignKey, except_all, null
 from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped, backref
 from sqlalchemy import Integer
 from flask_login import UserMixin
@@ -30,6 +30,7 @@ class User(Base, UserMixin):
     
     addresses: Mapped[List['Address']] = relationship(back_populates='user')
     cart_products: Mapped[List['CartProducts']] = relationship(back_populates='user')
+    reviews: Mapped[List['Review']] = relationship(back_populates='user')
 
     @staticmethod
     def __email_checker(email: str):
@@ -136,6 +137,7 @@ class Product(Base):
     orders: Mapped[List['OrderProducts']] = relationship(back_populates='product')
     seller: Mapped['User'] = relationship('User')
     tags: Mapped[List['TagProduct']] = relationship(back_populates='product')
+    reviews: Mapped[List['Review']] = relationship(back_populates='product')
 
     def __init__(self, user_id, category_id, product_name, date, price, availability, descr, image_filename):
         if user_id is None:
@@ -290,6 +292,10 @@ class Review(Base):
     product_id: Mapped[int] = mapped_column(ForeignKey(Product.id))
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
     review: Mapped[str]
+    stars: Mapped[int] = mapped_column(CheckConstraint('stars >= 0 AND stars <= 5'))
+
+    user = relationship('User')
+    product = relationship('Product')
 
     def __repr__(self):
         return f"{self.id} {self.product_id} {self.user_id} {self.review}"

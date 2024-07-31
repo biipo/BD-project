@@ -1,6 +1,6 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
 from sqlalchemy.engine import url
-from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, TagProduct, TagGroup
+from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, TagProduct, TagGroup, Review
 from sqlalchemy import create_engine, select, join, update, func, delete
 from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager
 from flask_sqlalchemy import SQLAlchemy
@@ -145,9 +145,9 @@ def home():
 @app.route('/product-details/<int:pid>', methods=['GET', 'POST'])
 def product_details(pid):
     if request.method == 'GET':
-        item = db_session.scalar(select(Product).where(Product.id == pid))
-        seller = db_session.scalar(select(User).where(User.id == item.user_id))
-        return render_template('zoom_in.html', item=item, seller=seller)
+        item = db_session.scalar(select(Product).filter(Product.id == pid))
+        #seller = db_session.scalar(select(User).where(User.id == item.user_id))
+        return render_template('zoom_in.html', item=item)
 
     else:
         if current_user.is_authenticated:

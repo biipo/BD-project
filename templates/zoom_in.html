@@ -24,7 +24,7 @@
                 <div class="product-availability mt-.5">
                     <p class="{% if item.availability <=5 %} bg-severe border-r p-.25 {% endif %} inline block">{{ item.availability }} pezzi disponibili</p>
                 </div>
-                <form method="post" onsubmit="">
+                <form class="mt-.5" method="post" onsubmit="">
                     <div class="quantity-container mt-.25">
                         <label for="quantity" class="quantity-label inline block pr-.5">Quantity:</label>
                         <input type="number" id="quantity" name="quantity" style="max-width:5em;" class="quantity-input inline block" value="1" min="1" max="{{ item.availability }}">
@@ -38,10 +38,23 @@
                     </details>
                 </div>
                 <div class="seller-info small py-.25">
-                    <p class="muted inline block">Sold by: <a href="#">{{seller.username}}</a></p>
+                    <p class="muted inline block">Sold by: <a href="#">{{item.seller.username}}</a></p>
                 </div> 
             </div>
         </div>
+    </div>
+    <div>
+        <h2>Recensioni</h2>
+        {% if not item.reviews %}
+            <p class="muted">There are no reviews for this product...</p>
+        {% else %}
+            {% for review in item.reviews %}
+                <details open>
+                    <summary>{{review.user.username}} - {% for _ in range(review.stars) %}<i class="bi bi-star-fill"></i>{% endfor %} </summary>
+                    {{review.review}}
+                </details>
+            {% endfor %}
+        {% endif %}
     </div>
 </div>
 {% endblock %}
