@@ -10,21 +10,23 @@
 - [ ] Notifiche per stato ordini
     - [x] Creare sezione notifiche
 - [ ] Se stato ordine completato, rendere possibile inserimento recensione
-- [ ] Pagina profilo (`profile.html`)
-    - [ ] Form modifica dati personali
-    - [ ] Form aggiunta indirizzi
+- [x] Pagina profilo (`profile.html`)
+    - [x] Form modifica dati personali
+    - [x] Form aggiunta indirizzi
     - [ ] Link a pagina recensioni fatte (ricevute se venditore)
     - [ ] Statistiche venditore (se venditore)
 - [ ] Pagina profilo altrui (`user.html`)
-- [ ] Pagina vendita (`sell.html`)
+- [x] Pagina vendita (`sell.html`)
 - [ ] Zoom in (`zoom_in.html`)
     - [ ] Fixare nuovo layout (è ancora bruttino)
 - [ ] Pagina home (`home.html`)
     - [x] Cambiare css
-- [ ] Template navbar (`nav.html`)
-    - [ ] Indicare pagina selezionata
+    - [ ] Aggiungere filtri
+- [x] Template navbar (`nav.html`)
+    - [x] Indicare pagina selezionata
 - [x] Passare a template jinja per bene (extends, block, ecc.)
-- [ ] Migliorare visualizzazione carrello
+- [x] Migliorare visualizzazione carrello
+- [ ] Aggiungere form con metodo di pagamento all'ordine
 
 
 ### Back-end
@@ -37,4 +39,4 @@
         (controllo disponibilità al momento della creazione dell'ordine o all'aggiunta al carrello?? Caso in cui abbiamo più utenti che fanno l'acquisto)
 - [x] Il carello quando aggiungi qualcosa mostra l'ultimo oggetto 2 volte, ma se aggiorni la pagina lo mostra correttamente (Da sistemare :/)
 - [x] Applicare cambiamenti alla struttura della tabella addresses (non capisco come farlo)
-- [ ] Implementare parte avvio ordine
+- [x] Implementare parte avvio ordine
