@@ -86,3 +86,12 @@ article img {
         width: 100%;
     }
 }
+
+.star-select {
+    max-width: 4rem;
+    color: var(--attention);
+}
+
+.star-select:user-valid, .star-select:hover {
+    border-color: var(--attention)
+}

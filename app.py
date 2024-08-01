@@ -147,11 +147,16 @@ def product_details(pid):
     if request.method == 'GET':
         item = db_session.scalar(select(Product).filter(Product.id == pid))
         #seller = db_session.scalar(select(User).where(User.id == item.user_id))
-        if len(item.reviews) > 0: # Altrimenti fa divisione per 0
-            rating = sum(r.stars for r in item.reviews) / len(item.reviews)
-            return render_template('zoom_in.html', item=item, rating=rating)
-        else:
-            return render_template('zoom_in.html', item=item, rating=None)
+        # Se ci sono recensioni ne calcolo la media
+        rating = sum(r.stars for r in item.reviews) / len(item.reviews) if len(item.reviews) > 0 else 0
+        bought = db_session.scalar(
+            select(OrderProducts)
+            .join(Order)
+            .filter(Order.user_id == current_user.get_id())
+            .filter(OrderProducts.product_id == pid)
+        )
+
+        return render_template('zoom_in.html', item=item, rating=rating, bought=bought)
 
     else:
         if current_user.is_authenticated:

@@ -22,9 +22,9 @@
                 {% endfor %}
                 <div id="" class="larger bold mt-1"><p class="py-.25 px-.5 bg-success inline block border-r">{{ item.price }}€</p></div>
                 <div class="product-availability mt-.5">
-                    <p class="{% if item.availability <=5 %} bg-severe border-r p-.25 {% endif %} inline block">{{ item.availability }} pezzi disponibili</p>
+                    <p class="{% if item.availability <=5 %} bg-severe border-r p-.25 {% endif %} inline block">{{ item.availability }} available</p>
                 </div>
-                <div id="rating" class="mt-.5">
+                <div id="avg-rating" class="mt-.5">
                     <p class="inline block my-0">{{rating}}</p>
                     <div id= "stars-container" class="inline block">
                         <div class="flex attention">
@@ -39,7 +39,7 @@
                         <label for="quantity" class="quantity-label inline block pr-.5">Quantity:</label>
                         <input type="number" id="quantity" name="quantity" style="max-width:5em;" class="quantity-input inline block" value="1" min="1" max="{{ item.availability }}">
                     </div>
-                    <button href="#" class="" type="submit">Add to Cart</button>
+                    <button href="#" class="" type="submit" name="add-cart">Add to Cart</button>
                 </form>
                 <div class="product-description mt-.5"> 
                     <details open>
@@ -54,7 +54,28 @@
         </div>
     </div>
     <div id="reviews">
-        <h2>Recensioni</h2>
+        <h2>Reviews</h2>
+        {% if bought %}
+            <form method="post">
+                <label>Write a review:</label>
+                <textarea rows="4" name="review-content" placeholder="">
+                </textarea>
+                <div class="mt-.5">
+                    <div>
+                        <select class="star-select inline block mr-.5" name="review-stars">
+                            <option selected disabled></option>
+                            <option value="5">5</option>
+                            <option value="4">4</option>
+                            <option value="3">3</option>
+                            <option value="2">2</option>
+                            <option value="1">1</option>
+                        </select>
+                        <p class="inline block"><i class="bi bi-star-fill attention"></i></p>
+                    </div>
+                </div>
+                <button type="submit" class="mt-.5" name="add-review">Post review</button>
+            </form>
+        {% endif %}
         {% if not item.reviews %}
             <p class="muted">There are no reviews for this product...</p>
         {% else %}
