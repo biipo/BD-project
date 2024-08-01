@@ -342,7 +342,7 @@ def cart():
                 flash('There are no products in the cart', 'error')
                 return redirect(request.url)
             else:
-                return redirect(url_for('payment')) # fare in modo di passare la query già fatta senza doverla rifare in '/payment'
+                return redirect(url_for('payment')) # fare in modo di passare la query già fatta senza doverla rifare in '/payment'?
              
 
 @app.route('/payment', methods=['GET', 'POST'])
@@ -356,10 +356,20 @@ def payment():
         if address is None:
             flash('Impossible to send the order, at least 1 shipping address is needed', 'error')
             return redirect('cart')
+        if products is None: # caso in cui dalla lista si elimina qualcosa
+            flash('There are no products in the cart', 'error')
+            return redirect('cart')
         return render_template('payment.html', cart_items=products, total=total, address=address)
     else:
         if request.form.get('cancel') is not None:
-            clear_cart(current_user.get_id())
+            return redirect(url_for('cart'))
+        elif request.form.get('delete-item') is not None:
+            db_session.execute(
+                    delete(CartProducts)
+                    .where(CartProducts.product_id == request.form.get('item-id'))
+                    .where(CartProducts.user_id == current_user.get_id())
+            )
+            return redirect(url_for('payment'))
         elif request.form.get('order') is not None:
             sellers_orders = {}
             pay_method = request.form.get('payment_method')
@@ -400,6 +410,10 @@ def payment():
                 return redirect(request.url)
 
             db_session.commit()
+            for p in products:
+                p.product.availability -= p.quantity # finito l'ordine riduciamo la quantità di prodotti disponibile
+                if p.product.availability == 0:
+                    db_session.execute(delete(Product).where(Product.id == p.product.id)) # se la disponibilità del prodotto va a 0 lo togliamo dal database
             clear_cart(current_user.get_id())
             return redirect(url_for('home'))
 

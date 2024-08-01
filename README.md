@@ -4,6 +4,14 @@
 > Materiale prof SQLAlchemy Core: https://colab.research.google.com/drive/1D59IbeExQL4AQihpcKMQ4yBQZabfwZO9?usp=sharing#scrollTo=6QYybaiNSD0m \
 > Materiale prof SQLAlchemy ORM: https://colab.research.google.com/drive/1nHd7iFKzTvvNsnYCbPHcWQVSrcgU_36T?usp=sharing \
 > Documentazione matcha.css: https://matcha.mizu.sh/
+
+### Dubbi 
+
+- In teoria gli utenti venditori, leggendo dal pdf, possono solamente vendere; quindi togliamo la possiblità che possano fare ordini??
+- Se un prodotto termina la sua disponibilità lo eliminamo dal DB o lo impostiamo tipo a -1 e lo mostriamo come 'Esaurito'?\
+    Ee magari, non so, possiamo fare che il venditore può riaumentare le quantità e rimetterlo disponibile\
+    Per ora i prodotti ho messo che vengono eliminati dal DB
+
 ## Todo
 
 ### Front-end
@@ -28,7 +36,7 @@
 - [ ] Carrello
     - [x] Migliorare visualizzazione carrello
     - [ ] Modificare eliminazione prodotti dal carrello per una certa quantità (es. se un prodotto sono 5 elementi di poterne togliere 2)
-- [ ] Aggiungere form con metodo di pagamento all'ordine
+- [x] Aggiungere form con metodo di pagamento all'ordine
 - [ ] Aggiungere form recensioni visibile se ordinato e confermato ricevuto
 
 ### Back-end
