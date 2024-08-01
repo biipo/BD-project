@@ -231,7 +231,8 @@ class Order(Base):
     address: Mapped[int] = mapped_column(ForeignKey(Address.id))
     payment_method: Mapped[str]
     status: Mapped[str]
-    
+    confirmed: Mapped[bool]
+
     # Rename address_obj to address and address to address_id later
     address_obj = relationship('Address')
     products: Mapped[List['OrderProducts']] = relationship(back_populates='order')

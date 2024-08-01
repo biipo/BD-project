@@ -159,6 +159,7 @@ def product_details(pid):
             .join(Order)
             .filter(Order.user_id == current_user.get_id())
             .filter(OrderProducts.product_id == pid)
+            .filter(Order.confirmed == True)
         ) is not None and db_session.scalar(
             select(Review)
             .filter(Review.user_id == current_user.get_id())
@@ -387,6 +388,7 @@ def cart():
                         ),
                         payment_method = 'PayPal',
                         status = 'Paid',
+                        confirmed = False,
                     )
                     db_session.add(new_order)
                     db_session.flush()
