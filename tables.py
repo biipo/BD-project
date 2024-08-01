@@ -4,7 +4,7 @@ from sqlalchemy import CheckConstraint, Column, Table, ForeignKey, except_all, n
 from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped, backref
 from sqlalchemy import Integer
 from flask_login import UserMixin
-from exceptions import InvalidCredential, MissingData
+from exceptions import InvalidCredential, MissingData, InvalidOrder
 from typing import List
 import re # regular expressions
 
@@ -235,6 +235,12 @@ class Order(Base):
     # Rename address_obj to address and address to address_id later
     address_obj = relationship('Address')
     products: Mapped[List['OrderProducts']] = relationship(back_populates='order')
+
+    # def set_status(status: str):
+    #     if status in ['Paid', 'Confirmed', 'Sent', 'In transit', 'Arrived']: # Esempi di possibili stati
+    #         self.status = status
+    #     else:
+    #         raise InvalidCredential('Invalid status')
 
     def __repr__(self):
         return f"{self.id} {self.user_id} {self.date} {self.price} {self.address} {self.payment_method} {self.status}"

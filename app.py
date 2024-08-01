@@ -8,7 +8,7 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 import datetime
 import os.path
-from exceptions import InvalidCredential, MissingData
+from exceptions import InvalidCredential, MissingData, InvalidOrder
 
 # Creazione app flask
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -122,9 +122,9 @@ def db_init():
         db_session.commit()
 
     if db_session.scalar(select(Tag)) is None:
-        db_session.add_all([ Tag(value='small', tag_group=dim),
-                             Tag(value='medium', tag_group=dim),
-                             Tag(value='big', tag_group=dim)
+        db_session.add_all([ Tag(value='small (less than 200x200 mm)', tag_group=dim),
+                             Tag(value='medium (between 200x200 and 500x500 mm)', tag_group=dim),
+                             Tag(value='big (more than 500x500 mm)', tag_group=dim)
                             ])
         db_session.commit()
     
@@ -211,9 +211,9 @@ def sell():
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(path)
-            dimensions = request.form.get('dimensions')
-            color = request.form.get('color')
-            brand = request.form.get('brand')
+            dimensions = str(request.form.get('dimensions'))
+            color = str(request.form.get('color'))
+            brand = str(request.form.get('brand'))
             
             try:
                 product = Product(user_id=current_user.get_id(),  # prende l'utente attualmente loggato (current_user)
@@ -227,16 +227,16 @@ def sell():
 
                 # Seleziona l'oggetto tag corrispondente al valore della dimensione scelta dal venditore, trattandosi
                 # della dimensione abbiamo imposto 3 grandezze che esistono già nel database quindi sicuramente non va aggiunta
-                prod_dim = TagProduct(db_session.scalar(select(Tag).where(Tag.value == str(dimensions))), product)
+                prod_dim = TagProduct(db_session.scalar(select(Tag).where(Tag.value == dimensions)), product)
 
-                color_db = db_session.scalar(select(Tag).where(Tag.value == str(color)))
+                color_db = db_session.scalar(select(Tag).where(Tag.value == color))
                 if  color_db == None: # Se il colore del prodotto è nuovo lo aggiungiamo
-                    color_db = Tag(str(color), db_session.scalar(select(TagGroup).where(TagGroup.name == 'Color')))
+                    color_db = Tag(color, db_session.scalar(select(TagGroup).where(TagGroup.name == 'Color')))
                 prod_color = TagProduct(color_db , product)
 
-                brand_db = db_session.scalar(select(Tag).where(Tag.value == str(brand)))
+                brand_db = db_session.scalar(select(Tag).where(Tag.value == brand))
                 if  brand_db  == None: # Se il brand del prodotto è nuovo
-                    brand_db = Tag(str(brand), db_session.scalar(select(TagGroup).where(TagGroup.name == 'Brand')))
+                    brand_db = Tag(brand, db_session.scalar(select(TagGroup).where(TagGroup.name == 'Brand')))
                 prod_brand = TagProduct(brand_db , product)
             except MissingData as err:
                 flash(err.message, 'error')
@@ -316,10 +316,9 @@ def clear_cart(user_id):
 @app.route('/cart' , methods=['GET', 'POST'])
 @login_required
 def cart():
+    products = db_session.scalars(select(CartProducts).where(CartProducts.user_id == int(current_user.get_id()))).all()
+    total = sum(p.quantity * p.product.price for p in products)
     if request.method == 'GET':
-        # La query ritorna una lista di elementi CartProduct
-        products = db_session.scalars(select(CartProducts).where(CartProducts.user_id == int(current_user.get_id()))).all()
-        total = sum(p.quantity * p.product.price for p in products)
         return render_template('cart.html', cart_items=products, total=total)
 
     else:
@@ -339,46 +338,70 @@ def cart():
             return redirect(url_for('cart'))
         
         elif request.form.get('place-order') is not None:
-            # Aggiungere pagamento
-            products = db_session.scalars(select(CartProducts).join(Product).where(CartProducts.user_id == int(current_user.get_id()))).all()
+            if products is None:
+                flash('There are no products in the cart', 'error')
+                return redirect(request.url)
+            else:
+                return redirect(url_for('payment')) # fare in modo di passare la query già fatta senza doverla rifare in '/payment'
+             
 
+@app.route('/payment', methods=['GET', 'POST'])
+@login_required
+def payment():
+    products = db_session.scalars(select(CartProducts).where(CartProducts.user_id == int(current_user.get_id()))).all()
+    total = sum(p.quantity * p.product.price for p in products)
+    if request.method == 'GET':
+        address = db_session.scalar(select(Address).filter(Address.user_id == int(current_user.get_id()))
+                                                   .filter(Address.active == True))
+        if address is None:
+            flash('Impossible to send the order, at least 1 shipping address is needed', 'error')
+            return redirect('cart')
+        return render_template('payment.html', cart_items=products, total=total, address=address)
+    else:
+        if request.form.get('cancel') is not None:
+            clear_cart(current_user.get_id())
+        elif request.form.get('order') is not None:
             sellers_orders = {}
-            for p in products:
-                if p.quantity > p.product.availability:
-                    break
+            pay_method = request.form.get('payment_method')
+            try:
+                for p in products:
+                    if p.quantity > p.product.availability:
+                        raise InvalidOrder('Product [ ' + p.product.product_name + ' ] quantity exceeds item availability')
 
-                seller_id = p.product.user_id
-                if seller_id not in sellers_orders.keys():
-                    new_order = Order(
-                        user_id = current_user.get_id(),
-                        date = datetime.datetime.now(),
-                        price = p.quantity * p.product.price,
-                        address = db_session.scalar(
-                            select(Address.id)
-                            .filter(Address.user_id == current_user.get_id())
-                            .filter(Address.active == True)
-                        ),
-                        payment_method = 'PayPal',
-                        status = 'Paid',
+                    seller_id = p.product.user_id
+                    if seller_id not in sellers_orders.keys(): # Viene creato un ordine per ciascun venditore
+                        new_order = Order(
+                            user_id = current_user.get_id(),
+                            date = datetime.datetime.now(),
+                            price = p.quantity * p.product.price,
+                            address = db_session.scalar(
+                                select(Address.id)
+                                .filter(Address.user_id == current_user.get_id())
+                                .filter(Address.active == True)
+                            ),
+                            payment_method = pay_method,
+                            status = 'Paid',
+                        )
+                        db_session.add(new_order)
+                        db_session.flush() # aggiungiamo nel database la transazione in corso
+                        sellers_orders[seller_id] = new_order # aggiungiamo al dizionario il venditore con il relativo ordine
+                    
+                    else:
+                        sellers_orders[seller_id].price += (p.quantity * p.product.price)
+
+                    new_order_product = OrderProducts( # gruppo di prodotti che erano nello stesso carrello
+                        order_id = sellers_orders[seller_id].id,
+                        product_id = p.product_id,
+                        quantity = p.quantity,
                     )
-                    db_session.add(new_order)
-                    db_session.flush()
-                    sellers_orders[seller_id] = new_order
-                
-                else:
-                    sellers_orders[seller_id].price += (p.quantity * p.product.price)
-
-                new_order_product = OrderProducts(
-                    order_id = sellers_orders[seller_id].id,
-                    product_id = p.product_id,
-                    quantity = p.quantity,
-                )
-                db_session.add(new_order_product)
+                    db_session.add(new_order_product)
+            except InvalidOrder as err:
+                flash(err, 'error')
+                return redirect(request.url)
 
             db_session.commit()
             clear_cart(current_user.get_id())
-            return redirect(url_for('cart'))
-             
+            return redirect(url_for('home'))
 
 @app.route('/orders', methods=['GET', 'POST'])
 @login_required

@@ -26,5 +26,14 @@
             </div>
         </div>
         </form>
+        {% with errors = get_flashed_messages(category_filter=["error"]) %}
+        {% if errors %}
+            <ul class="flash danger"><!-- serve una <ul> perché i messaggi li dobbiamo iterare con un for, ma sarà sempre 1 msg -->
+                {% for msg in errors %}
+                    {{ msg }}
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
     </div>
 {% endblock %}

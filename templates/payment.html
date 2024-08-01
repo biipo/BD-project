@@ -1,0 +1,59 @@
+
+{% extends 'base.html' %}
+{% block title %}Payment{% endblock %}
+{% block content %}
+<!--
+Cosa mostrare:
+    - Lista di elementi del carrello che si stanno acquistando (con prezzo)
+    - Prezzo totale
+    - Form per selezione metodo di pagamento
+    - Form selezione indirizzo di consegna (con possibilità di aggiungere o redirect al profilo per aggiungere??)
+    - Tasto paga (se possibile aggiunta di conferma) e anche tasto annulla
+-->
+    {% with errors = get_flashed_messages(category_filter=["error"]) %}
+    {% if errors %}
+        <ul class="flash danger"><!-- serve una <ul> perché i messaggi li dobbiamo iterare con un for, ma sarà sempre 1 msg -->
+            {% for msg in errors %}
+                {{ msg }}
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% endwith %}
+<div class="container-big">
+    {% for item in cart_items %}
+    <form method="post" class="border p-1">
+        <input type="hidden" value="{{item.product_id}}" name="item-id" />
+        <div class="flex">
+            <div class="col-7">
+                <p class="larger"><a class="default" href="/product-details/{{item.product.id}}">{{item.product.product_name}}</a></p>
+                <p><b>Qty</b>: {{item.quantity}}</p>
+            </div>
+            <div>
+                <p class="py-.25 px-.5 bg-success border-r">{{ item.product.price }}€</p>
+                <button class="danger" type="submit" name="delete-item"><i class="bi bi-trash-fill"></i></button>
+            </div>
+        </div>
+    </form>
+    {% endfor %}
+    <div style="margin-left: auto; margin-right: 0" class="larger">
+        Total: <p class="py-.25 px-.5 bg-success inline block border-r">{{ total }}€</p>
+    </div>
+    <form method="post" onsubmit="">
+        <select class="mb-.5" name="payment_method">
+            <option selected value="Prepaid card">Prepaid card</option>
+            <option value="PayPal">PayPal</option>
+        </select>
+        <div class="flex">
+            <div class="col-7">
+                <p class="larger">Shipping address</p>
+                <p>{{ address.street }}, {{ address.province }}, {{ address.state }} (postal code: {{ address.postcode }}) </p>
+                <br>
+            </div>
+        </div>
+        <div class="flex">
+            <button name="cancel" class="danger" type="submit">Cancel</button>
+            <button name="order" class="ml-.5" type="submit">Send order</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
