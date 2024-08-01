@@ -7,7 +7,7 @@
     <details>
         <summary>
             {% if order.status == 'Received' %}
-                <i class="success bi bi-check-circle-fill"></i>
+                <i class="{{'success' if order.confirmed else 'attention'}} bi bi-check-circle-fill"></i>
             {% elif order.status == 'Processing' %}
                 <i class="attention bi bi-three-dots"></i>
             {% elif order.status == 'Sent' %}
@@ -55,7 +55,13 @@
         </table>
         </div>
         <div id="order-info">
-            <p><b>Order status</b>: {{order.status}}</p>
+            <p><b>Order status</b>: {{order.status}} <small class="muted">({{ 'Confirmed' if order.confirmed else 'Unconfirmed'}})</small></p>
+            {% if order.status == 'Received' and order.confirmed is false and not current_user.is_seller() %}
+            <form method="post" class="bg-default p-0">
+                <input type="hidden" value="{{order.id}}" name="order-id">
+                <button type="submit" name="update-confirmed" class="mb-1">Confirm received</button>
+            </form>
+            {% endif %}
             <p><b>Seller</b>: <a href="#">{{order.products[0].product.seller.username}}</a></p>
             <p><b>Sent to</b>:</p>
             <div class="address mx-.5" style="max-width: 75%">

@@ -431,22 +431,45 @@ def orders():
             return render_template('orders_sold.html', orders=orders, now=curr_time)
     
     else:
-        new_status = request.form.get('new-status')
-        order_id = request.form.get('order-id')
+        if current_user.is_seller():
+            new_status = request.form.get('new-status')
+            order_id = request.form.get('order-id')
 
-        # If new status valid
-        if not new_status or new_status not in ['Received', 'Sent', 'Processing', 'Cancelled']:
-            return redirect(url_for('orders'))
-        
-        # Query for order with given id and sold by current user
-        order = db_session.scalar(select(Order).join(OrderProducts).join(Product).filter(Order.id == order_id).filter(Product.seller == user))
-        if order is None:
-            return redirect(url_for('orders'))
-       
-        # If order status new and not received or cancelled
-        if order.status not in [new_status, 'Received', 'Cancelled']:
-            order.status = new_status
-            db_session.commit()
+            # If new status valid
+            if not new_status or new_status not in ['Received', 'Sent', 'Processing', 'Cancelled']:
+                return redirect(url_for('orders'))
+            
+            # Query for order with given id and sold by current user
+            order = db_session.scalar(select(Order).join(OrderProducts).join(Product).filter(Order.id == order_id).filter(Product.seller == user))
+            if order is None:
+                return redirect(url_for('orders'))
+           
+            # If order status new and not received or cancelled
+            if order.status not in [new_status, 'Received', 'Cancelled']:
+                order.status = new_status
+                db_session.commit()
+
+        else:
+            if request.form.get('update-confirmed') is not None:
+                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
+                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
+                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
+                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
+                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
+                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
+                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
+                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
+                order_id = request.form.get('order-id')
+                order = db_session.scalar(
+                    select(Order)
+                    .filter(Order.id == order_id)
+                    .filter(Order.user_id == current_user.get_id())
+                    .filter(Order.status == 'Received')
+                    .filter(Order.confirmed == False)
+                )
+                if order is not None:
+                    order.confirmed = True
+                    db_session.commit()
 
         return redirect(url_for('orders'))
 
