@@ -148,48 +148,70 @@ def product_details(pid):
         item = db_session.scalar(select(Product).filter(Product.id == pid))
         #seller = db_session.scalar(select(User).where(User.id == item.user_id))
         # Se ci sono recensioni ne calcolo la media
+        if item is None:
+            return redirect(url_for('home'))
+
         rating = sum(r.stars for r in item.reviews) / len(item.reviews) if len(item.reviews) > 0 else 0
-        bought = db_session.scalar(
+
+        # Se articolo acquistato e non recensito
+        bought= db_session.scalar(
             select(OrderProducts)
             .join(Order)
             .filter(Order.user_id == current_user.get_id())
             .filter(OrderProducts.product_id == pid)
-        )
+        ) is not None and db_session.scalar(
+            select(Review)
+            .filter(Review.user_id == current_user.get_id())
+        ) is None
 
         return render_template('zoom_in.html', item=item, rating=rating, bought=bought)
 
     else:
-        if current_user.is_authenticated:
-            order_quantity = int(request.form.get('quantity'))
-            item = db_session.scalar(select(Product).where(Product.id == pid))
-            
-            # Check server-side disponibilità
-            if order_quantity <= item.availability:
-                new_cart_item = CartProducts(item, order_quantity, current_user)
-            else:
-                flash('Invalid quantity selected', 'error')
-                return redirect(url_for('product_details', pid=item.id))
+        if request.form.get('add-cart') is not None:
+            if current_user.is_authenticated: 
+                order_quantity = int(request.form.get('quantity'))
+                item = db_session.scalar(select(Product).where(Product.id == pid))
+                
+                # Check server-side disponibilità
+                if order_quantity <= item.availability:
+                    new_cart_item = CartProducts(item, order_quantity, current_user)
+                else:
+                    flash('Invalid quantity selected', 'error')
+                    return redirect(url_for('product_details', pid=item.id))
 
-            # Controllo se esiste già l'elemento nel carrello prima di crearlo
-            existing = db_session.scalar(
-                select(CartProducts)
-                .filter(CartProducts.product_id == new_cart_item.product_id)
-                .filter(CartProducts.user_id == new_cart_item.user_id)
+                # Controllo se esiste già l'elemento nel carrello prima di crearlo
+                existing = db_session.scalar(
+                    select(CartProducts)
+                    .filter(CartProducts.product_id == new_cart_item.product_id)
+                    .filter(CartProducts.user_id == new_cart_item.user_id)
+                )
+
+                # Se già esiste aggiungiamo la quantità
+                if existing is not None:
+                    existing.quantity += order_quantity
+                else:
+                    db_session.add(new_cart_item)
+
+                db_session.commit()
+
+                return redirect(url_for('cart'))
+
+            else:
+                flash('Login is required to place orders', 'error')
+                return redirect(url_for('login'))
+
+        elif request.form.get('add-review') is not None:
+            new_review = Review(
+                product_id = pid,
+                user_id = current_user.get_id(),
+                review = request.form.get('review-content'),
+                stars = int(request.form.get('review-stars')),
+                date = datetime.datetime.now(),
             )
-
-            # Se già esiste aggiungiamo la quantità
-            if existing is not None:
-                existing.quantity += order_quantity
-            else:
-                db_session.add(new_cart_item)
-
+            db_session.add(new_review)
             db_session.commit()
-
-            return redirect(url_for('cart'))
-
-        else:
-            flash('Login is required to place orders', 'error')
-            return redirect(url_for('login'))
+            return redirect(url_for('product_details', pid=pid))
+    
 
 # Controlla se il file è di tipo corretto (foto/gif)
 def allowed_file(filename):

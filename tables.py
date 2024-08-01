@@ -196,7 +196,7 @@ class Address(Base):
 
 class CartProducts(Base):
     __tablename__ = 'cart_product'
-    
+
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), primary_key=True)
     product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), primary_key=True)
     quantity: Mapped[int]
@@ -292,7 +292,8 @@ class Review(Base):
     product_id: Mapped[int] = mapped_column(ForeignKey(Product.id))
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
     review: Mapped[str]
-    stars: Mapped[int] = mapped_column(CheckConstraint('stars >= 0 AND stars <= 5'))
+    stars: Mapped[int] = mapped_column(CheckConstraint('stars >= 1 AND stars <= 5'))
+    date: Mapped[datetime] 
 
     user = relationship('User')
     product = relationship('Product')
