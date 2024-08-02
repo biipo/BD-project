@@ -378,6 +378,7 @@ def cart():
 def payment():
     products = db_session.scalars(select(CartProducts).where(CartProducts.user_id == int(current_user.get_id()))).all()
     total = sum(p.quantity * p.product.price for p in products)
+
     if request.method == 'GET':
         address = db_session.scalar(select(Address).filter(Address.user_id == int(current_user.get_id()))
                                                    .filter(Address.active == True))
@@ -418,6 +419,7 @@ def payment():
                             ),
                             payment_method = pay_method,
                             status = 'Paid',
+                            confirmed = False,
                         )
                         db_session.add(new_order)
                         db_session.flush() # aggiungiamo nel database la transazione in corso
