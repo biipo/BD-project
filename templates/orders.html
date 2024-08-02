@@ -55,7 +55,13 @@
         </table>
         </div>
         <div id="order-info">
-            <p><b>Order status</b>: {{order.status}} <small class="muted">({{ 'Confirmed' if order.confirmed else 'Unconfirmed'}})</small></p>
+            <p><b>Order status</b>: {{order.status}} 
+            {% if order.status == 'Received' %}
+            <small class="muted">
+                ({{ 'Confirmed' if order.confirmed else 'Unconfirmed'}})  
+            </small>
+            {% endif %}
+            </p>
             {% if order.status == 'Received' and order.confirmed is false and not current_user.is_seller() %}
             <form method="post" class="bg-default p-0">
                 <input type="hidden" value="{{order.id}}" name="order-id">
