@@ -239,15 +239,38 @@ def product_details(pid):
 @app.route('/edit-listing/<int:pid>', methods=['GET', 'POST'])
 @login_required
 def edit_listing(pid):
+    item = db_session.scalar(select(Product).filter(Product.id == pid).filter(Product.user_id == current_user.get_id()))
+    if item is None:
+        return redirect(url_for('home'))
+
     if request.method == 'GET':
-        item = db_session.scalar(select(Product).filter(Product.id == pid).filter(Product.user_id == current_user.get_id()))
-        if item is None:
-            return redirect(url_for('home'))
         return render_template('update.html', item=item)
 
     else:
-        pass
-    
+        image_filename = item.image_filename
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file.filename != '' and file and allowed_file(file.filename):
+                # filename = secure_filename(file.filename)
+                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+                file.save(path)
+                image_filename = file.filename
+
+        if request.form.get('update') is not None:
+            item.product_name = request.form.get('name')
+            item.category_id = request.form.get('category')
+            item.price = request.form.get('price')
+            item.availability = request.form.get('availability')
+            item.descr = request.form.get('description')
+            item.image_filename = image_filename
+            item.tags[0].tag.value = request.form.get('color')
+            item.tags[1].tag.value = request.form.get('dimensions')
+            item.tags[2].tag.value = request.form.get('brand')
+            db_session.commit()
+            
+            return redirect(url_for('product_details', pid=pid))
+        return redirect(url_for('home'))
 
 # Controlla se il file è di tipo corretto (foto/gif)
 def allowed_file(filename):

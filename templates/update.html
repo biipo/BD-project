@@ -35,7 +35,7 @@
                             <option {{'selected' if item.category_id == 10}} value="10">DIY</option>
                         </select>
                         <input class="mb-.5" title="Price (€)" type="number" min="1" step="any" name="price" placeholder="Price (€)" value={{item.price}}>
-                        <input class="mb-.5" title="Availability" type="number" min="1" step="any" name="availability" placeholder="Quantity" value={{item.availability}}>
+                        <input class="mb-.5" title="Availability" type="number" min="0" step="any" name="availability" placeholder="Quantity" value={{item.availability}}>
                         <textarea class="mb-.5" title="Description" name="description" placeholder="Description">{{item.descr}}</textarea>
                         <button type="submit" name="update">Update</button>
                         {% with errors = get_flashed_messages(category_filter=["error"]) %}
