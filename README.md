@@ -37,7 +37,7 @@
     - [x] Migliorare visualizzazione carrello
     - [ ] Modificare eliminazione prodotti dal carrello per una certa quantità (es. se un prodotto sono 5 elementi di poterne togliere 2)
 - [x] Aggiungere form con metodo di pagamento all'ordine
-- [ ] Aggiungere form recensioni visibile se ordinato e confermato ricevuto
+- [x] Aggiungere form recensioni visibile se ordinato e confermato ricevuto
 
 ### Back-end
 - [ ] Migliorare controlli sugli attributi tabelle
