@@ -140,7 +140,13 @@ def uploaded_file(filename):
 
 @app.route('/home')
 def home():
-    return render_template('home.html' , items=(db_session.scalars(select(Product)).all()))
+    seller = request.args.get('seller')
+    if seller is not None:
+        items = db_session.scalars(select(Product).filter(Product.user_id == seller)).all()
+    else:
+        items = db_session.scalars(select(Product)).all()
+
+    return render_template('home.html' , items=items)
 
 @app.route('/product-details/<int:pid>', methods=['GET', 'POST'])
 def product_details(pid):
