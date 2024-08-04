@@ -1,7 +1,7 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
 from sqlalchemy.engine import url
 from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, TagProduct, TagGroup, Review
-from sqlalchemy import create_engine, select, join, update, func, delete
+from sqlalchemy import create_engine, select, join, union, update, func, delete
 from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -232,6 +232,21 @@ def product_details(pid):
                 item.availability = 0
                 db_session.commit()
             return redirect(url_for('home'))
+        
+        elif request.form.get('update-prod') is not None and current_user.is_seller():
+            return redirect(url_for('edit_listing', pid=pid))
+
+@app.route('/edit-listing/<int:pid>', methods=['GET', 'POST'])
+@login_required
+def edit_listing(pid):
+    if request.method == 'GET':
+        item = db_session.scalar(select(Product).filter(Product.id == pid).filter(Product.user_id == current_user.get_id()))
+        if item is None:
+            return redirect(url_for('home'))
+        return render_template('update.html', item=item)
+
+    else:
+        pass
     
 
 # Controlla se il file è di tipo corretto (foto/gif)
