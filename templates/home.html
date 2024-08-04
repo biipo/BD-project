@@ -3,7 +3,7 @@
 {% block content %}
     <div class="flex wrap">
         {% for item in items %}
-        <article>
+        <article {% if item.availability == 0 %} style="opacity: 0.3" {% endif %}>
             <header>
                 <h1><a class="flex default" href="{{ url_for('product_details', pid=item.id)}}">{{ item.product_name }}</a></h1>
             </header>

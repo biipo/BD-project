@@ -140,11 +140,16 @@ def uploaded_file(filename):
 
 @app.route('/home')
 def home():
+    items_q = db_session.query(Product)
+
     seller = request.args.get('seller')
     if seller is not None:
-        items = db_session.scalars(select(Product).filter(Product.user_id == seller)).all()
+        items_q = items_q.filter(Product.user_id == seller)
+        if current_user.get_id() != seller:
+            items_q = items_q.filter(Product.availability > 0)
+        items = items_q.all()
     else:
-        items = db_session.scalars(select(Product)).all()
+        items = (items_q.filter(Product.availability > 0)).all()
 
     return render_template('home.html' , items=items)
 
@@ -218,6 +223,15 @@ def product_details(pid):
             db_session.add(new_review)
             db_session.commit()
             return redirect(url_for('product_details', pid=pid))
+        
+        elif request.form.get('delete-prod') is not None and current_user.is_seller():
+            item = db_session.scalar(select(Product).filter(Product.id == pid).filter(Product.user_id == current_user.get_id()))
+            if item is not None:
+                # Non si può rimuovere prodotto perché è presente in carrelli e ordini vecchi
+                # invece settiamo disponibilità a 0 e la usiamo come "filtro"
+                item.availability = 0
+                db_session.commit()
+            return redirect(url_for('home'))
     
 
 # Controlla se il file è di tipo corretto (foto/gif)
