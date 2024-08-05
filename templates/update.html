@@ -18,9 +18,9 @@
                             <input title="Color" class="ml-.25" type="text" name="color" placeholder="Color" value="{{item.tags[1].tag.value}}">
                         </div>
                         <select class="mb-.5" name="dimensions">
-                            <option {{'selected' if item.tags[1].tag.value == 'small'}} value="small (less than 200x200 mm)">Small (less than 200x200 mm)</option>
-                            <option {{'selected' if item.tags[1].tag.value == 'medium'}} value="medium (between 200x200 and 500x500 mm)">Medium (between 200x200 and 500x500 mm)</option>
-                            <option {{'selected' if item.tags[1].tag.value == 'big'}} value="big (more than 500x500 mm)">Big (more than 500x500 mm)</option>
+                            <option {{'selected' if item.tags[1].tag.value == 'small'}} value="small"Small (less than 200x200 mm)</option>
+                            <option {{'selected' if item.tags[1].tag.value == 'medium'}} value="medium">Medium (between 200x200 and 500x500 mm)</option>
+                            <option {{'selected' if item.tags[1].tag.value == 'big'}} value="big">Big (more than 500x500 mm)</option>
                         </select>
                         <select class="mb-.5" name="category">
                             <option {{'selected' if item.category_id == 1}} value="1">Arts</option>
