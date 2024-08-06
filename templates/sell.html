@@ -44,10 +44,7 @@
                             <tr> 
                             {% for tag in tags %}
                                 <td style="border:none">
-                                    <label for="{{tag.id}}">
-                                        <input type="checkbox" name="tag" value="{{tag.id}}" id="{{tag.value.lower()}}">
-                                        {{tag.value}}
-                                    </label>
+                                    <input type="checkbox" name="tag" value="{{tag.id}}" id="{{tag.value.lower()}}">{{tag.value}}
                                 </td>
                             {% if loop.index%4 == 0 %}</tr><tr>{% endif %}
                             {% endfor %}
