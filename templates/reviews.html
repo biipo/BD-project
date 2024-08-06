@@ -1,5 +1,26 @@
-{% extends 'base.html'}
+{% extends 'base.html' %}
 {% block title %}Your reviews{% endblock %}
 {% block content %}
-
+    <div class="container-big">
+        {% for review in reviews %}
+            <div class="flex">
+                <div class="col-7">
+                    <p class="larger"><a class="default" href="/product-details/{{review.product.id}}">{{review.product.product_name}}</a></p>
+                    <p>{{ review.date }}{% if current_user.is_seller() %} - by: {{ review.user.username }}{% endif %}</p><!-- Aggiungere ref al profilo dell'utente -->
+                    <div id= "stars-container" class="inline block">
+                        <div class="flex attention">
+                            {% for _ in range(review.stars | int) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                            {% for _ in range(5-review.stars | int) %}<i class="bi bi-star"></i>{% endfor %}
+                        </div>
+                    </div>
+                    <!-- Fa vedere solo una parte della recensione se troppo lunga -->
+                    {% if review.review | length <= 100 %}
+                        <p>{{ review.review }}</p>
+                    {% else %}
+                        <p>{{ review.review[:100] }}...</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}

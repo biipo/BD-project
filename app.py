@@ -436,6 +436,16 @@ def profile():
         
         return redirect(url_for('profile'))
 
+@app.route('/reviews-page') # solo metodo GET
+@login_required
+def reviews_page():
+    query = select(Review)
+    if current_user.is_seller():
+        query = query.filter(Review.product.user_id == current_user.get_id())
+    else:
+        query = query.filter(Review.user_id == current_user.get_id())
+    reviews = db_session.scalars(query.order_by(Review.date.desc())).all()
+    return render_template('reviews.html', reviews=reviews)
 
 @app.route('/user/<username>')
 def user(username):

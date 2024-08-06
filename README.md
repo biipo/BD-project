@@ -22,10 +22,12 @@
     - [x] Form modifica dati personali
     - [x] Form aggiunta indirizzi
     - [ ] Link a pagina recensioni fatte (ricevute se venditore)
+        - [ ] Per utenti venditori aggiungere ref alla pagina profilo utente che ha fatto la recensione
     - [ ] Statistiche venditore (se venditore)
 - [ ] Pagina profilo altrui (`user.html`)
 - [x] Zoom in (`zoom_in.html`)
     - [ ] Fixare nuovo layout (è ancora bruttino)
+    - [ ] Migliorare visualizzazione tag
 - [ ] Pagina home (`home.html`)
     - [x] Cambiare css
 - [ ] Carrello
