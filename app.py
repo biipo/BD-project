@@ -1,6 +1,6 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
 from sqlalchemy.engine import url
-from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, TagProduct, TagGroup, Review
+from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, TagProduct, Review
 from sqlalchemy import create_engine, select, join, update, func, delete
 from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager
 from flask_sqlalchemy import SQLAlchemy
@@ -112,21 +112,49 @@ def db_init():
                             Category(name='DIY')
                             ])
         db_session.commit()
-
-    dim = TagGroup(name='Dimensions')
-    if db_session.scalar(select(TagGroup)) is None:
-        db_session.add_all([ TagGroup(name='Color'),
-                             TagGroup(name='Brand'),
-                             dim
-                             ])
-        db_session.commit()
-
+    
     if db_session.scalar(select(Tag)) is None:
-        db_session.add_all([ Tag(value='small (less than 200x200 mm)', tag_group=dim),
-                             Tag(value='medium (between 200x200 and 500x500 mm)', tag_group=dim),
-                             Tag(value='big (more than 500x500 mm)', tag_group=dim)
-                            ])
+        db_session.add_all([ 
+            Tag('Red'),
+            Tag('Blue'),
+            Tag('Green'),
+            Tag('Yellow'),
+            Tag('Orange'),
+            Tag('Purple'),
+            Tag('Pink'),
+            Tag('Brown'),
+            Tag('Black'),
+            Tag('White'),
+            Tag('Gray'),
+            Tag('Beige'),
+            Tag('Maroon'),
+            Tag('Navy'),
+            Tag('Teal'),
+            Tag('Turquoise'),
+            Tag('Lavender'),
+            Tag('Magenta'),
+            Tag('Cyan'),
+            Tag('Lime'),
+            Tag('Small'),
+            Tag('Medium'),
+            Tag('Big')
+        ])
         db_session.commit()
+
+    # dim = TagGroup(name='Dimensions')
+    # if db_session.scalar(select(TagGroup)) is None:
+    #     db_session.add_all([ TagGroup(name='Color'),
+    #                          TagGroup(name='Brand'),
+    #                          dim
+    #                          ])
+    #     db_session.commit()
+
+    # if db_session.scalar(select(Tag)) is None:
+    #     db_session.add_all([ Tag(value='small (less than 200x200 mm)', tag_group=dim),
+    #                          Tag(value='medium (between 200x200 and 500x500 mm)', tag_group=dim),
+    #                          Tag(value='big (more than 500x500 mm)', tag_group=dim)
+    #                         ])
+    #     db_session.commit()
     
 
 @app.route('/')
@@ -140,6 +168,7 @@ def uploaded_file(filename):
 
 @app.route('/home')
 def home():
+
     return render_template('home.html' , items=(db_session.scalars(select(Product)).all()))
 
 @app.route('/product-details/<int:pid>', methods=['GET', 'POST'])
@@ -213,6 +242,36 @@ def product_details(pid):
             db_session.commit()
             return redirect(url_for('product_details', pid=pid))
     
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    brands = db_session.scalars(select(Product.brand)).all()
+    query = select(Product).distinct(Product.id).join(TagProduct).join(Tag)
+    max_price = db_session.scalar(select(func.max(Product.price)))
+    if request.method == 'GET':
+        items = db_session.scalars(query).all()
+        return render_template('search.html', items=items, brands=brands, max_price=max_price)
+    else:
+        tags = request.form.getlist('color')
+        dim = request.form.get('dimension')
+        brand = request.form.get('brand')
+        min_price_range = request.form.get('min_price_range')
+        max_price_range = request.form.get('max_price_range')
+        # query = select(Product).distinct(Product.id).join(TagProduct).join(Tag)
+
+        # I check servono perché potrebbe fare query cercando valori None tra gli attributi
+        if tags:
+            query = query.filter(Tag.value.in_(tags))
+        if dim:
+            query = query.filter(Tag.value == dim)
+        if brand:
+            query = query.filter(Product.brand == brand)
+        if min_price_range:
+            query = query.filter(Product.price >= min_price_range)
+        if max_price_range:
+            query = query.filter(Product.price <= max_price_range)
+
+        items = db_session.scalars(query).all()
+        return render_template('search.html', items=items, brands=brands, max_price=max_price)
 
 # Controlla se il file è di tipo corretto (foto/gif)
 def allowed_file(filename):
@@ -239,12 +298,12 @@ def sell():
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(path)
-            dimensions = str(request.form.get('dimensions'))
-            color = str(request.form.get('color'))
-            brand = str(request.form.get('brand'))
+            dimensions = request.form.get('dimensions')
+            colors = request.form.getlist('color')
             
             try:
                 product = Product(user_id=current_user.get_id(),  # prende l'utente attualmente loggato (current_user)
+                                  brand=request.form.get('brand'),
                                   category_id=int(request.form.get('category')),
                                   product_name=request.form.get('name'),
                                   date=datetime.datetime.now(),
@@ -252,25 +311,13 @@ def sell():
                                   availability=int(request.form.get('availability')),
                                   descr=request.form.get('description'),
                                   image_filename=file.filename)
-
-                # Seleziona l'oggetto tag corrispondente al valore della dimensione scelta dal venditore, trattandosi
-                # della dimensione abbiamo imposto 3 grandezze che esistono già nel database quindi sicuramente non va aggiunta
-                prod_dim = TagProduct(db_session.scalar(select(Tag).where(Tag.value == dimensions)), product)
-
-                color_db = db_session.scalar(select(Tag).where(Tag.value == color))
-                if  color_db == None: # Se il colore del prodotto è nuovo lo aggiungiamo
-                    color_db = Tag(color, db_session.scalar(select(TagGroup).where(TagGroup.name == 'Color')))
-                prod_color = TagProduct(color_db , product)
-
-                brand_db = db_session.scalar(select(Tag).where(Tag.value == brand))
-                if  brand_db  == None: # Se il brand del prodotto è nuovo
-                    brand_db = Tag(brand, db_session.scalar(select(TagGroup).where(TagGroup.name == 'Brand')))
-                prod_brand = TagProduct(brand_db , product)
             except MissingData as err:
                 flash(err.message, 'error')
                 return redirect(request.url)
 
-            product.tags.extend([prod_dim , prod_color , prod_brand]) # Aggiunge i tag relativi al prodotto
+            for color in colors:
+                db_session.add_all([TagProduct(db_session.scalar(select(Tag).filter(Tag.value == color)), product)])
+            db_session.add(TagProduct(db_session.scalar(select(Tag).filter(Tag.value == dimensions)), product))
 
             db_session.add(product)
             db_session.commit()
