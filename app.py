@@ -305,9 +305,11 @@ def search():
     brands = db_session.scalars(select(Product.brand)).all()
     query = select(Product).distinct(Product.id).join(TagProduct).join(Tag)
     max_price = db_session.scalar(select(func.max(Product.price)))
+    tags = db_session.scalars(select(Tag))
+
     if request.method == 'GET':
         items = db_session.scalars(query).all()
-        return render_template('search.html', items=items, brands=brands, max_price=max_price)
+        return render_template('search.html', items=items, brands=brands, max_price=max_price, tags=tags)
     else:
         tags = request.form.getlist('color')
         dim = request.form.get('dimension')
@@ -383,7 +385,8 @@ def sell():
             flash('Invalid file type', 'error')
             return redirect(request.url)
     else: # Renderizziamo la pagina in cui dovrà inserire i dettagli del prodotto
-        return render_template('sell.html')
+        tags = db_session.scalars(select(Tag)).all()
+        return render_template('sell.html', tags=tags)
 
 @login_manager.user_loader
 def load_user(user_id):
