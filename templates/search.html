@@ -3,33 +3,25 @@
 <div>
     <form method="post">
         <fieldset>
-            <legend>Color</legend>
-            <input type="checkbox" name="color" value="Red">Red<br>
-            <input type="checkbox" name="color" value="Blue">Blue<br>
-            <input type="checkbox" name="color" value="Green">Green<br>
-            <input type="checkbox" name="color" value="Yellow">Yellow<br>
-            <input type="checkbox" name="color" value="Orange">Orange<br>
-            <input type="checkbox" name="color" value="Purple">Purple<br>
-            <input type="checkbox" name="color" value="Pink">Pink<br>
-            <input type="checkbox" name="color" value="Brown">Brown<br>
-            <input type="checkbox" name="color" value="Black">Black<br>
-            <input type="checkbox" name="color" value="White">White<br>
-            <input type="checkbox" name="color" value="Gray">Gray<br>
-            <input type="checkbox" name="color" value="Beige">Beige<br>
-            <input type="checkbox" name="color" value="Maroon">Maroon<br>
-            <input type="checkbox" name="color" value="Navy">Navy<br>
-            <input type="checkbox" name="color" value="Teal">Teal<br>
-            <input type="checkbox" name="color" value="Turquoise">Turquoise<br>
-            <input type="checkbox" name="color" value="Lavender">Lavender<br>
-            <input type="checkbox" name="color" value="Magenta">Magenta<br>
-            <input type="checkbox" name="color" value="Cyan">Cyan<br>
-            <input type="checkbox" name="color" value="Lime">Lime
-        </fieldset>
-        <fieldset>
             <legend>Dimensions</legend>
-            <input type="radio" name="dimension" value="Small">Small (less than 200x200 mm)<br>
-            <input type="radio" name="dimension" value="Medium">Medium (between 200x200 and 500x500 mm)<br>
-            <input type="radio" name="dimension" value="Big">Big (more than 500x500 mm)<br>
+            <div class="mb-.5">
+                <label for="any">
+                    <input id="any" type="radio" name="dimension" value="Any" checked>
+                    Any
+                </label>
+                <label for="small">
+                    <input id="small" type="radio" name="dimension" value="Small">
+                    Small (less than 200x200 mm)
+                </label>
+                <label for="medium">
+                    <input id="medium" type="radio" name="dimension" value="Medium">
+                    Medium (between 200x200 and 500x500 mm)
+                </label>
+                <label for="big">
+                    <input id="big" type="radio" name="dimension" value="Big">
+                    Big (more than 500x500 mm)
+                </label>
+            </div>
         </fieldset>
         <fieldset>
             <legend>Brands</legend>
@@ -37,13 +29,27 @@
                 <input type="radio" name="brand" value="{{ brand }}">{{ brand }}<br>
             {% endfor %}
         </fieldset>
-        <p>Price range</p>
-        <div class="quantity-container mt-.25">
-            <label for="min_price_range" class="quantity-label inline block pr-.5">Min:</label>
-            <input type="number" id="quantity" name="min_price_range" style="max-width:5em;" class="quantity-input inline block" value="None" min="1" max="{{ max_price }}">
-            <label for="max_price_range" class="quantity-label inline block pr-.5">Max:</label>
-            <input type="number" id="quantity" name="max_price_range" style="max-width:5em;" class="quantity-input inline block" value="None" min="1" max="{{ max_price }}">
-        </div>
+        <details >
+            <summary class="default">Tags</summary>
+            <div style="max-height:10rem; overflow:auto; position:relative">
+            <table>
+            <tr> 
+            {% for tag in tags %}
+                <td style="border:none"><input type="checkbox" name="tag" value="{{tag.id}}">{{tag.value}}</input></td>
+            {% if loop.index%6 == 0 %}</tr><tr>{% endif %}
+            {% endfor %}
+            </table>
+            </div>
+        </details>
+        <fieldset>
+            <legend>Price range (€)</legend>
+            <div class="quantity-container mt-.25">
+                <label for="min_price_range" class="quantity-label inline block pr-.5">Min:</label>
+                <input type="number" id="quantity" name="min_price_range" style="max-width:5em;" class="quantity-input inline block" value="None" min="1" max="{{ max_price }}">
+                <label for="max_price_range" class="quantity-label inline block pr-.5">Max:</label>
+                <input type="number" id="quantity" name="max_price_range" style="max-width:5em;" class="quantity-input inline block" value="None" min="1" max="{{ max_price }}">
+            </div>
+        </fieldset>
         <div>
             <button type="submit">Apply filters</button>
         </div>

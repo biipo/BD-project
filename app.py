@@ -310,23 +310,24 @@ def search():
     if request.method == 'GET':
         items = db_session.scalars(query).all()
         return render_template('search.html', items=items, brands=brands, max_price=max_price, tags=tags)
+
     else:
-        tags = request.form.getlist('color')
+        tags = request.form.getlist('tags')
         dim = request.form.get('dimension')
         brand = request.form.get('brand')
         min_price_range = request.form.get('min_price_range')
         max_price_range = request.form.get('max_price_range')
 
         # I check servono perché potrebbe fare query cercando valori None tra gli attributi
-        if tags:
+        if tags is not None:
             query = query.filter(Tag.value.in_(tags))
-        if dim:
+        if dim is not None and dim != 'Any':
             query = query.filter(Tag.value == dim)
-        if brand:
+        if brand is not None:
             query = query.filter(Product.brand == brand)
-        if min_price_range:
+        if min_price_range is not None:
             query = query.filter(Product.price >= min_price_range)
-        if max_price_range:
+        if max_price_range is not None:
             query = query.filter(Product.price <= max_price_range)
 
         items = db_session.scalars(query).all()
@@ -358,7 +359,7 @@ def sell():
             path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(path)
             dimensions = request.form.get('dimensions')
-            colors = request.form.getlist('color')
+            tags = request.form.getlist('tag')
             
             try:
                 product = Product(user_id=current_user.get_id(),  # prende l'utente attualmente loggato (current_user)
@@ -374,8 +375,8 @@ def sell():
                 flash(err.message, 'error')
                 return redirect(request.url)
 
-            for color in colors:
-                db_session.add_all([TagProduct(db_session.scalar(select(Tag).filter(Tag.value == color)), product)])
+            for tag_id in tags:
+                db_session.add_all([TagProduct(db_session.scalar(select(Tag).filter(Tag.id == tag_id)), product)])
             db_session.add(TagProduct(db_session.scalar(select(Tag).filter(Tag.value == dimensions)), product))
 
             db_session.add(product)
