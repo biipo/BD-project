@@ -35,6 +35,7 @@
 ### Back-end
 - [ ] Migliorare controlli sugli attributi tabelle
 - [ ] Ricerca prodotti dalla barra di ricerca
+- [ ] Creare template `products.html` da usare per mostrare prodotti in home e dopo search
 
 ## Fatti
 
