@@ -1,6 +1,7 @@
 <menu>
     <li><a href="/home">Store</a></li>
     <li class="{% if request.path ==  '/cart' %} selected {% endif %}"><a href="/cart"><i class="bi bi-cart3"></i> Cart</a></li>
+    <li class="{% if request.path == '/search' %} selected {% endif %}"><a href="/search"><i class="bi bi-search"></i> Search</a></li>
     <li>
         <a href="#">Menu</a>
         <menu>

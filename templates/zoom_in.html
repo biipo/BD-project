@@ -9,17 +9,19 @@
         </div>
         <div class="col-7 m-1">
             <div class="product-details">
-                {% for tag in item.tags %}
-                    {% if tag.tag.tag_group.name == 'Dimensions' %}
-                        <div id="brand" class="muted"><b>Dimensions</b>: {{ tag.tag.value }}</div>
+                 {% for t in item.tags %}
+                    {% if t.tag.value in ['small', 'medium', 'big'] %} <!-- è un po' una merda, va sistemato -->
+                        <p>Dimensions: {{ t.tag.value }}</p><br>
                     {% endif %}
-                    {% if tag.tag.tag_group.name == 'Color' %}
-                        <div id="brand" class="muted"><b>Color</b>: {{ tag.tag.value }}</div>
+                 {% endfor %}
+                 <p>Colors:</p>
+                 <ul>
+                 {% for t in item.tags %}
+                    {% if t.tag.value not in ['small', 'medium', 'big'] %}
+                        <li>{{ t.tag.value }}</li>
                     {% endif %}
-                    {% if tag.tag.tag_group.name == 'Brand' %}
-                    <div id="brand" class="muted"><b>Brand</b>: {{ tag.tag.value }}</div>
-                    {% endif %}
-                {% endfor %}
+                 {% endfor %}
+                </ul>
                 <div id="" class="larger bold mt-1"><p class="py-.25 px-.5 bg-success inline block border-r">{{ item.price }}€</p></div>
                 <div class="product-availability mt-.5">
                     <p class="{% if item.availability <=5 %} bg-severe border-r p-.25 {% endif %} inline block">{{ item.availability }} available</p>
