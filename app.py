@@ -312,26 +312,26 @@ def search():
         return render_template('search.html', items=items, brands=brands, max_price=max_price, tags=tags)
 
     else:
-        tags = request.form.getlist('tags')
+        tag_list = request.form.getlist('tags')
         dim = request.form.get('dimension')
         brand = request.form.get('brand')
         min_price_range = request.form.get('min_price_range')
         max_price_range = request.form.get('max_price_range')
 
         # I check servono perché potrebbe fare query cercando valori None tra gli attributi
-        if tags is not None:
-            query = query.filter(Tag.value.in_(tags))
-        if dim is not None and dim != 'Any':
+        if tag_list:
+            query = query.filter(Tag.id.in_(tag_list))
+        if dim and dim != 'Any':
             query = query.filter(Tag.value == dim)
-        if brand is not None:
+        if brand:
             query = query.filter(Product.brand == brand)
-        if min_price_range is not None:
+        if min_price_range:
             query = query.filter(Product.price >= min_price_range)
-        if max_price_range is not None:
+        if max_price_range:
             query = query.filter(Product.price <= max_price_range)
-
         items = db_session.scalars(query).all()
-        return render_template('search.html', items=items, brands=brands, max_price=max_price)
+
+        return render_template('home.html', items=items)
 
 # Controlla se il file è di tipo corretto (foto/gif)
 def allowed_file(filename):
