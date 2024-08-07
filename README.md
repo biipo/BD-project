@@ -17,25 +17,16 @@
 ### Front-end
 - [ ] Notifiche per stato ordini
     - [x] Creare sezione notifiche
-- [ ] Se stato ordine completato, rendere possibile inserimento recensione
 - [x] Pagina profilo (`profile.html`)
     - [x] Form modifica dati personali
     - [x] Form aggiunta indirizzi
     - [ ] Link a pagina recensioni fatte (ricevute se venditore)
-    - [ ] Statistiche venditore (se venditore)
-- [ ] Pagina profilo altrui (`user.html`)
-- [x] Zoom in (`zoom_in.html`)
-    - [ ] Fixare nuovo layout (è ancora bruttino)
-- [ ] Pagina home (`home.html`)
-    - [x] Cambiare css
-- [ ] Carrello
-    - [x] Migliorare visualizzazione carrello
-    - [ ] Modificare eliminazione prodotti dal carrello per una certa quantità (es. se un prodotto sono 5 elementi di poterne togliere 2)
 
 ### Back-end
 - [ ] Migliorare controlli sugli attributi tabelle
 - [ ] Ricerca prodotti dalla barra di ricerca
 - [ ] Creare template `products.html` da usare per mostrare prodotti in home e dopo search
+- [ ] Controllare tutti gli input per bene server-side
 
 ## Fatti
 
@@ -47,6 +38,14 @@
 - [x] Passare a template jinja per bene (extends, block, ecc.)
 - [x] Aggiungere form con metodo di pagamento all'ordine
 - [x] Aggiungere form recensioni visibile se ordinato e confermato ricevuto
+- [x] Pagina home (`home.html`)
+    - [x] Cambiare css
+- [x] Zoom in (`zoom_in.html`)
+    - [x] Fixare nuovo layout (è ancora bruttino)
+- [x] Carrello
+    - [x] Migliorare visualizzazione carrello
+    - [x] Modificare eliminazione prodotti dal carrello per una certa quantità (es. se un prodotto sono 5 elementi di poterne togliere 2)
+- [x] Se stato ordine completato, rendere possibile inserimento recensione
 
 ### Back-end
 - [x] Aggiungere controllo sulla route `'/sell'` per utenti NON venditori
