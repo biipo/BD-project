@@ -479,6 +479,14 @@ def cart():
                 return redirect(request.url)
             else:
                 return redirect(url_for('payment')) # fare in modo di passare la query già fatta senza doverla rifare in '/payment'?
+        
+        elif request.form.get('update-item') is not None:
+            new_qty = int(request.form.get('quantity'))
+            for prod in products:
+                if prod.product_id == int(request.form.get('item-id')) and prod.product.availability > new_qty:
+                    prod.quantity = new_qty
+                    db_session.commit()
+            return redirect(url_for('cart'))
              
 
 @app.route('/payment', methods=['GET', 'POST'])
