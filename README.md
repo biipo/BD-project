@@ -33,6 +33,7 @@
 - [ ] Carrello
     - [x] Migliorare visualizzazione carrello
     - [ ] Modificare eliminazione prodotti dal carrello per una certa quantità (es. se un prodotto sono 5 elementi di poterne togliere 2)
+- [ ] Mettere tutti i prezzi con filtro jinja "... | round(2)" per mostrare solo 2 cifre dopo la virgola
 
 ### Back-end
 - [ ] Migliorare controlli sugli attributi tabelle

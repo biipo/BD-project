@@ -36,7 +36,7 @@ Cosa mostrare:
     </form>
     {% endfor %}
     <div class="larger">
-        Total: <p class="py-.25 px-.5 bg-success inline block border-r">{{ total }}€</p>
+        Total: <p class="py-.25 px-.5 bg-success inline block border-r">{{ total | round(2) }}€</p>
     </div>
     <br>
     <form method="post" onsubmit="">
