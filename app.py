@@ -564,21 +564,22 @@ def payment():
 @app.route('/orders', methods=['GET', 'POST'])
 @login_required
 def orders():
-    user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
+    # user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
     curr_time = datetime.datetime.now()
 
     if request.method == 'GET':
         # Se utente non venditore
-        if not user.is_seller():
+        if not current_user.is_seller():
             orders = db_session.scalars(select(Order).filter(Order.user_id == current_user.get_id()).order_by(Order.date.desc()))
             return render_template('orders.html', orders=orders, now=curr_time)
 
         else:
             orders = db_session.scalars(
                 select(Order)
+                .distinct(Order.id) # Altrimenti con la join ritorna più volte lo stesso prodotto
                 .join(OrderProducts)
                 .join(Product)
-                .filter(Product.seller == user)
+                .filter(Product.seller == current_user)
             )
             return render_template('orders_sold.html', orders=orders, now=curr_time)
     
@@ -592,7 +593,7 @@ def orders():
                 return redirect(url_for('orders'))
             
             # Query for order with given id and sold by current user
-            order = db_session.scalar(select(Order).join(OrderProducts).join(Product).filter(Order.id == order_id).filter(Product.seller == user))
+            order = db_session.scalar(select(Order).join(OrderProducts).join(Product).filter(Order.id == order_id).filter(Product.seller == current_user))
             if order is None:
                 return redirect(url_for('orders'))
            

@@ -11,7 +11,7 @@
 - Se un prodotto termina la sua disponibilità lo eliminamo dal DB o lo impostiamo tipo a -1 e lo mostriamo come 'Esaurito'?\
     Ee magari, non so, possiamo fare che il venditore può riaumentare le quantità e rimetterlo disponibile\
     Per ora i prodotti ho messo che vengono eliminati dal DB
-
+- Possibilità di modificare le recensioni??
 ## Todo
 
 ### Front-end
