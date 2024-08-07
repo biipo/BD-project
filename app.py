@@ -202,6 +202,7 @@ def product_details(pid):
         ) is not None and db_session.scalar(
             select(Review)
             .filter(Review.user_id == current_user.get_id())
+            .filter(Review.product_id == item.id)
         ) is None
 
         return render_template('zoom_in.html', item=item, rating=rating, bought=bought)
