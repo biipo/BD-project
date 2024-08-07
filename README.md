@@ -11,6 +11,7 @@
 - Se un prodotto termina la sua disponibilità lo eliminamo dal DB o lo impostiamo tipo a -1 e lo mostriamo come 'Esaurito'?\
     Ee magari, non so, possiamo fare che il venditore può riaumentare le quantità e rimetterlo disponibile\
     Per ora i prodotti ho messo che vengono eliminati dal DB
+- Possibilità di modificare le recensioni??
 
 ## Todo
 
@@ -21,6 +22,18 @@
     - [x] Form modifica dati personali
     - [x] Form aggiunta indirizzi
     - [ ] Link a pagina recensioni fatte (ricevute se venditore)
+        - [ ] Per utenti venditori aggiungere ref alla pagina profilo utente che ha fatto la recensione
+    - [ ] Statistiche venditore (se venditore)
+- [ ] Pagina profilo altrui (`user.html`)
+- [x] Zoom in (`zoom_in.html`)
+    - [ ] Fixare nuovo layout (è ancora bruttino)
+    - [ ] Migliorare visualizzazione tag
+- [ ] Pagina home (`home.html`)
+    - [x] Cambiare css
+- [ ] Carrello
+    - [x] Migliorare visualizzazione carrello
+    - [ ] Modificare eliminazione prodotti dal carrello per una certa quantità (es. se un prodotto sono 5 elementi di poterne togliere 2)
+- [ ] Migliorare pagina recensioni sul profilo, dove vedi le recensioni fatte/ricevute
 
 ### Back-end
 - [ ] Migliorare controlli sugli attributi tabelle

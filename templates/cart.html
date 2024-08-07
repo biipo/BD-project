@@ -14,7 +14,7 @@
                         </div>
                     </div>
                     <div>
-                        <p class="py-.25 px-.5 bg-success border-r">{{ item.product.price }}€</p>
+                        <p class="py-.25 px-.5 bg-success border-r">{{ item.product.price | round(2) }}€</p>
                         <button class="danger" type="submit" name="delete-item"><i class="bi bi-trash-fill"></i></button>
                     </div>
                 </div>
@@ -25,13 +25,13 @@
             <button name="place-order" class="ml-.5" type="submit">Order and Pay</button>
             <button name="clear-cart" class="ml-.5 danger" type="submit">Clear Cart</button>
             <div style="margin-left: auto; margin-right: 0" class="larger">
-                Total: <p class="py-.25 px-.5 bg-success inline block border-r">{{ total }}€</p>
+                Total: <p class="py-.25 px-.5 bg-success inline block border-r">{{ total | round(2) }}€</p>
             </div>
         </div>
         </form>
         {% with errors = get_flashed_messages(category_filter=["error"]) %}
         {% if errors %}
-            <ul class="flash danger"><!-- serve una <ul> perché i messaggi li dobbiamo iterare con un for, ma sarà sempre 1 msg -->
+            <ul class="flash danger">
                 {% for msg in errors %}
                     {{ msg }}
                 {% endfor %}

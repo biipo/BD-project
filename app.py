@@ -2,7 +2,7 @@ from flask import Flask, redirect, render_template, request, session, url_for, f
 from sqlalchemy.engine import url
 from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, TagProduct, Review
 from sqlalchemy import create_engine, select, join, union, update, func, delete
-from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager
+from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager, aliased
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
@@ -202,6 +202,7 @@ def product_details(pid):
         ) is not None and db_session.scalar(
             select(Review)
             .filter(Review.user_id == current_user.get_id())
+            .filter(Review.product_id == item.id)
         ) is None
 
         return render_template('zoom_in.html', item=item, rating=rating, bought=bought)
@@ -440,6 +441,17 @@ def profile():
         
         return redirect(url_for('profile'))
 
+@app.route('/reviews-page') # solo metodo GET
+@login_required
+def reviews_page():
+    if current_user.is_seller():
+        product_rev = db_session.scalars(select(Product)
+                                        .filter(Product.user_id == current_user.get_id())
+                                        ).all()
+        return render_template('reviews.html', reviews=product_rev)
+    else:
+        reviews = db_session.scalars(select(Review).filter(Review.user_id == current_user.get_id())).all()
+        return render_template('reviews.html', reviews=reviews)
 
 @app.route('/user/<username>')
 def user(username):
@@ -565,21 +577,22 @@ def payment():
 @app.route('/orders', methods=['GET', 'POST'])
 @login_required
 def orders():
-    user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
+    # user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
     curr_time = datetime.datetime.now()
 
     if request.method == 'GET':
         # Se utente non venditore
-        if not user.is_seller():
+        if not current_user.is_seller():
             orders = db_session.scalars(select(Order).filter(Order.user_id == current_user.get_id()).order_by(Order.date.desc()))
             return render_template('orders.html', orders=orders, now=curr_time)
 
         else:
             orders = db_session.scalars(
                 select(Order)
+                .distinct(Order.id) # Altrimenti con la join ritorna più volte lo stesso prodotto
                 .join(OrderProducts)
                 .join(Product)
-                .filter(Product.seller == user)
+                .filter(Product.seller == current_user)
             )
             return render_template('orders_sold.html', orders=orders, now=curr_time)
     
@@ -593,7 +606,7 @@ def orders():
                 return redirect(url_for('orders'))
             
             # Query for order with given id and sold by current user
-            order = db_session.scalar(select(Order).join(OrderProducts).join(Product).filter(Order.id == order_id).filter(Product.seller == user))
+            order = db_session.scalar(select(Order).join(OrderProducts).join(Product).filter(Order.id == order_id).filter(Product.seller == current_user))
             if order is None:
                 return redirect(url_for('orders'))
            

@@ -308,5 +308,5 @@ class Review(Base):
     product = relationship('Product')
 
     def __repr__(self):
-        return f"{self.id} {self.product_id} {self.user_id} {self.review}"
+        return f"££{self.id} {self.product.product_name} {self.user.username} {self.review}££"
 

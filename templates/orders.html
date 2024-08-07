@@ -39,15 +39,15 @@
                 <th>{{loop.index}}</th>
                 <td>{{ord_prod.quantity}}</td>
                 <td><a href="/product-details/{{prod.id}}" title="{{prod.product_name}}" class="default">{{prod.product_name}}</a></td>
-                <td>{{prod.price}}</td>
-                <td>{{prod.price * ord_prod.quantity}}</td>
+                <td>{{prod.price | round(2)}}</td>
+                <td>{{(prod.price * ord_prod.quantity) | round(2)}}</td>
             </tr>
         {% endwith %}
         {% endfor %}
             <tr class="larger">
                 <th></th>
                 <td colspan="3"></td>
-                <td class="bold success bg-success">{{order.price}}</td>
+                <td class="bold success bg-success">{{order.price | round(2)}}</td>
             </tr>
             <caption class="italic">
                     {{order.date.strftime("%d/%m/%Y, %H:%M")}}
