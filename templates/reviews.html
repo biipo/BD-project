@@ -1,12 +1,42 @@
 {% extends 'base.html' %}
 {% block title %}Your reviews{% endblock %}
 {% block content %}
-    <div class="container-big">
+    {% if current_user.is_seller() %}
+        {% for p in reviews %}
+            <div class="container-big">
+                <p class="larger"><a class="default" href="/product-details/{{p.id}}">{{p.product_name}}</a></p>
+                {% if p.reviews | length == 0 %}
+                    <p>No reviews for this product...</p>
+                {% else %}
+                    {% for r in p.reviews %}
+                        <div class="col-7">
+                            <p>{{ r.date.strftime('%x') }} - {{ r.user.username }}</p><!-- Aggiungere ref al profilo dell'utente -->
+                            <div id= "stars-container" class="inline block">
+                                <div class="flex attention">
+                                    {% for _ in range(r.stars | int) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                                    {% for _ in range(5-r.stars | int) %}<i class="bi bi-star"></i>{% endfor %}
+                                </div>
+                            </div>
+                            <!-- Fa vedere solo una parte della recensione se troppo lunga -->
+                            {% if r.review | length <= 100 %}
+                                <p>{{ r.review }}</p>
+                            {% else %}
+                                <p>{{ r.review[:100] }}...</p>
+                            {% endif %}
+                        </div>
+                        <br>
+                    {% endfor %}
+                {% endif %}
+                <p>------------------------</p>
+            </div>
+        {% endfor %}
+    {% else %}
         {% for review in reviews %}
-            <div class="flex">
+            <div class="container-big">
+                <p>------------------------</p>
                 <div class="col-7">
                     <p class="larger"><a class="default" href="/product-details/{{review.product.id}}">{{review.product.product_name}}</a></p>
-                    <p>{{ review.date }}{% if current_user.is_seller() %} - by: {{ review.user.username }}{% endif %}</p><!-- Aggiungere ref al profilo dell'utente -->
+                    <p>{{ review.date.strftime('%x') }}</p>
                     <div id= "stars-container" class="inline block">
                         <div class="flex attention">
                             {% for _ in range(review.stars | int) %}<i class="bi bi-star-fill"></i>{% endfor %}
@@ -20,7 +50,8 @@
                         <p>{{ review.review[:100] }}...</p>
                     {% endif %}
                 </div>
+                <p>------------------------</p>
             </div>
         {% endfor %}
-    </div>
+    {% endif %}
 {% endblock %}

@@ -2,7 +2,7 @@ from flask import Flask, redirect, render_template, request, session, url_for, f
 from sqlalchemy.engine import url
 from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, TagProduct, Review
 from sqlalchemy import create_engine, select, join, union, update, func, delete
-from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager
+from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager, aliased
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
@@ -440,13 +440,14 @@ def profile():
 @app.route('/reviews-page') # solo metodo GET
 @login_required
 def reviews_page():
-    query = select(Review)
     if current_user.is_seller():
-        query = query.filter(Review.product.user_id == current_user.get_id())
+        product_rev = db_session.scalars(select(Product)
+                                        .filter(Product.user_id == current_user.get_id())
+                                        ).all()
+        return render_template('reviews.html', reviews=product_rev)
     else:
-        query = query.filter(Review.user_id == current_user.get_id())
-    reviews = db_session.scalars(query.order_by(Review.date.desc())).all()
-    return render_template('reviews.html', reviews=reviews)
+        reviews = db_session.scalars(select(Review).filter(Review.user_id == current_user.get_id())).all()
+        return render_template('reviews.html', reviews=reviews)
 
 @app.route('/user/<username>')
 def user(username):

@@ -62,7 +62,7 @@
                     </a>
                     <footer>
                         <p class="small muted">{{ item.brand }}</p>
-                        <p class="bold larger py-.25 px-.5 bg-success inline block border-r">{{ item.price }}€</p>
+                        <p class="bold larger py-.25 px-.5 bg-success inline block border-r">{{ item.price | round(2)}}€</p>
                     </footer>
                 </article>
                 {% endfor %}

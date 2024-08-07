@@ -12,6 +12,7 @@
     Ee magari, non so, possiamo fare che il venditore può riaumentare le quantità e rimetterlo disponibile\
     Per ora i prodotti ho messo che vengono eliminati dal DB
 - Possibilità di modificare le recensioni??
+
 ## Todo
 
 ### Front-end
@@ -33,7 +34,7 @@
 - [ ] Carrello
     - [x] Migliorare visualizzazione carrello
     - [ ] Modificare eliminazione prodotti dal carrello per una certa quantità (es. se un prodotto sono 5 elementi di poterne togliere 2)
-- [ ] Mettere tutti i prezzi con filtro jinja "... | round(2)" per mostrare solo 2 cifre dopo la virgola
+- [ ] Migliorare pagina recensioni sul profilo, dove vedi le recensioni fatte/ricevute
 
 ### Back-end
 - [ ] Migliorare controlli sugli attributi tabelle
