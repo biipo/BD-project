@@ -10,6 +10,8 @@ import re # regular expressions
 
 engine = sq.create_engine('sqlite:///./data.db', echo=True)
 
+
+
 class Base(DeclarativeBase):
     pass
 
@@ -86,10 +88,6 @@ class User(Base, UserMixin):
         return  self.user_type
 
 
-    def __repr__(self):
-        return f"Id:{self.id}, Email:{self.email}, Username:{self.username}, Password:{self.password}, Nome:{self.name}, Cognome:{self.last_name}, Tipo utente:{self.user_type}"
-
-
 class Category(Base):
     __tablename__ = 'categories'
 
@@ -100,9 +98,6 @@ class Category(Base):
 
     def __init__(self, name):
         self.name = name
-
-    def __repr__(self):
-        return f"{self.id} {self.name}"
 
 # class SubCategory(Base):
 #     __tablename__ = 'sub_categories'
@@ -131,6 +126,7 @@ class Product(Base):
     price: Mapped[float] = mapped_column(nullable=False)
     availability: Mapped[int] = mapped_column(nullable=False)
     descr: Mapped[str] = mapped_column(nullable=True)
+    rating: Mapped[int]
     image_filename: Mapped[str] = mapped_column(nullable=False)
 
     cart_product: Mapped[List['CartProducts']] = relationship(back_populates='product')
@@ -156,6 +152,7 @@ class Product(Base):
             raise MissingData('Missing quantity')
         self.availability = availability
         self.descr = descr
+        self.rating = 0
         if image_filename is None:
             raise MissingData('Missing image')
         self.image_filename = image_filename

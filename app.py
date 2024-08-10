@@ -1,7 +1,7 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
 from sqlalchemy.engine import url
 from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, TagProduct, Review
-from sqlalchemy import create_engine, select, join, union, update, func, delete
+from sqlalchemy import create_engine, select, join, union, update, func, delete, event
 from sqlalchemy.orm import sessionmaker, Session, declarative_base, contains_eager, aliased
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -32,8 +32,7 @@ bcrypt.init_app(app)
 engine = create_engine('sqlite:///./data.db', echo=True)
 #Base = declarative_base()
 Base.metadata.create_all(engine)
-#Session = sessionmaker(bind=engine)
-db_session = Session(engine)
+db_session = Session()
 
 def db_init():
     '''
@@ -155,8 +154,38 @@ def db_init():
     #                          Tag(value='big (more than 500x500 mm)', tag_group=dim)
     #                         ])
     #     db_session.commit()
-    
+"""     
+@event.listens_for(db_session, 'after_flush')
+def after_flush_postexec(db_session, flush_context):
+    print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
+    print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
+    for obj in db_session.new:
+        print('KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK')
+        print('KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK')
+        if isinstance(obj, Review):
+            obj._is_inserted = True # sappiamo che è stato aggiunto perché è tra i db_session.new
+            # session['new_review'] = ibj
+            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
 
+@event.listens_for(db_session, 'after_commit')
+def after_commit(db_session):
+    print('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH')
+    print('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH')
+    for obj in db_session:
+        print('WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW')
+        print('WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW')
+        if isinstance(obj, Review) and hasattr(obj, '_is_inserted') and obj._is_inserted:
+            item = obj.product # db_session.scalar(select(Product).filter(Product.id == obj.product_id))
+            print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+            print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+            item.rating = sum(r.stars for r in item.reviews) / len(item.reviews) if len(item.reviews) > 0 else 0
+            print(item.rating)
+            print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+            print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+            del obj._is_inserted
+ """
 @app.route('/')
 def start():
     db_init()
@@ -185,12 +214,11 @@ def home():
 def product_details(pid):
     if request.method == 'GET':
         item = db_session.scalar(select(Product).filter(Product.id == pid))
-        #seller = db_session.scalar(select(User).where(User.id == item.user_id))
-        # Se ci sono recensioni ne calcolo la media
         if item is None:
             return redirect(url_for('home'))
 
-        rating = sum(r.stars for r in item.reviews) / len(item.reviews) if len(item.reviews) > 0 else 0
+        # Se ci sono recensioni ne calcolo la media
+        # rating = sum(r.stars for r in item.reviews) / len(item.reviews) if len(item.reviews) > 0 else 0
 
         # Se articolo acquistato e non recensito
         bought= db_session.scalar(
@@ -205,7 +233,7 @@ def product_details(pid):
             .filter(Review.product_id == item.id)
         ) is None
 
-        return render_template('zoom_in.html', item=item, rating=rating, bought=bought)
+        return render_template('zoom_in.html', item=item, bought=bought)
 
     else:
         if request.form.get('add-cart') is not None:
@@ -318,6 +346,9 @@ def search():
         brand = request.form.get('brand')
         min_price_range = request.form.get('min_price_range')
         max_price_range = request.form.get('max_price_range')
+        reviews_sort = request.form.get('reviews-sort')
+        name_sort = request.form.get('name_sort')
+        price_sort = request.form.get('price_sort')
 
         # I check servono perché potrebbe fare query cercando valori None tra gli attributi
         if tag_list:
@@ -330,6 +361,11 @@ def search():
             query = query.filter(Product.price >= min_price_range)
         if max_price_range:
             query = query.filter(Product.price <= max_price_range)
+        if reviews_sort:
+            if reviews_sort == 'asc':
+                query = query.order_by(Product.id)
+            else:
+                query = query.order_by(Product.id)
         items = db_session.scalars(query).all()
 
         return render_template('home.html', items=items)
