@@ -40,6 +40,7 @@
 - [ ] Ricerca prodotti dalla barra di ricerca
 - [ ] Creare template `products.html` da usare per mostrare prodotti in home e dopo search
 - [ ] Controllare tutti gli input per bene server-side
+- [ ] Fare trigger per recensioni che aggiorna attributo rating in Product (non trovo come fare o non mi va, ho provato con '@event.listen_for()')
 
 ## Fatti
 
