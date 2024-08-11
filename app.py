@@ -32,7 +32,7 @@ bcrypt.init_app(app)
 engine = create_engine('sqlite:///./data.db', echo=True)
 #Base = declarative_base()
 Base.metadata.create_all(engine)
-db_session = Session()
+db_session = Session(engine)
 
 def db_init():
     '''
@@ -154,20 +154,23 @@ def db_init():
     #                          Tag(value='big (more than 500x500 mm)', tag_group=dim)
     #                         ])
     #     db_session.commit()
-"""     
-@event.listens_for(db_session, 'after_flush')
-def after_flush_postexec(db_session, flush_context):
+
+
+""" 
+@event.listens_for(db_session, 'do_orm_execute')
+def orm_execute(orm_state):
     print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
     print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
-    for obj in db_session.new:
-        print('KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK')
-        print('KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK')
-        if isinstance(obj, Review):
-            obj._is_inserted = True # sappiamo che è stato aggiunto perché è tra i db_session.new
-            # session['new_review'] = ibj
-            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+    if orm_state.is_insert:
+        for obj in db_session.new:
+            print('KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK')
+            print('KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK')
+            if isinstance(obj, Review):
+                obj._is_inserted = True # sappiamo che è stato aggiunto perché è tra i db_session.new
+                # session['new_review'] = ibj
+                print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
 
 @event.listens_for(db_session, 'after_commit')
 def after_commit(db_session):
@@ -347,8 +350,11 @@ def search():
         min_price_range = request.form.get('min_price_range')
         max_price_range = request.form.get('max_price_range')
         reviews_sort = request.form.get('reviews-sort')
-        name_sort = request.form.get('name_sort')
-        price_sort = request.form.get('price_sort')
+        print(reviews_sort)
+        name_sort = request.form.get('name-sort')
+        print(name_sort)
+        price_sort = request.form.get('price-sort')
+        print(price_sort)
 
         # I check servono perché potrebbe fare query cercando valori None tra gli attributi
         if tag_list:
@@ -361,12 +367,27 @@ def search():
             query = query.filter(Product.price >= min_price_range)
         if max_price_range:
             query = query.filter(Product.price <= max_price_range)
-        if reviews_sort:
-            if reviews_sort == 'asc':
-                query = query.order_by(Product.id)
+        # if reviews_sort:
+        #     if reviews_sort == 'asc':
+        #         query = query.order_by(Product.rating.asc())
+        #     else:
+        #         query = query.order_by(Product.rating.desc())
+        if name_sort:
+            if name_sort == 'asc':
+                query = query.order_by(Product.product_name.asc())
             else:
-                query = query.order_by(Product.id)
+                query = query.order_by(Product.product_name.desc())
+        if price_sort:
+            if price_sort == 'asc':
+                query = query.order_by(Product.price.asc())
+            else:
+                query = query.order_by(Product.price.desc())
         items = db_session.scalars(query).all()
+        print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+        print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+        print(items)
+        print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+        print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
 
         return render_template('home.html', items=items)
 
