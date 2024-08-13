@@ -17,11 +17,6 @@
 ## Todo
 
 ### Front-end
-- [x] Pagina profilo (`profile.html`)
-    - [x] Form modifica dati personali
-    - [x] Form aggiunta indirizzi
-    - [ ] Link a pagina recensioni fatte (ricevute se venditore)
-- [ ] Migliorare pagina recensioni sul profilo, dove vedi le recensioni fatte/ricevute
 
 ### Back-end
 - [ ] Migliorare controlli sugli attributi tabelle
@@ -57,6 +52,11 @@
 - [x] Zoom in (`zoom_in.html`)
     - [x] Fixare nuovo layout (è ancora bruttino)
     - [x] Migliorare visualizzazione tag
+- [x] Pagina profilo (`profile.html`)
+    - [x] Form modifica dati personali
+    - [x] Form aggiunta indirizzi
+    - [x] Link a pagina recensioni fatte (ricevute se venditore)
+- [x] Migliorare pagina recensioni sul profilo, dove vedi le recensioni fatte/ricevute
 
 ### Back-end
 - [x] Aggiungere controllo sulla route `'/sell'` per utenti NON venditori
