@@ -216,8 +216,8 @@ def home():
     
     elif request.method == 'POST':
         if request.form.get('search') is not None:
-            if not current_user.is_authenticated:
-                return redirect(url_for('home'))
+            #if not current_user.is_authenticated:
+            #    return redirect(url_for('home'))
             items = db_session.query(Product).filter(Product.product_name.like('%' + request.form.get('search-query') + '%')).all()
             return render_template('home.html', items=items)
         else:
