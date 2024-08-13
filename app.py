@@ -215,7 +215,7 @@ def home():
         return render_template('home.html' , items=items)
     
     elif request.method == 'POST':
-        if request.form.get('search') is not None:
+        if request.form.get('search-query') is not None:
             #if not current_user.is_authenticated:
             #    return redirect(url_for('home'))
             items = db_session.query(Product).filter(Product.product_name.like('%' + request.form.get('search-query') + '%')).all()
@@ -527,6 +527,9 @@ def clear_cart(user_id):
 @app.route('/cart' , methods=['GET', 'POST'])
 @login_required
 def cart():
+    if current_user.is_seller():
+        return redirect(url_for('home'))
+
     products = db_session.scalars(select(CartProducts).where(CartProducts.user_id == int(current_user.get_id()))).all()
     total = sum(p.quantity * p.product.price for p in products)
     if request.method == 'GET':

@@ -1,6 +1,8 @@
 <menu>
     <li><a href="/home">Store</a></li>
+    {% if not current_user.is_seller %}
     <li class="{% if request.path ==  '/cart' %} selected {% endif %}"><a href="/cart"><i class="bi bi-cart3"></i> Cart</a></li>
+    {% endif %}
     <li class="{% if request.path == '/search' %} selected {% endif %}"><a href="/search"><i class="bi bi-search"></i> Search</a></li>
     <li>
         <a href="#">Menu</a>
@@ -15,5 +17,13 @@
             {% endif %}
         </menu>
     </li>
-    <!-- <li class="m-0" ><input type="search" placeholder="Search"></li> -->
+    {% if request.path == '/home' %}
+    <li class="m-.25 p-0">
+        <form method="post" class="m-0 p-.25 bg-default">
+            <div class="flex">
+                <input id="search-bar" name="search-query" placeholder="Search" class="inline block" style="height:100%"></input>
+            </div>
+        </form>
+    </li>
+    {% endif %}
 </menu>

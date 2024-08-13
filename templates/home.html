@@ -2,14 +2,6 @@
 {% block title %}Home{% endblock %}
 {% block content %}
 <div class="container-big">
-    <div class="search-container">
-        <form method="post" id="search-form">
-            <div class="flex">
-                <input id="search-bar" name="search-query" placeholder="Search for a product..." class="inline block" style="height:100%"></input>
-                <button type="submit" class="inline block success" style="width:5rem" name="search"><i class="bi bi-search"></i></button>
-            </div>
-        </form>
-    </div>
     {% if items|length == 0 %}
         <p class="muted mt-1 centered">No products to show :(</p>
     {% endif %}
