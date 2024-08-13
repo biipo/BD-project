@@ -21,16 +21,10 @@
     - [x] Form modifica dati personali
     - [x] Form aggiunta indirizzi
     - [ ] Link a pagina recensioni fatte (ricevute se venditore)
-        - [ ] Per utenti venditori aggiungere ref alla pagina profilo utente che ha fatto la recensione
-- [ ] (?) Pagina profilo altrui (`user.html`)
-- [x] Zoom in (`zoom_in.html`)
-    - [ ] Fixare nuovo layout (è ancora bruttino)
-    - [ ] Migliorare visualizzazione tag
 - [ ] Migliorare pagina recensioni sul profilo, dove vedi le recensioni fatte/ricevute
 
 ### Back-end
 - [ ] Migliorare controlli sugli attributi tabelle
-- [ ] Ricerca prodotti dalla barra di ricerca
 - [ ] Creare template `products.html` da usare per mostrare prodotti in home e dopo search
 - [ ] Controllare tutti gli input per bene server-side
 - [ ] Fare trigger per recensioni che aggiorna attributo rating in Product (non trovo come fare o non mi va, ho provato con '@event.listen_for()')
@@ -60,6 +54,9 @@
     - [x] Cambiare css
 - [x] Notifiche per stato ordini
     - [x] Creare sezione notifiche
+- [x] Zoom in (`zoom_in.html`)
+    - [x] Fixare nuovo layout (è ancora bruttino)
+    - [x] Migliorare visualizzazione tag
 
 ### Back-end
 - [x] Aggiungere controllo sulla route `'/sell'` per utenti NON venditori
@@ -71,3 +68,4 @@
 - [x] Applicare cambiamenti alla struttura della tabella addresses (non capisco come farlo)
 - [x] Implementare parte avvio ordine
 - [x] Aggiungere booleano `confirmed` alla tabella ordini per confermare ordine quando `state` settato a ricevuto da venditore
+- [x] Ricerca prodotti dalla barra di ricerca
