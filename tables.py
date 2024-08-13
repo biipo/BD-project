@@ -232,6 +232,7 @@ class Order(Base):
     address: Mapped[int] = mapped_column(ForeignKey(Address.id))
     payment_method: Mapped[str]
     status: Mapped[str]
+    status_time: Mapped[datetime]
     confirmed: Mapped[bool]
 
     # Rename address_obj to address and address to address_id later
@@ -245,7 +246,7 @@ class Order(Base):
     #         raise InvalidCredential('Invalid status')
 
     def __repr__(self):
-        return f"{self.id} {self.user_id} {self.date} {self.price} {self.address} {self.payment_method} {self.status}"
+        return f"{self.id} {self.user_id} {self.date} {self.price} {self.address} {self.payment_method} {self.status} {self.status_time} {self.confirmed}"
 
 # class TagGroup(Base):
 #     # Tabella con relazione (TagGroup)1:m(Tag), che serve per riconoscere di che categoria è il tag (dimensione, colore o brand)

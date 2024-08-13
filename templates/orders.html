@@ -3,8 +3,11 @@
 {% block content %}
 <div class="container-big">
     <h1>Your orders</h1><!-- Pagina ordini per acquirenti -->
+    {% for notif in notifs %}
+    <div class="flash success"><a href="#order-{{notif}}" class="success">The status of Order no. {{notif}} has been updated!<i class="bi bi-arrow-right"></i></a></div>
+    {% endfor %}
     {% for order in orders %}
-    <details>
+    <details id="order-{{order.id}}">
         <summary>
             {% if order.status == 'Received' %}
                 <i class="{{'success' if order.confirmed else 'attention'}} bi bi-check-circle-fill"></i>

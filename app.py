@@ -592,10 +592,11 @@ def payment():
                     if p.quantity > p.product.availability:
                         raise InvalidOrder('Product [ ' + p.product.product_name + ' ] quantity exceeds item availability')
                     seller_id = p.product.user_id
+                    date = datetime.datetime.now()
                     if seller_id not in sellers_orders.keys(): # Viene creato un ordine per ciascun venditore
                         new_order = Order(
                             user_id = current_user.get_id(),
-                            date = datetime.datetime.now(),
+                            date = date,
                             price = p.quantity * p.product.price,
                             address = db_session.scalar(
                                 select(Address.id)
@@ -604,6 +605,7 @@ def payment():
                             ),
                             payment_method = pay_method,
                             status = 'Paid',
+                            status_time = date,
                             confirmed = False,
                         )
                         db_session.add(new_order)
@@ -640,8 +642,26 @@ def orders():
     if request.method == 'GET':
         # Se utente non venditore
         if not current_user.is_seller():
-            orders = db_session.scalars(select(Order).filter(Order.user_id == current_user.get_id()).order_by(Order.date.desc()))
-            return render_template('orders.html', orders=orders, now=curr_time)
+            orders = db_session.scalars(
+                select(Order)
+                .filter(Order.user_id == current_user.get_id())
+                .order_by(Order.date.desc())
+            )
+            
+            # Se la pagina ordini è stata già controllata prendo timestamp dell'ultimo controllo
+            # sennò prendo timestamp più piccolo possibile
+            date = session["orders_check"] if "orders_check" in session.keys() else datetime.date.min
+            # Prendo id ordini aggiornati dopo ultimo controllo degli ordini
+            notifs = db_session.scalars(
+                select(Order.id)
+                .filter(Order.user_id == current_user.get_id())
+                .filter(date < Order.status_time)
+                .order_by(Order.status_time)
+            )
+            # Aggiorno timestamp ultimo controllo ordini
+            session["orders_check"] = datetime.datetime.now()
+
+            return render_template('orders.html', orders=orders, now=curr_time, notifs=notifs)
 
         else:
             orders = db_session.scalars(
@@ -670,6 +690,7 @@ def orders():
             # If order status new and not received or cancelled
             if order.status not in [new_status, 'Received', 'Cancelled']:
                 order.status = new_status
+                order.status_time = datetime.datetime.now()
                 db_session.commit()
 
         else:
