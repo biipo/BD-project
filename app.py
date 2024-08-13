@@ -198,20 +198,30 @@ def start():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-@app.route('/home')
+@app.route('/home', methods=['GET', 'POST'])
 def home():
-    items_q = db_session.query(Product)
+    if request.method == 'GET':
+        items_q = db_session.query(Product)
 
-    seller = request.args.get('seller')
-    if seller is not None:
-        items_q = items_q.filter(Product.user_id == seller)
-        if current_user.get_id() != seller:
-            items_q = items_q.filter(Product.availability > 0)
-        items = items_q.all()
-    else:
-        items = (items_q.filter(Product.availability > 0)).all()
+        seller = request.args.get('seller')
+        if seller is not None:
+            items_q = items_q.filter(Product.user_id == seller)
+            if current_user.get_id() != seller:
+                items_q = items_q.filter(Product.availability > 0)
+            items = items_q.all()
+        else:
+            items = (items_q.filter(Product.availability > 0)).all()
 
-    return render_template('home.html' , items=items)
+        return render_template('home.html' , items=items)
+    
+    elif request.method == 'POST':
+        if request.form.get('search') is not None:
+            if not current_user.is_authenticated:
+                return redirect(url_for('home'))
+            items = db_session.query(Product).filter(Product.product_name.like('%' + request.form.get('search-query') + '%')).all()
+            return render_template('home.html', items=items)
+        else:
+            return redirect(url_for('home'))
 
 @app.route('/product-details/<int:pid>', methods=['GET', 'POST'])
 def product_details(pid):
