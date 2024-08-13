@@ -393,13 +393,9 @@ def search():
             else:
                 query = query.order_by(Product.price.desc())
         items = db_session.scalars(query).all()
-        print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-        print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
         print(items)
-        print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-        print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
 
-        return render_template('home.html', items=items)
+        return render_template('search.html', items=items)
 
 # Controlla se il file è di tipo corretto (foto/gif)
 def allowed_file(filename):

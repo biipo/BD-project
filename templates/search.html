@@ -1,106 +1,107 @@
 {% extends 'base.html' %}
 {% block content %}
-<div>
-    <form method="post">
-        <fieldset>
-            <legend>Dimensions</legend>
-            <div class="mb-.5">
-                <label for="any">
-                    <input id="any" type="radio" name="dimension" value="Any" checked>
-                    Any
-                </label>
-                <label for="small">
-                    <input id="small" type="radio" name="dimension" value="small">
-                    Small (less than 200x200 mm)
-                </label>
-                <label for="medium">
-                    <input id="medium" type="radio" name="dimension" value="medium">
-                    Medium (between 200x200 and 500x500 mm)
-                </label>
-                <label for="big">
-                    <input id="big" type="radio" name="dimension" value="big">
-                    Big (more than 500x500 mm)
-                </label>
+<div class="container-big">
+    <details class="bg-muted" open>
+        <summary class="default">Search parameters</summary>
+        <form method="post">
+            <fieldset>
+                <legend>Dimensions</legend>
+                <div class="mb-.5">
+                    <label for="any">
+                        <input id="any" type="radio" name="dimension" value="Any" checked>
+                        Any
+                    </label>
+                    <label for="small">
+                        <input id="small" type="radio" name="dimension" value="small">
+                        Small (less than 200x200 mm)
+                    </label>
+                    <label for="medium">
+                        <input id="medium" type="radio" name="dimension" value="medium">
+                        Medium (between 200x200 and 500x500 mm)
+                    </label>
+                    <label for="big">
+                        <input id="big" type="radio" name="dimension" value="big">
+                        Big (more than 500x500 mm)
+                    </label>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Brands</legend>
+                {% for brand in brands %}
+                    <input type="radio" name="brand" value="{{ brand }}">{{ brand }}<br>
+                {% endfor %}
+            </fieldset>
+            <details>
+                <summary class="default">Tags</summary>
+                <div style="max-height:10rem; overflow:auto; position:relative">
+                <table>
+                <tr> 
+                {% for tag in tags %}
+                    <td style="border:none"><input type="checkbox" name="tag" value="{{tag.id}}">{{tag.value}}</input></td>
+                {% if loop.index%6 == 0 %}</tr><tr>{% endif %}
+                {% endfor %}
+                </table>
+                </div>
+            </details>
+            <fieldset>
+                <legend>Price range (€)</legend>
+                <div class="quantity-container mt-.25">
+                    <label for="min_price_range" class="quantity-label inline block pr-.5">Min:</label>
+                    <input type="number" id="quantity" name="min_price_range" style="max-width:5em;" class="quantity-input inline block" value="None" min="1" max="{{ max_price }}">
+                    <label for="max_price_range" class="quantity-label inline block pr-.5">Max:</label>
+                    <input type="number" id="quantity" name="max_price_range" style="max-width:5em;" class="quantity-input inline block" value="None" min="1" max="{{ max_price }}">
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Order by</legend>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Reviews</th>
+                            <th>Product name</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <input type="radio" name="reviews-sort" value="asc"> Asc
+                                <input type="radio" name="reviews-sort" value="desc"> Desc
+                            </td>
+                            <td>
+                                <input type="radio" name="name-sort" value="asc"> Asc
+                                <input type="radio" name="name-sort" value="desc"> Desc
+                            </td>
+                            <td>
+                                <input type="radio" name="price-sort" value="asc"> Asc
+                                <input type="radio" name="price-sort" value="desc"> Desc
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </fieldset>
+            <div>
+                <button type="submit">Apply filters</button>
             </div>
-        </fieldset>
-        <fieldset>
-            <legend>Brands</legend>
-            {% for brand in brands %}
-                <input type="radio" name="brand" value="{{ brand }}">{{ brand }}<br>
-            {% endfor %}
-        </fieldset>
-        <details>
-            <summary class="default">Tags</summary>
-            <div style="max-height:10rem; overflow:auto; position:relative">
-            <table>
-            <tr> 
-            {% for tag in tags %}
-                <td style="border:none"><input type="checkbox" name="tag" value="{{tag.id}}">{{tag.value}}</input></td>
-            {% if loop.index%6 == 0 %}</tr><tr>{% endif %}
-            {% endfor %}
-            </table>
-            </div>
-        </details>
-        <fieldset>
-            <legend>Price range (€)</legend>
-            <div class="quantity-container mt-.25">
-                <label for="min_price_range" class="quantity-label inline block pr-.5">Min:</label>
-                <input type="number" id="quantity" name="min_price_range" style="max-width:5em;" class="quantity-input inline block" value="None" min="1" max="{{ max_price }}">
-                <label for="max_price_range" class="quantity-label inline block pr-.5">Max:</label>
-                <input type="number" id="quantity" name="max_price_range" style="max-width:5em;" class="quantity-input inline block" value="None" min="1" max="{{ max_price }}">
-            </div>
-        </fieldset>
-        <fieldset>
-            <legend>Order by</legend>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Reviews</th>
-                        <th>Product name</th>
-                        <th>Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <input type="radio" name="reviews-sort" value="asc"> Asc
-                            <input type="radio" name="reviews-sort" value="desc"> Desc
-                        </td>
-                        <td>
-                            <input type="radio" name="name-sort" value="asc"> Asc
-                            <input type="radio" name="name-sort" value="desc"> Desc
-                        </td>
-                        <td>
-                            <input type="radio" name="price-sort" value="asc"> Asc
-                            <input type="radio" name="price-sort" value="desc"> Desc
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </fieldset>
-        <div>
-            <button type="submit">Apply filters</button>
-        </div>
-    </form>
+        </form>
+    </details>
 </div>
-<div class="flex">
-    <div class="flex-1 p-3">
-        <div class="flex wrap">
-            {% for item in items %}
-            <article>
-                <header>
-                    <h1><a class="flex default" href="{{ url_for('product_details', pid=item.id)}}">{{ item.product_name }}</a></h1>
-                </header>
-                <a class="flex" href="{{ url_for('product_details', pid=item.id)}}">
-                    <img class="" src="{{ url_for('uploaded_file', filename=item.image_filename)}}" />
-                </a>
-                <footer>
-                    <p class="small muted">{{ item.brand }}</p>
-                    <p class="bold larger py-.25 px-.5 bg-success inline block border-r">{{ item.price | round(2)}}€</p>
-                </footer>
-            </article>
-            {% endfor %}
-        </div>
+<div class="container-big">
+    <div class="flex">
+        {% for item in items %}
+        <article>
+            <header>
+                <h1><a class="flex default" href="{{ url_for('product_details', pid=item.id)}}">{{ item.product_name }}</a></h1>
+            </header>
+            <a class="flex" href="{{ url_for('product_details', pid=item.id)}}">
+                <img class="" src="{{ url_for('uploaded_file', filename=item.image_filename)}}" />
+            </a>
+            <footer>
+                <p class="small muted">{{ item.brand }}</p>
+                <p class="bold larger py-.25 px-.5 bg-success inline block border-r">{{ item.price | round(2)}}€</p>
+            </footer>
+        </article>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
