@@ -391,7 +391,7 @@ def search():
         items = db_session.scalars(query).all()
         print(items)
 
-        return render_template('search.html', items=items)
+        return render_template('search.html', items=items, brands=brands, max_price=max_price, tags=tags)
 
 # Controlla se il file è di tipo corretto (foto/gif)
 def allowed_file(filename):
