@@ -1,57 +1,52 @@
 {% extends 'base.html' %}
 {% block title %}Your reviews{% endblock %}
 {% block content %}
+<div class="container-big">
     {% if current_user.is_seller() %}
         {% for p in reviews %}
-            <div class="container-big">
-                <p class="larger"><a class="default" href="/product-details/{{p.id}}">{{p.product_name}}</a></p>
+            <details open>
+                <summary class="default" style="text-decoration:none">
+                    <b style="text-decoration:none" class="larger">
+                        <a href="/product-details/{{p.id}}" class="default">{{p.product_name}} <i class="bi bi-arrow-right"></i></a>
+                    </b>
+                </summary>
                 {% if p.reviews | length == 0 %}
-                    <p>No reviews for this product...</p>
+                    <p class="muted">No reviews for this product...</p>
                 {% else %}
-                    {% for r in p.reviews %}
-                        <div class="col-7">
-                            <p>{{ r.date.strftime('%x') }} - {{ r.user.username }}</p><!-- Aggiungere ref al profilo dell'utente -->
-                            <div id= "stars-container" class="inline block">
-                                <div class="flex attention">
-                                    {% for _ in range(r.stars | int) %}<i class="bi bi-star-fill"></i>{% endfor %}
-                                    {% for _ in range(5-r.stars | int) %}<i class="bi bi-star"></i>{% endfor %}
+                    {% for review in p.reviews %}
+                        <details>
+                            <summary class="default" style="text-decoration:none">
+                                <p class="my-0 inline block default"><b>{{review.user.username}}</b></p>
+                                <div class="inline block">
+                                    <div class="flex attention">
+                                        {% for _ in range(review.stars) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                                        {% for _ in range(5-review.stars | int) %}<i class="bi bi-star"></i>{% endfor %}
+                                    </div>
                                 </div>
-                            </div>
-                            <!-- Fa vedere solo una parte della recensione se troppo lunga -->
-                            {% if r.review | length <= 100 %}
-                                <p>{{ r.review }}</p>
-                            {% else %}
-                                <p>{{ r.review[:100] }}...</p>
-                            {% endif %}
-                        </div>
-                        <br>
+                            </summary>
+                            <p>{{review.review}}</p>
+                            <footer><p class="muted">{{ review.date.strftime('%x') }}</p></footer>
+                        </details>
                     {% endfor %}
                 {% endif %}
-                <p>------------------------</p>
-            </div>
+            </details>
         {% endfor %}
     {% else %}
         {% for review in reviews %}
-            <div class="container-big">
-                <p>------------------------</p>
-                <div class="col-7">
-                    <p class="larger"><a class="default" href="/product-details/{{review.product.id}}">{{review.product.product_name}}</a></p>
-                    <p>{{ review.date.strftime('%x') }}</p>
-                    <div id= "stars-container" class="inline block">
+            <details>
+                <summary class="default" style="text-decoration:none">
+                    <p class="my-0 inline block default"><a href="/product-details/{{review.product.id}}" class="default">{{review.product.product_name}} <i class="bi bi-arrow-right"></i></a></p>
+                    <div class="inline block">
                         <div class="flex attention">
-                            {% for _ in range(review.stars | int) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                            {% for _ in range(review.stars) %}<i class="bi bi-star-fill"></i>{% endfor %}
                             {% for _ in range(5-review.stars | int) %}<i class="bi bi-star"></i>{% endfor %}
                         </div>
                     </div>
-                    <!-- Fa vedere solo una parte della recensione se troppo lunga -->
-                    {% if review.review | length <= 100 %}
-                        <p>{{ review.review }}</p>
-                    {% else %}
-                        <p>{{ review.review[:100] }}...</p>
-                    {% endif %}
-                </div>
-                <p>------------------------</p>
-            </div>
+                </summary>
+                <p>{{review.review}}</p>
+                <footer><p class="muted">{{ review.date.strftime('%x') }}</p></footer>
+            </details>
         {% endfor %}
     {% endif %}
+</div>
 {% endblock %}

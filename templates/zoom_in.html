@@ -93,9 +93,9 @@
             <p class="muted">There are no reviews for this product...</p>
         {% else %}
             {% for review in item.reviews %}
-                <details open>
-                    <summary style="text-decoration:none">
-                        <p class="my-0 inline block">{{review.user.username}} -</p>
+                <details id="review-{{review.id}}" open>
+                    <summary style="text-decoration:none" class="default">
+                        <p class="my-0 inline block"><b>{{review.user.username}}</b></p>
                         <div class="inline block">
                             <div class="flex attention">
                                 {% for _ in range(review.stars) %}<i class="bi bi-star-fill"></i>{% endfor %}
@@ -103,7 +103,8 @@
                             </div>
                         </div>
                     </summary>
-                    {{review.review}}
+                    <p>{{review.review}}</p>
+                    <footer><p class="muted">{{ review.date.strftime('%x') }}</p></footer>
                 </details>
             {% endfor %}
         {% endif %}
