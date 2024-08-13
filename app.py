@@ -198,12 +198,17 @@ def start():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-@app.route('/home', methods=['GET', 'POST'])
+@app.route('/home')
 def home():
     if request.method == 'GET':
         items_q = db_session.query(Product)
 
         seller = request.args.get('seller')
+        search = request.args.get('search')
+        
+        if search is not None:
+            items_q = items_q.filter(Product.product_name.like('%' + search + '%'))
+
         if seller is not None:
             items_q = items_q.filter(Product.user_id == seller)
             if current_user.get_id() != seller:
@@ -214,15 +219,6 @@ def home():
 
         return render_template('home.html' , items=items)
     
-    elif request.method == 'POST':
-        if request.form.get('search-query') is not None:
-            #if not current_user.is_authenticated:
-            #    return redirect(url_for('home'))
-            items = db_session.query(Product).filter(Product.product_name.like('%' + request.form.get('search-query') + '%')).all()
-            return render_template('home.html', items=items)
-        else:
-            return redirect(url_for('home'))
-
 @app.route('/product-details/<int:pid>', methods=['GET', 'POST'])
 def product_details(pid):
     if request.method == 'GET':
