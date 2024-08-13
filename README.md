@@ -17,8 +17,6 @@
 ## Todo
 
 ### Front-end
-- [ ] Notifiche per stato ordini
-    - [x] Creare sezione notifiche
 - [x] Pagina profilo (`profile.html`)
     - [x] Form modifica dati personali
     - [x] Form aggiunta indirizzi
@@ -60,6 +58,8 @@
     - [x] Modificare eliminazione prodotti dal carrello per una certa quantità (es. se un prodotto sono 5 elementi di poterne togliere 2)
 - [x] Pagina home (`home.html`)
     - [x] Cambiare css
+- [x] Notifiche per stato ordini
+    - [x] Creare sezione notifiche
 
 ### Back-end
 - [x] Aggiungere controllo sulla route `'/sell'` per utenti NON venditori
