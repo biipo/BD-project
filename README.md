@@ -12,6 +12,7 @@
     Ee magari, non so, possiamo fare che il venditore può riaumentare le quantità e rimetterlo disponibile\
     Per ora i prodotti ho messo che vengono eliminati dal DB
 - Possibilità di modificare le recensioni??
+    - Nah
 
 ## Todo
 
@@ -23,16 +24,10 @@
     - [x] Form aggiunta indirizzi
     - [ ] Link a pagina recensioni fatte (ricevute se venditore)
         - [ ] Per utenti venditori aggiungere ref alla pagina profilo utente che ha fatto la recensione
-    - [ ] Statistiche venditore (se venditore)
-- [ ] Pagina profilo altrui (`user.html`)
+- [ ] (?) Pagina profilo altrui (`user.html`)
 - [x] Zoom in (`zoom_in.html`)
     - [ ] Fixare nuovo layout (è ancora bruttino)
     - [ ] Migliorare visualizzazione tag
-- [ ] Pagina home (`home.html`)
-    - [x] Cambiare css
-- [ ] Carrello
-    - [x] Migliorare visualizzazione carrello
-    - [ ] Modificare eliminazione prodotti dal carrello per una certa quantità (es. se un prodotto sono 5 elementi di poterne togliere 2)
 - [ ] Migliorare pagina recensioni sul profilo, dove vedi le recensioni fatte/ricevute
 
 ### Back-end
@@ -60,6 +55,11 @@
     - [x] Migliorare visualizzazione carrello
     - [x] Modificare eliminazione prodotti dal carrello per una certa quantità (es. se un prodotto sono 5 elementi di poterne togliere 2)
 - [x] Se stato ordine completato, rendere possibile inserimento recensione
+- [x] Carrello
+    - [x] Migliorare visualizzazione carrello
+    - [x] Modificare eliminazione prodotti dal carrello per una certa quantità (es. se un prodotto sono 5 elementi di poterne togliere 2)
+- [x] Pagina home (`home.html`)
+    - [x] Cambiare css
 
 ### Back-end
 - [x] Aggiungere controllo sulla route `'/sell'` per utenti NON venditori
