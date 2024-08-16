@@ -1,6 +1,6 @@
 <menu>
     <li><a href="/home">Store</a></li>
-    {% if not current_user.is_seller %}
+    {% if current_user.is_authenticated and not current_user.is_seller() %}
     <li class="{% if request.path ==  '/cart' %} selected {% endif %}"><a href="/cart"><i class="bi bi-cart3"></i> Cart</a></li>
     {% endif %}
     <li class="{% if request.path == '/search' %} selected {% endif %}"><a href="/search"><i class="bi bi-search"></i> Search</a></li>

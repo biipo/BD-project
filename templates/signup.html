@@ -9,9 +9,14 @@
                 <input class="ml-.25" type="text" name="lname" placeholder="Last name">
             </div>
             <input class="mb-.5" type="text" name="username" placeholder="Username">
-            <input class="mb-.5" type="text" name="email" placeholder="E-mail">
-            <input class="mb-.5" type="password" name="password" placeholder="Password">
-            <input class="mb-.5" type="password" name="conf-password" placeholder="Confirm Password">
+            <input class="mb-.5" type="email" name="email" placeholder="E-mail">
+            <input class="mb-.5" type="password" minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" 
+                title="Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character" required name="password" placeholder="Password">
+            <input class="mb-.5" type="password" minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+                title="Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character" required name="conf-password" placeholder="Confirm Password">
+            <ul class="muted small mb-.5" id="pass-requirements">
+                <li>Minimum 8 characters, one uppercase letter, one lowercase letter, one number, one special character</li>
+            </ul>
             <select class="mb-.5" name="user_type">
                 <option selected value="Buyer">Buyer</option>
                 <option value="Seller">Seller</option>

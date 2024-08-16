@@ -2,7 +2,8 @@ import sqlalchemy as sq
 from datetime import datetime
 from sqlalchemy import CheckConstraint, Column, Table, ForeignKey, except_all, null
 from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped, backref
-from sqlalchemy import Integer
+from sqlalchemy import Integer, Numeric, Text, String
+from decimal import Decimal
 from flask_login import UserMixin
 from exceptions import InvalidCredential, MissingData, InvalidOrder
 from typing import List
@@ -29,7 +30,8 @@ class User(Base, UserMixin):
     name: Mapped[str] = mapped_column()
     last_name: Mapped[str] = mapped_column(nullable=True)
     user_type: Mapped[bool] = mapped_column() # True se venditore
-    
+    last_logout: Mapped[datetime] = mapped_column()
+
     addresses: Mapped[List['Address']] = relationship(back_populates='user')
     cart_products: Mapped[List['CartProducts']] = relationship(back_populates='user')
     reviews: Mapped[List['Review']] = relationship(back_populates='user')
@@ -77,12 +79,13 @@ class User(Base, UserMixin):
             raise InvalidCredential("Invalid last name")
         return name, lastname
 
-    def __init__(self, email, username, password, name, last_name, user_type):
+    def __init__(self, email, username, password, name, last_name, user_type, last_logout):
         self.email = self.__email_checker(email)
         self.username = self.__username_checker(username)
         self.password = self.__password_checker(password)
         self.name, self.last_name = self.__name_lastname_checker(name, last_name)
         self.user_type = user_type
+        self.last_logout = last_logout
     
     def is_seller(self):
         return  self.user_type
@@ -123,7 +126,7 @@ class Product(Base):
     category_id: Mapped[int] = mapped_column(ForeignKey(Category.id))
     product_name: Mapped[str] = mapped_column(nullable=False)
     date: Mapped[datetime] = mapped_column(nullable=True)
-    price: Mapped[float] = mapped_column(nullable=False)
+    price: Mapped[Decimal] = mapped_column(Numeric(precision=8, scale=2), nullable=False) #8 cifre totali, 2 dopo virgola
     availability: Mapped[int] = mapped_column(nullable=False)
     descr: Mapped[str] = mapped_column(nullable=True)
     rating: Mapped[int]
@@ -139,11 +142,19 @@ class Product(Base):
         if user_id is None:
             raise MissingData('Missing user id')
         self.user_id = user_id
+
+        if len(brand) > 20:
+            raise ValueError('Brand name too long')
         self.brand = brand
+
         if category_id is None:
             raise MissingData('Missing category id')
         self.category_id = category_id
+
+        if len(product_name) > 50:
+            raise ValueError('Product name too long')
         self.product_name = product_name
+
         self.date = date
         if price is None:
             raise MissingData('Missing price')
@@ -151,7 +162,11 @@ class Product(Base):
         if availability is None:
             raise MissingData('Missing quantity')
         self.availability = availability
+
+        if len(descr) > 300:
+            raise ValueError('Description too long')
         self.descr = descr
+
         self.rating = 0
         if image_filename is None:
             raise MissingData('Missing image')

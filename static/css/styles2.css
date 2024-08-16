@@ -95,3 +95,13 @@ article img {
 .star-select:user-valid, .star-select:hover {
     border-color: var(--attention)
 }
+
+#pass-requirements {
+    list-style: none;
+}
+
+#pass-requirements li:before {
+    font-family: 'bootstrap-icons';
+    content: '\F132';
+    margin:0 5px 0 -15px;
+}

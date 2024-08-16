@@ -13,8 +13,8 @@
                     <fieldset>
                         <legend>Details</legend>
                         <div class="mb-.5 flex">
-                            <input title="Product name" class="mr-.25" type="text" name="name" placeholder="Product name">
-                            <input title="Brand" class="mr-.25" type="text" name="brand" placeholder="Brand">
+                            <input title="Product name" class="mr-.25" type="text" name="name" placeholder="Product name" maxlength="50">
+                            <input title="Brand" class="mr-.25" type="text" name="brand" placeholder="Brand" maxlength="20">
                         </div>
                         <select class="mb-.5" name="dimensions">
                             <option selected disabled>Product dimensions</option>
@@ -37,7 +37,7 @@
                         </select>
                         <input class="mb-.5" title="Price (€)" type="number" min="1" step="any" name="price" placeholder="Price (€)">
                         <input class="mb-.5" title="Availability" type="number" min="1" step="any" name="availability" placeholder="Quantity">
-                        <textarea class="mb-.5" title="Description" name="description" placeholder="Description"></textarea>
+                        <textarea class="mb-.5" title="Description" name="description" placeholder="Description" style="resize:vertical; min-height:5rem;  max-height:15rem" maxlength="300"></textarea>
                         <fieldset style="height:15rem; overflow:auto; position:relative">
                             <legend>Tags</legend>
                             <table>
@@ -50,15 +50,15 @@
                             {% endfor %}
                             </table>
                         </fieldset>
-                        <button type="submit" value="Upload">Sell</button>
                         {% with errors = get_flashed_messages(category_filter=["error"]) %}
-                        {% if errors != None %}
-                            <ul style="color:red"><!-- serve una <ul> perché i messaggi li dobbiamo iterare con un for, ma sarà sempre 1 msg -->
+                        {% if errors %}
+                            <ul class="flash danger"><!-- serve una <ul> perché i messaggi li dobbiamo iterare con un for, ma sarà sempre 1 msg -->
                                 {% for msg in errors %}
                                     {{ msg }}
                                 {% endfor %}
                             </ul>
                         {% endif %}
+                        <button type="submit" value="Upload">Sell</button>
                         {% endwith %}
                     </fieldset>
                 </div>

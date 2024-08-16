@@ -434,13 +434,21 @@ def sell():
             except MissingData as err:
                 flash(err.message, 'error')
                 return redirect(request.url)
+            except ValueError as err:
+                flash(str(err), 'error')
+                return redirect(request.url)
 
             for tag_id in tags:
                 db_session.add_all([TagProduct(db_session.scalar(select(Tag).filter(Tag.id == tag_id)), product)])
             db_session.add(TagProduct(db_session.scalar(select(Tag).filter(Tag.value == dimensions)), product))
 
-            db_session.add(product)
-            db_session.commit()
+            try:
+                db_session.add(product)
+                db_session.commit()
+            except Exception as e:
+                flash(str(e), 'error')
+                return redirect(request.url)
+
             return redirect(url_for('home')) # Reindirizza alla pagina di tutti i prodotti in vendita
         else:
             flash('Invalid file type', 'error')
@@ -653,18 +661,19 @@ def orders():
                 .order_by(Order.date.desc())
             )
             
-            # Se la pagina ordini è stata già controllata prendo timestamp dell'ultimo controllo
-            # sennò prendo timestamp più piccolo possibile
-            date = session["orders_check"] if "orders_check" in session.keys() else datetime.date.min
+            # La data dal cui calcolare le notifiche parte dall'ultimo logout
+            # se non è ancora stata controllata la pagina
+            date = session["last_check"] if "last_check" in session.keys() else current_user.last_logout
             # Prendo id ordini aggiornati dopo ultimo controllo degli ordini
             notifs = db_session.scalars(
                 select(Order.id)
                 .filter(Order.user_id == current_user.get_id())
                 .filter(date < Order.status_time)
+                .filter(Order.confirmed == False)
                 .order_by(Order.status_time)
             )
-            # Aggiorno timestamp ultimo controllo ordini
-            session["orders_check"] = datetime.datetime.now()
+            # Si aggiorna il timestamp dell'ultimo controllo al tempo corrente
+            session["last_check"] = datetime.datetime.now()
 
             return render_template('orders.html', orders=orders, now=curr_time, notifs=notifs)
 
@@ -700,14 +709,6 @@ def orders():
 
         else:
             if request.form.get('update-confirmed') is not None:
-                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
-                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
-                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
-                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
-                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
-                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
-                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
-                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
                 order_id = request.form.get('order-id')
                 order = db_session.scalar(
                     select(Order)
@@ -756,6 +757,8 @@ def login():
 @app.route('/logout')
 @login_required # Indica che è richiesto un login per accedere a questa pagina, un login avvenuto con successo e quindi con un utente loggato
 def logout():
+    current_user.last_logout = datetime.datetime.now()
+    db_session.commit()
     logout_user()
     return redirect(url_for('home')) # route HOME da creare
 
@@ -765,6 +768,16 @@ def signup():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        email = request.form.get('email')
+        
+        if db_session.scalar(select(User).filter(User.username == username)) is not None:
+            flash('Username already exists', 'error')
+            return redirect(request.url)
+
+        if db_session.scalar(select(User).filter(User.email == email)) is not None:
+            flash('E-mail address already exists', 'error')
+            return redirect(request.url)
+
         conf_password = request.form.get('conf-password')
 
         if password != conf_password:
@@ -774,18 +787,26 @@ def signup():
         # Nel costruttore della classe User chiamiamo metodi che controllano la correttenzza dei dati e in caso lanciano un'eccezione
         # con un messaggio specifico, che prendiamo nel catch e stampiamo a schermo
         try:
-            new_user = User(email= request.form.get('email'),
+            new_user = User(email= email,
                             username= username,
                             password= password,
                             name= request.form.get('fname'),
                             last_name= request.form.get('lname'),
-                            user_type= (request.form.get('user_type') == "Seller"))
+                            user_type= (request.form.get('user_type') == "Seller"),
+                            last_logout=datetime.datetime.min
+                            )
         except InvalidCredential as err:
             flash(err.message, 'error') # il primo è il messaggio che mandiamo e il secondo la tipologia del messaggio
             return redirect(request.url)
 
         db_session.add(new_user)
-        db_session.commit()
+
+        try:
+            db_session.commit()
+        except Exception as e:
+            db_session.rollback()
+            flash(str(e), 'error')
+            return redirect(request.url)
 
         return redirect(url_for('login'))
     else:
