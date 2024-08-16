@@ -81,6 +81,8 @@ class User(Base, UserMixin):
 
     def __init__(self, email, username, password, name, last_name, user_type, last_logout):
         self.email = self.__email_checker(email)
+        if len(username) > 15:
+            raise ValueError("Username length over the limit of 15")
         self.username = self.__username_checker(username)
         self.password = self.__password_checker(password)
         self.name, self.last_name = self.__name_lastname_checker(name, last_name)
