@@ -19,9 +19,7 @@
 ### Front-end
 
 ### Back-end
-- [ ] Migliorare controlli sugli attributi tabelle
 - [ ] Creare template `products.html` da usare per mostrare prodotti in home e dopo search
-- [ ] Controllare tutti gli input per bene server-side
 - [ ] Fare trigger per recensioni che aggiorna attributo rating in Product (non trovo come fare o non mi va, ho provato con '@event.listen_for()')
 
 ## Fatti
@@ -69,3 +67,5 @@
 - [x] Implementare parte avvio ordine
 - [x] Aggiungere booleano `confirmed` alla tabella ordini per confermare ordine quando `state` settato a ricevuto da venditore
 - [x] Ricerca prodotti dalla barra di ricerca
+- [x] Migliorare controlli sugli attributi tabelle
+- [x] Controllare tutti gli input per bene server-side
