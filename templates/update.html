@@ -13,8 +13,8 @@
                     <fieldset>
                         <legend>Details</legend>
                         <div class="mb-.5 flex">
-                            <input title="Product name" class="mr-.25" type="text" name="name" placeholder="Product name" value="{{item.product_name}}">
-                            <input title="Brand" class="ml-.25" type="text" name="brand" placeholder="Brand" value="{{item.brand}}">
+                            <input title="Product name" class="mr-.25" type="text" name="name" placeholder="Product name" value="{{item.product_name}}" maxlength="50">
+                            <input title="Brand" class="ml-.25" type="text" name="brand" placeholder="Brand" value="{{item.brand}}" maxlength="20">
                         </div>
                         <select class="mb-.5" name="size">
                             <option selected disabled>Product size</option>
@@ -29,7 +29,7 @@
                         </select>
                         <input class="mb-.5" title="Price (€)" type="number" min="1" step="any" name="price" placeholder="Price (€)" value={{item.price}}>
                         <input class="mb-.5" title="Availability" type="number" min="0" step="any" name="availability" placeholder="Quantity" value={{item.availability}}>
-                        <textarea class="mb-.5" title="Description" name="description" placeholder="Description">{{item.descr}}</textarea>
+                        <textarea class="mb-.5" title="Description" name="description" placeholder="Description" maxlength="300">{{item.descr}}</textarea>
                         <fieldset style="height:15rem; overflow:auto; position:relative">
                             <legend>Tags</legend>
                             <table>

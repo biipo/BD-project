@@ -365,7 +365,12 @@ def edit_listing(pid):
                 if int(tag_id) not in it_tags:
                     db_session.add_all([TagProduct(db_session.scalar(select(Tag).filter(Tag.id == tag_id)), item)])
 
-            db_session.commit()    
+            try:
+                db_session.commit()    
+            except Exception as e:
+                flash(str(e), 'error')
+                return redirect(request.url)
+
             return redirect(url_for('product_details', pid=pid))
 
         return redirect(url_for('home'))
@@ -460,10 +465,11 @@ def sell():
                     size = request.form.get('size'),
                     product_name = request.form.get('name'),
                     date = datetime.datetime.now(),
-                    price = float(request.form.get('price')),
+                    price = Decimal(request.form.get('price')),
                     availability = int(request.form.get('availability')),
                     descr = request.form.get('description'),
-                    image_filename = file.filename)
+                    image_filename = file.filename
+                )
 
             except MissingData as err:
                 flash(err.message, 'error')
@@ -605,6 +611,7 @@ def cart():
     ).all()
     # Totale dei prodotti nel carrello
     total = sum(p.quantity * p.product.price for p in products)
+
     if request.method == 'GET':
         return render_template('cart.html', cart_items=products, total=total)
 
@@ -628,7 +635,7 @@ def cart():
         
         # Effettua ordine
         elif request.form.get('place-order') is not None:
-            if products is None:
+            if len(products) == 0:
                 flash('There are no products in the cart', 'error')
                 return redirect(request.url)
             else:
@@ -771,6 +778,7 @@ def orders():
                 .join(OrderProducts)
                 .join(Product)
                 .filter(Product.seller == current_user)
+                .order_by(Order.date.desc())
             )
             return render_template('orders_sold.html', orders=orders, now=curr_time)
     
