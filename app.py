@@ -695,7 +695,9 @@ def payment():
             try:
                 for p in products:
                     if p.quantity > p.product.availability:
-                        raise InvalidOrder('Product [ ' + p.product.product_name + ' ] quantity exceeds item availability')
+                        flash('Product quantity exceeds availability', 'error')
+                        return redirect(url_for('cart'))
+
                     seller_id = p.product.user_id
                     date = datetime.datetime.now()
                     # Viene creato un ordine per ciascun venditore
