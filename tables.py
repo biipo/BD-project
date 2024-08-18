@@ -126,6 +126,7 @@ class Product(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
     brand: Mapped[str] = mapped_column(nullable=True)
     category_id: Mapped[int] = mapped_column(ForeignKey(Category.id))
+    size: Mapped[str] = mapped_column(CheckConstraint('size = "small" OR size = "medium" OR size = "big"'), nullable=False)
     product_name: Mapped[str] = mapped_column(nullable=False)
     date: Mapped[datetime] = mapped_column(nullable=True)
     price: Mapped[Decimal] = mapped_column(Numeric(precision=8, scale=2), nullable=False) #8 cifre totali, 2 dopo virgola
@@ -140,7 +141,7 @@ class Product(Base):
     tags: Mapped[List['TagProduct']] = relationship(back_populates='product')
     reviews: Mapped[List['Review']] = relationship(back_populates='product')
 
-    def __init__(self, user_id, brand, category_id, product_name, date, price, availability, descr, image_filename):
+    def __init__(self, user_id, brand, category_id, size, product_name, date, price, availability, descr, image_filename):
         if user_id is None:
             raise MissingData('Missing user id')
         self.user_id = user_id
@@ -152,6 +153,8 @@ class Product(Base):
         if category_id is None:
             raise MissingData('Missing category id')
         self.category_id = category_id
+        
+        self.size = size
 
         if len(product_name) > 50:
             raise ValueError('Product name too long')

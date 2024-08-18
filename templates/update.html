@@ -14,29 +14,34 @@
                         <legend>Details</legend>
                         <div class="mb-.5 flex">
                             <input title="Product name" class="mr-.25" type="text" name="name" placeholder="Product name" value="{{item.product_name}}">
-                            <input title="Brand" class="ml-.25" type="text" name="brand" placeholder="Brand" value="{{item.tags[2].tag.value}}">
-                            <input title="Color" class="ml-.25" type="text" name="color" placeholder="Color" value="{{item.tags[1].tag.value}}">
+                            <input title="Brand" class="ml-.25" type="text" name="brand" placeholder="Brand" value="{{item.brand}}">
                         </div>
-                        <select class="mb-.5" name="dimensions">
-                            <option {{'selected' if item.tags[1].tag.value == 'small'}} value="small"Small (less than 200x200 mm)</option>
-                            <option {{'selected' if item.tags[1].tag.value == 'medium'}} value="medium">Medium (between 200x200 and 500x500 mm)</option>
-                            <option {{'selected' if item.tags[1].tag.value == 'big'}} value="big">Big (more than 500x500 mm)</option>
+                        <select class="mb-.5" name="size">
+                            <option selected disabled>Product size</option>
+                            <option value="small" {{'selected' if item.size == 'small'}}>Small (less than 200x200 mm)</option>
+                            <option value="medium" {{'selected' if item.size == 'medium'}}>Medium (between 200x200 and 500x500 mm)</option>
+                            <option value="big" {{'selected' if item.size == 'big'}}>Big (more than 500x500 mm)</option>
                         </select>
                         <select class="mb-.5" name="category">
-                            <option {{'selected' if item.category_id == 1}} value="1">Arts</option>
-                            <option {{'selected' if item.category_id == 2}} value="2">Personal Care</option>
-                            <option {{'selected' if item.category_id == 3}} value="3">Electronics</option>
-                            <option {{'selected' if item.category_id == 5}} value="4">Music</option>
-                            <option {{'selected' if item.category_id == 5}} value="5">Sports</option>
-                            <option {{'selected' if item.category_id == 6}} value="6">Movies & TV</option>
-                            <option {{'selected' if item.category_id == 7}} value="7">Software</option>
-                            <option {{'selected' if item.category_id == 8}} value="8">Games</option>
-                            <option {{'selected' if item.category_id == 9}} value="9">House</option>
-                            <option {{'selected' if item.category_id == 10}} value="10">DIY</option>
+                            {% for cat in ('Arts', 'Personal Care', 'Electronics', 'Music', 'Sports', 'Movies & TV', 'Software', 'Games', 'House', 'DIY') %}
+                            <option {{'selected' if item.category_id == loop.index}} value="{{loop.index}}">{{cat}}</option>
+                            {% endfor %}
                         </select>
                         <input class="mb-.5" title="Price (€)" type="number" min="1" step="any" name="price" placeholder="Price (€)" value={{item.price}}>
                         <input class="mb-.5" title="Availability" type="number" min="0" step="any" name="availability" placeholder="Quantity" value={{item.availability}}>
                         <textarea class="mb-.5" title="Description" name="description" placeholder="Description">{{item.descr}}</textarea>
+                        <fieldset style="height:15rem; overflow:auto; position:relative">
+                            <legend>Tags</legend>
+                            <table>
+                            <tr> 
+                            {% for tag in tags %}
+                                <td style="border:none">
+                                    <input type="checkbox" name="tag" value="{{tag.id}}" id="{{tag.value.lower()}}" {{'checked' if tag.value in it_tags}}>{{tag.value}}
+                                </td>
+                            {% if loop.index%4 == 0 %}</tr><tr>{% endif %}
+                            {% endfor %}
+                            </table>
+                        </fieldset>
                         <button type="submit" name="update">Update</button>
                         {% with errors = get_flashed_messages(category_filter=["error"]) %}
                         {% if errors != None %}

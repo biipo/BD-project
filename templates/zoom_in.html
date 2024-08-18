@@ -10,12 +10,7 @@
         <div class="col-7 m-1">
             <div class="product-details">
                 <p class="m-0"><b>Brand</b>: {{item.brand}}</p>
-                {% for t in item.tags %}
-                    {% if t.tag.value in ['small', 'medium', 'big'] %} <!-- è un po' una merda, va sistemato -->
-                        <p><b>Dimensions</b>: {{ t.tag.value }}</p>
-                    {% endif %}
-                {% endfor %}
-
+                <p><b>Size</b>: {{ item.size }}</p>
                 <div id="" class="larger bold mt-1"><p class="py-.25 px-.5 bg-success inline block border-r">{{ item.price | round(2) }}€</p></div>
                 <div class="product-availability mt-.5">
                     <p class="{% if item.availability <=5 %} bg-severe border-r p-.25 {% endif %} inline block">{{ item.availability }} available</p>

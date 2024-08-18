@@ -1,3 +1,4 @@
+from decimal import Decimal
 from flask import Flask, redirect, render_template, request, session, url_for, flash, send_from_directory
 from sqlalchemy.engine import url
 from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, TagProduct, Review
@@ -134,9 +135,6 @@ def db_init():
             Tag('Magenta'),
             Tag('Cyan'),
             Tag('Lime'),
-            Tag('small'),
-            Tag('medium'),
-            Tag('big')
         ])
         db_session.commit()
 
@@ -291,7 +289,12 @@ def product_details(pid):
             return redirect(url_for('product_details', pid=pid))
         
         elif request.form.get('delete-prod') is not None and current_user.is_seller():
-            item = db_session.scalar(select(Product).filter(Product.id == pid).filter(Product.user_id == current_user.get_id()))
+            # Check esistenza prodotto con id=pid e venduto dall'utente 
+            item = db_session.scalar(
+                select(Product)
+                .filter(Product.id == pid)
+                .filter(Product.user_id == current_user.get_id())
+            )
             if item is not None:
                 # Non si può rimuovere prodotto perché è presente in carrelli e ordini vecchi
                 # invece settiamo disponibilità a 0 e la usiamo come "filtro"
@@ -310,29 +313,47 @@ def edit_listing(pid):
         return redirect(url_for('home'))
 
     if request.method == 'GET':
-        return render_template('update.html', item=item)
+        tags = db_session.scalars(select(Tag)).all()
+        it_tags = [it.tag.value for it in item.tags]
+        return render_template('update.html', item=item, tags=tags, it_tags=it_tags)
 
     else:
-        image_filename = item.image_filename
-        if 'image_file' in request.files:
-            file = request.files['image_file']
-            if file.filename != '' and file and allowed_file(file.filename):
-                # filename = secure_filename(file.filename)
-                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-                path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-                file.save(path)
-                image_filename = file.filename
-
+        
         if request.form.get('update') is not None:
+            for v in request.form:
+                print(v)
+            image_filename = item.image_filename
+            if 'image_file' in request.files:
+                file = request.files['image_file']
+                if file.filename != '' and file and allowed_file(file.filename):
+                    # filename = secure_filename(file.filename)
+                    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+                    file.save(path)
+                    image_filename = file.filename
+
             item.product_name = request.form.get('name')
-            item.category_id = request.form.get('category')
-            item.price = request.form.get('price')
+            item.brand = str(request.form.get('brand'))
+            item.category_id = int(str(request.form.get('category')))
+            item.size = request.form.get('size')
+            item.price = Decimal(str(request.form.get('price')))
             item.availability = request.form.get('availability')
             item.descr = request.form.get('description')
             item.image_filename = image_filename
-            item.tags[0].tag.value = request.form.get('color')
-            item.tags[1].tag.value = request.form.get('dimensions')
-            item.tags[2].tag.value = request.form.get('brand')
+            
+            tags = request.form.getlist('tag')
+
+            for i_t in item.tags:
+                if i_t.tag_id not in [int(tag) for tag in tags]:
+                    db_session.delete(i_t)
+
+            it_tags = [i_t.tag.id for i_t in item.tags]
+            for tag_id in tags:
+                print("Checking tag:", tag_id)
+                if int(tag_id) not in it_tags:
+                    print("Adding tag:", tag_id)
+                    db_session.add_all([TagProduct(db_session.scalar(select(Tag).filter(Tag.id == tag_id)), item)])
+
             db_session.commit()
             
             return redirect(url_for('product_details', pid=pid))
@@ -351,7 +372,7 @@ def search():
 
     else:
         tag_list = request.form.getlist('tags')
-        dim = request.form.get('dimension')
+        size = request.form.get('size')
         brand = request.form.get('brand')
         min_price_range = request.form.get('min_price_range')
         max_price_range = request.form.get('max_price_range')
@@ -365,8 +386,8 @@ def search():
         # I check servono perché potrebbe fare query cercando valori None tra gli attributi
         if tag_list:
             query = query.filter(Tag.id.in_(tag_list))
-        if dim and dim != 'Any':
-            query = query.filter(Tag.value == dim)
+        if size and size != 'Any':
+            query = query.filter(Product.size == size)
         if brand:
             query = query.filter(Product.brand == brand)
         if min_price_range:
@@ -418,13 +439,13 @@ def sell():
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(path)
-            dimensions = request.form.get('dimensions')
             tags = request.form.getlist('tag')
             
             try:
                 product = Product(user_id=current_user.get_id(),  # prende l'utente attualmente loggato (current_user)
                                   brand=request.form.get('brand'),
                                   category_id=int(request.form.get('category')),
+                                  size = request.form.get('size'),
                                   product_name=request.form.get('name'),
                                   date=datetime.datetime.now(),
                                   price=float(request.form.get('price')),
@@ -440,7 +461,6 @@ def sell():
 
             for tag_id in tags:
                 db_session.add_all([TagProduct(db_session.scalar(select(Tag).filter(Tag.id == tag_id)), product)])
-            db_session.add(TagProduct(db_session.scalar(select(Tag).filter(Tag.value == dimensions)), product))
 
             try:
                 db_session.add(product)
