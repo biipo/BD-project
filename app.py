@@ -200,7 +200,8 @@ def uploaded_file(filename):
 def home():
     if request.method == 'GET':
         items_q = db_session.query(Product)
-
+        
+        # Parametri GET possibili
         seller = request.args.get('seller')
         search = request.args.get('search')
         
@@ -209,6 +210,7 @@ def home():
 
         if seller is not None:
             items_q = items_q.filter(Product.user_id == seller)
+            # Rimuove prodotti non disponibili, a meno che utente non ne sia venditore
             if current_user.get_id() != seller:
                 items_q = items_q.filter(Product.availability > 0)
             items = items_q.all()
@@ -228,7 +230,7 @@ def product_details(pid):
         # rating = sum(r.stars for r in item.reviews) / len(item.reviews) if len(item.reviews) > 0 else 0
 
         # Se articolo acquistato e non recensito
-        bought= db_session.scalar(
+        bought = db_session.scalar(
             select(OrderProducts)
             .join(Order)
             .filter(Order.user_id == current_user.get_id())
@@ -243,6 +245,7 @@ def product_details(pid):
         return render_template('zoom_in.html', item=item, bought=bought)
 
     else:
+        # Aggiungi al carrello
         if request.form.get('add-cart') is not None:
             if current_user.is_authenticated: 
                 order_quantity = int(request.form.get('quantity'))
@@ -275,7 +278,8 @@ def product_details(pid):
             else:
                 flash('Login is required to place orders', 'error')
                 return redirect(url_for('login'))
-
+    
+        # Posta recensione
         elif request.form.get('add-review') is not None:
             new_review = Review(
                 product_id = pid,
@@ -288,6 +292,7 @@ def product_details(pid):
             db_session.commit()
             return redirect(url_for('product_details', pid=pid))
         
+        # Elimina prodotto
         elif request.form.get('delete-prod') is not None and current_user.is_seller():
             # Check esistenza prodotto con id=pid e venduto dall'utente 
             item = db_session.scalar(
@@ -302,26 +307,30 @@ def product_details(pid):
                 db_session.commit()
             return redirect(url_for('home'))
         
+        # Aggiorna prodotto
         elif request.form.get('update-prod') is not None and current_user.is_seller():
             return redirect(url_for('edit_listing', pid=pid))
 
 @app.route('/edit-listing/<int:pid>', methods=['GET', 'POST'])
 @login_required
 def edit_listing(pid):
-    item = db_session.scalar(select(Product).filter(Product.id == pid).filter(Product.user_id == current_user.get_id()))
+    item = db_session.scalar(
+        select(Product)
+        .filter(Product.id == pid)
+        .filter(Product.user_id == current_user.get_id())
+    )
     if item is None:
         return redirect(url_for('home'))
 
     if request.method == 'GET':
         tags = db_session.scalars(select(Tag)).all()
+        # Prende tutti i valori dei tag correnti dell prodotto
         it_tags = [it.tag.value for it in item.tags]
         return render_template('update.html', item=item, tags=tags, it_tags=it_tags)
 
     else:
-        
+        # Aggiorna prodotto 
         if request.form.get('update') is not None:
-            for v in request.form:
-                print(v)
             image_filename = item.image_filename
             if 'image_file' in request.files:
                 file = request.files['image_file']
@@ -341,22 +350,24 @@ def edit_listing(pid):
             item.descr = request.form.get('description')
             item.image_filename = image_filename
             
+            # Tag inseriti nel form
             tags = request.form.getlist('tag')
 
             for i_t in item.tags:
+                # Se tag corrente non presente nel form nuovo lo elimina
                 if i_t.tag_id not in [int(tag) for tag in tags]:
                     db_session.delete(i_t)
-
+            
+            # Id dei tag correnti del prodotto
             it_tags = [i_t.tag.id for i_t in item.tags]
             for tag_id in tags:
-                print("Checking tag:", tag_id)
+                # Se tag nel form non presente in tag correnti lo aggiungo
                 if int(tag_id) not in it_tags:
-                    print("Adding tag:", tag_id)
                     db_session.add_all([TagProduct(db_session.scalar(select(Tag).filter(Tag.id == tag_id)), item)])
 
-            db_session.commit()
-            
+            db_session.commit()    
             return redirect(url_for('product_details', pid=pid))
+
         return redirect(url_for('home'))
     
 @app.route('/search', methods=['GET', 'POST'])
@@ -377,11 +388,8 @@ def search():
         min_price_range = request.form.get('min_price_range')
         max_price_range = request.form.get('max_price_range')
         reviews_sort = request.form.get('reviews-sort')
-        print(reviews_sort)
         name_sort = request.form.get('name-sort')
-        print(name_sort)
         price_sort = request.form.get('price-sort')
-        print(price_sort)
 
         # I check servono perché potrebbe fare query cercando valori None tra gli attributi
         if tag_list:
@@ -410,7 +418,6 @@ def search():
             else:
                 query = query.order_by(Product.price.desc())
         items = db_session.scalars(query).all()
-        print(items)
 
         return render_template('search.html', items=items, brands=brands, max_price=max_price, tags=tags)
 
@@ -426,10 +433,13 @@ def sell():
     if not current_user.is_seller():
         return redirect(url_for('home'))
 
-    if request.method == 'POST': # Sono stati inseriti i dati di un prodotto, lo memorizziamo
+    # Upload dati nuovo prodotto
+    if request.method == 'POST':
         if 'image_file' not in request.files:
             flash('No file attached', 'error')
             return redirect(request.url)
+
+        # Upload dell'immagine del prodotto
         file = request.files['image_file']
         if file.filename == '':
             flash('No selected file', 'error')
@@ -439,26 +449,30 @@ def sell():
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(path)
+
             tags = request.form.getlist('tag')
-            
+
             try:
-                product = Product(user_id=current_user.get_id(),  # prende l'utente attualmente loggato (current_user)
-                                  brand=request.form.get('brand'),
-                                  category_id=int(request.form.get('category')),
-                                  size = request.form.get('size'),
-                                  product_name=request.form.get('name'),
-                                  date=datetime.datetime.now(),
-                                  price=float(request.form.get('price')),
-                                  availability=int(request.form.get('availability')),
-                                  descr=request.form.get('description'),
-                                  image_filename=file.filename)
+                product = Product(
+                    user_id = current_user.get_id(),  # prende l'utente attualmente loggato (current_user)
+                    brand = request.form.get('brand'),
+                    category_id = int(request.form.get('category')),
+                    size = request.form.get('size'),
+                    product_name = request.form.get('name'),
+                    date = datetime.datetime.now(),
+                    price = float(request.form.get('price')),
+                    availability = int(request.form.get('availability')),
+                    descr = request.form.get('description'),
+                    image_filename = file.filename)
+
             except MissingData as err:
                 flash(err.message, 'error')
                 return redirect(request.url)
             except ValueError as err:
                 flash(str(err), 'error')
                 return redirect(request.url)
-
+            
+            # Per ogni tag scelto si aggiunge una riga alla tabella intermedia tag_products
             for tag_id in tags:
                 db_session.add_all([TagProduct(db_session.scalar(select(Tag).filter(Tag.id == tag_id)), product)])
 
@@ -469,11 +483,15 @@ def sell():
                 flash(str(e), 'error')
                 return redirect(request.url)
 
-            return redirect(url_for('home')) # Reindirizza alla pagina di tutti i prodotti in vendita
+            return redirect(url_for('home'))
+
         else:
             flash('Invalid file type', 'error')
             return redirect(request.url)
-    else: # Renderizziamo la pagina in cui dovrà inserire i dettagli del prodotto
+
+    # Se richiesta GET
+    else:
+        # Renderizziamo la pagina in cui dovrà inserire i dettagli del prodotto
         tags = db_session.scalars(select(Tag)).all()
         return render_template('sell.html', tags=tags)
 
@@ -492,36 +510,56 @@ def profile():
         return render_template('profile.html', user=user, addrs=addrs)
     
     else:
+        # Aggiorna dati personali
         if request.form.get('info-update') is not None:
-            user = db_session.scalar(select(User).filter(User.id == current_user.get_id()))
-            user.name = request.form.get('info-fname')
-            user.last_name = request.form.get('info-lname')
-            user.email = request.form.get('info-email')
+            current_user.name = request.form.get('info-fname')
+            current_user.last_name = request.form.get('info-lname')
+            current_user.email = request.form.get('info-email')
             db_session.commit()
         
+        # Elimina indirizzo
         elif request.form.get('address-delete') is not None:
-            db_session.delete(db_session.scalar(select(Address).filter(Address.id == request.form.get('address-id'))))
+            db_session.delete(db_session.scalar(
+                select(Address)
+                .filter(Address.id == request.form.get('address-id'))
+            ))
             db_session.commit()
-            
+        
+        # Setta come indirizzo attivo
         elif request.form.get('address-set-active') is not None:
-            curr_active = db_session.scalar(select(Address).filter(Address.user_id == current_user.get_id()).filter(Address.active == True))
+            # Indirizzo attivo al momento
+            curr_active = db_session.scalar(
+                select(Address)
+                .filter(Address.user_id == current_user.get_id())
+                .filter(Address.active == True)
+            )
             if not curr_active.id == request.form.get('address-id'):
                 curr_active.active = False
-                db_session.scalar(select(Address).filter(Address.id == request.form.get('address-id'))).active = True
+                # Setta indirizzo indicato nel form come attivo
+                db_session.scalar(
+                    select(Address)
+                    .filter(Address.id == request.form.get('address-id'))
+                ).active = True
                 db_session.commit()
 
+        # Aggiungi indirizzo
         elif request.form.get('address-add') is not None:
-            active = (db_session.scalar(select(Address).filter(Address.user_id == current_user.get_id()).filter(Address.active == True)) is None)
+            # Se non sono presenti altri indirizzi attivi, active = True
+            active = (db_session.scalar
+                (select(Address)
+                 .filter(Address.user_id == current_user.get_id())
+                 .filter(Address.active == True)) is None)
+
             new_address = Address(
-                user_id=current_user.get_id(),
-                active=active,
-                first_name=request.form.get('fname'),
-                last_name=request.form.get('lname'),
-                street=request.form.get('street'),
-                postcode=request.form.get('post-code'),
-                state=request.form.get('state'),
-                #city=request.form.get('city'),
-                province=request.form.get('province')
+                user_id = current_user.get_id(),
+                active = active,
+                first_name = request.form.get('fname'),
+                last_name = request.form.get('lname'),
+                street = request.form.get('street'),
+                postcode = request.form.get('post-code'),
+                state = request.form.get('state'),
+                city = request.form.get('city'),
+                province = request.form.get('province')
             )
             db_session.add(new_address)
             db_session.commit()
@@ -532,12 +570,18 @@ def profile():
 @login_required
 def reviews_page():
     if current_user.is_seller():
-        product_rev = db_session.scalars(select(Product)
-                                        .filter(Product.user_id == current_user.get_id())
-                                        ).all()
+        # Prodotti del venditore
+        product_rev = db_session.scalars(
+            select(Product)
+            .filter(Product.user_id == current_user.get_id())
+        ).all()
         return render_template('reviews.html', reviews=product_rev)
     else:
-        reviews = db_session.scalars(select(Review).filter(Review.user_id == current_user.get_id())).all()
+        # Recensioni dell'utente
+        reviews = db_session.scalars(
+            select(Review)
+            .filter(Review.user_id == current_user.get_id())
+        ).all()
         return render_template('reviews.html', reviews=reviews)
 
 @app.route('/user/<username>')
@@ -553,17 +597,24 @@ def clear_cart(user_id):
 def cart():
     if current_user.is_seller():
         return redirect(url_for('home'))
-
-    products = db_session.scalars(select(CartProducts).where(CartProducts.user_id == int(current_user.get_id()))).all()
+    
+    # Prodotti nel carrello dell'utente
+    products = db_session.scalars(
+        select(CartProducts)
+        .filter(CartProducts.user_id == int(current_user.get_id()))
+    ).all()
+    # Totale dei prodotti nel carrello
     total = sum(p.quantity * p.product.price for p in products)
     if request.method == 'GET':
         return render_template('cart.html', cart_items=products, total=total)
 
     else:
+        # Pulisci carrello
         if request.form.get('clear-cart') is not None:
             clear_cart(current_user.get_id())
             return redirect(url_for('cart'))
         
+        # Elimina prodotto
         elif request.form.get('delete-item') is not None:
             db_session.delete(
                 db_session.scalar(
@@ -575,6 +626,7 @@ def cart():
             db_session.commit()
             return redirect(url_for('cart'))
         
+        # Effettua ordine
         elif request.form.get('place-order') is not None:
             if products is None:
                 flash('There are no products in the cart', 'error')
@@ -582,9 +634,11 @@ def cart():
             else:
                 return redirect(url_for('payment')) # fare in modo di passare la query già fatta senza doverla rifare in '/payment'?
         
+        # Aggiorna quantità prodotto
         elif request.form.get('update-item') is not None:
             new_qty = int(request.form.get('quantity'))
             for prod in products:
+                # Se quantità non supera disponibilità
                 if prod.product_id == int(request.form.get('item-id')) and prod.product.availability > new_qty:
                     prod.quantity = new_qty
                     db_session.commit()
@@ -594,12 +648,18 @@ def cart():
 @app.route('/payment', methods=['GET', 'POST'])
 @login_required
 def payment():
-    products = db_session.scalars(select(CartProducts).where(CartProducts.user_id == int(current_user.get_id()))).all()
+    products = db_session.scalars(
+        select(CartProducts)
+        .filter(CartProducts.user_id == int(current_user.get_id()))
+    ).all()
     total = sum(p.quantity * p.product.price for p in products)
 
     if request.method == 'GET':
-        address = db_session.scalar(select(Address).filter(Address.user_id == int(current_user.get_id()))
-                                                   .filter(Address.active == True))
+        address = db_session.scalar(
+            select(Address)
+            .filter(Address.user_id == int(current_user.get_id()))
+            .filter(Address.active == True)
+        )
         if address is None:
             flash('Impossible to send the order, at least 1 shipping address is needed', 'error')
             return redirect('cart')
@@ -608,8 +668,11 @@ def payment():
             return redirect('cart')
         return render_template('payment.html', cart_items=products, total=total, address=address)
     else:
+        # Cancella ordine
         if request.form.get('cancel') is not None:
             return redirect(url_for('cart'))
+
+        # Elimina prodotto
         elif request.form.get('delete-item') is not None:
             db_session.execute(
                     delete(CartProducts)
@@ -617,6 +680,8 @@ def payment():
                     .where(CartProducts.user_id == current_user.get_id())
             )
             return redirect(url_for('payment'))
+
+        # Effettua ordine
         elif request.form.get('order') is not None:
             sellers_orders = {}
             pay_method = request.form.get('payment_method')
@@ -626,7 +691,8 @@ def payment():
                         raise InvalidOrder('Product [ ' + p.product.product_name + ' ] quantity exceeds item availability')
                     seller_id = p.product.user_id
                     date = datetime.datetime.now()
-                    if seller_id not in sellers_orders.keys(): # Viene creato un ordine per ciascun venditore
+                    # Viene creato un ordine per ciascun venditore
+                    if seller_id not in sellers_orders.keys():
                         new_order = Order(
                             user_id = current_user.get_id(),
                             date = date,
@@ -654,11 +720,13 @@ def payment():
                         quantity = p.quantity,
                     )
                     db_session.add(new_order_product)
+
             except InvalidOrder as err:
                 flash(err, 'error')
                 return redirect(request.url)
 
             db_session.commit()
+
             for p in products:
                 p.product.availability -= p.quantity # finito l'ordine riduciamo la quantità di prodotti disponibile
                 # if p.product.availability == 0:
@@ -669,7 +737,6 @@ def payment():
 @app.route('/orders', methods=['GET', 'POST'])
 @login_required
 def orders():
-    # user = db_session.scalar(select(User).where(User.id == current_user.get_id()))
     curr_time = datetime.datetime.now()
 
     if request.method == 'GET':
@@ -707,27 +774,29 @@ def orders():
             )
             return render_template('orders_sold.html', orders=orders, now=curr_time)
     
+    # Richiesta POST per aggiornamento stato
     else:
-        if current_user.is_seller():
+        if request.form.get('update-status') is not None and current_user.is_seller():
             new_status = request.form.get('new-status')
             order_id = request.form.get('order-id')
 
-            # If new status valid
+            # Se nuovo stato valido
             if not new_status or new_status not in ['Received', 'Sent', 'Processing', 'Cancelled']:
                 return redirect(url_for('orders'))
             
-            # Query for order with given id and sold by current user
+            # Query per ordine con certo id e venduto dall'utente corrente
             order = db_session.scalar(select(Order).join(OrderProducts).join(Product).filter(Order.id == order_id).filter(Product.seller == current_user))
             if order is None:
                 return redirect(url_for('orders'))
            
-            # If order status new and not received or cancelled
+            # Se nuovo stato diverso da prima e non ricevuto o cancellato, lo aggiorna 
             if order.status not in [new_status, 'Received', 'Cancelled']:
                 order.status = new_status
                 order.status_time = datetime.datetime.now()
                 db_session.commit()
 
-        else:
+        elif not current_user.is_seller():
+            # Conferma ricezione ordine
             if request.form.get('update-confirmed') is not None:
                 order_id = request.form.get('order-id')
                 order = db_session.scalar(
@@ -752,16 +821,14 @@ def login():
 
         # Query per individuare l'utente per poi testare la password, se non trova l'utente ritorna 'None'
         usr = db_session.scalar(select(User).where(User.email == email))
-
         if usr == None: # Utente non trovato
             flash('Wrong credentials', 'error')
-            return redirect(request.url) # Ritenta il login
+            return redirect(request.url)
         
         # Controllo della password; nel database abbiamo memorizzato l'hash quindi facciamo l'hash di quella inserita
         # e controlliamo che sia uguale
         if bcrypt.check_password_hash(usr.password, password_form):
             login_user(usr)
-            # print(current_user.get_id())
             if request.args.get('next'):
                 return redirect(request.args.get('next'))
 
@@ -769,7 +836,7 @@ def login():
 
         else:
             flash('Wrong credentials', 'error')
-            return redirect(request.url) # Ritenta il login
+            return redirect(request.url)
 
     else: # Carichiamo la pagina per inserire i dati
         return render_template('login.html')
@@ -780,7 +847,7 @@ def logout():
     current_user.last_logout = datetime.datetime.now()
     db_session.commit()
     logout_user()
-    return redirect(url_for('home')) # route HOME da creare
+    return redirect(url_for('home'))
 
 # route per la registrazione
 @app.route('/signup', methods=['GET','POST'])
@@ -807,14 +874,15 @@ def signup():
         # Nel costruttore della classe User chiamiamo metodi che controllano la correttenzza dei dati e in caso lanciano un'eccezione
         # con un messaggio specifico, che prendiamo nel catch e stampiamo a schermo
         try:
-            new_user = User(email= email,
-                            username= username,
-                            password= password,
-                            name= request.form.get('fname'),
-                            last_name= request.form.get('lname'),
-                            user_type= (request.form.get('user_type') == "Seller"),
-                            last_logout=datetime.datetime.min
-                            )
+            new_user = User(
+                email= email,
+                username= username,
+                password= password,
+                name= request.form.get('fname'),
+                last_name= request.form.get('lname'),
+                user_type= (request.form.get('user_type') == "Seller"),
+                last_logout=datetime.datetime.min
+            )
         except InvalidCredential as err:
             flash(err.message, 'error') # il primo è il messaggio che mandiamo e il secondo la tipologia del messaggio
             return redirect(request.url)

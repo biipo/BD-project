@@ -191,13 +191,13 @@ class Address(Base):
     last_name: Mapped[str]
     street: Mapped[str]
     postcode: Mapped[str]
-    #city: Mapped[str]
+    city: Mapped[str]
     state: Mapped[str] 
     province: Mapped[str] 
     
     user = relationship('User')
 
-    def __init__(self, user_id, active, first_name, last_name, street, postcode, state, province):
+    def __init__(self, user_id, active, first_name, last_name, street, postcode, city, state, province):
         if user_id is None:
             raise MissingData('Missing user_id')
         if None in (first_name, last_name, street, postcode, state, province):
@@ -209,6 +209,7 @@ class Address(Base):
         self.last_name = last_name
         self.street = street
         self.postcode = postcode
+        self.city = city
         self.state = state
         self.province = province
 

@@ -51,7 +51,7 @@
                     <input type="hidden" value="{{addr.id}}" />
                     <p class="bold" id="name">{{addr.first_name}} {{addr.last_name}}</p>
                     <p id="street">{{addr.street}}</p>
-                    <!-- Enable after adding city to DB structure <p id="city">{# addr.city #}</p> -->
+                    <p id="city">{{ addr.city }}</p>
                     <p id="province">{{addr.province}} {{addr.postcode}}</p>
                     <p id="country">{{addr.state}}</p>
                 </div>
