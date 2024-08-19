@@ -249,7 +249,7 @@ class Order(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
     date: Mapped[datetime]
-    price: Mapped[float]
+    price: Mapped[Decimal] = mapped_column(Numeric(precision=8, scale=2), nullable=False) #8 cifre totali, 2 dopo virgola
     address: Mapped[int] = mapped_column(ForeignKey(Address.id))
     payment_method: Mapped[str]
     status: Mapped[str]
@@ -315,7 +315,8 @@ class TagProduct(Base):
 
 class Review(Base):
     __tablename__ = 'reviews'
-
+    
+    # !!! Rendere le 2 chiavi esterne chiavi primarie
     id: Mapped[int] = mapped_column(primary_key=True)
     product_id: Mapped[int] = mapped_column(ForeignKey(Product.id))
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
