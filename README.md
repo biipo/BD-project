@@ -20,7 +20,6 @@
 
 ### Back-end
 - [ ] Creare template `products.html` da usare per mostrare prodotti in home e dopo search
-- [ ] Fare trigger per recensioni che aggiorna attributo rating in Product (non trovo come fare o non mi va, ho provato con '@event.listen_for()')
 
 ## Fatti
 
@@ -57,6 +56,7 @@
 - [x] Migliorare pagina recensioni sul profilo, dove vedi le recensioni fatte/ricevute
 
 ### Back-end
+- [x] Fare trigger per recensioni che aggiorna attributo rating in Product (non trovo come fare o non mi va, ho provato con '@event.listen_for()')
 - [x] Aggiungere controllo sulla route `'/sell'` per utenti NON venditori
 - [x] Fare pagina `'/home'`
 - [x] Fixare registrazione
