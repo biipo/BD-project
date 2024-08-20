@@ -153,40 +153,16 @@ def db_init():
     #                         ])
     #     db_session.commit()
 
+# Trigger che aggiorna il rating di un prodotto nel momento in cui viene aggiunta una nuova recensione
+@event.listens_for(db_session, 'before_commit')
+def before_commit(session):
+    for obj in session.new:
+        if isinstance(obj, Review):
+            item = db_session.scalar(select(Product).filter(Product.id == obj.product_id))
+            item.rating = sum(r.stars for r in item.reviews) / len(item.reviews) if len(item.reviews if item.reviews is not None else []) > 0 else 0
+            session.add(item)
+            
 
-""" 
-@event.listens_for(db_session, 'do_orm_execute')
-def orm_execute(orm_state):
-    print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
-    print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
-    if orm_state.is_insert:
-        for obj in db_session.new:
-            print('KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK')
-            print('KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK')
-            if isinstance(obj, Review):
-                obj._is_inserted = True # sappiamo che è stato aggiunto perché è tra i db_session.new
-                # session['new_review'] = ibj
-                print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-                print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-                print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-
-@event.listens_for(db_session, 'after_commit')
-def after_commit(db_session):
-    print('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH')
-    print('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH')
-    for obj in db_session:
-        print('WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW')
-        print('WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW')
-        if isinstance(obj, Review) and hasattr(obj, '_is_inserted') and obj._is_inserted:
-            item = obj.product # db_session.scalar(select(Product).filter(Product.id == obj.product_id))
-            print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
-            print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
-            item.rating = sum(r.stars for r in item.reviews) / len(item.reviews) if len(item.reviews) > 0 else 0
-            print(item.rating)
-            print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
-            print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
-            del obj._is_inserted
- """
 @app.route('/')
 def start():
     db_init()
@@ -223,6 +199,10 @@ def home():
 def product_details(pid):
     if request.method == 'GET':
         item = db_session.scalar(select(Product).filter(Product.id == pid))
+        print('gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg')
+        print(item.rating)
+        print(item.product_name)
+        print('gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg')
         if item is None:
             return redirect(url_for('home'))
 

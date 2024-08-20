@@ -94,7 +94,7 @@
                         <div class="inline block">
                             <div class="flex attention">
                                 {% for _ in range(review.stars) %}<i class="bi bi-star-fill"></i>{% endfor %}
-                                {% for _ in range(item.rating | int) %}<i class="bi bi-star"></i>{% endfor %}
+                                {% for _ in range(5-item.rating | int) %}<i class="bi bi-star"></i>{% endfor %}
                             </div>
                         </div>
                     </summary>
