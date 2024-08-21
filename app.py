@@ -356,13 +356,14 @@ def edit_listing(pid):
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     brands = db_session.scalars(select(Product.brand)).all()
-    query = select(Product).distinct(Product.id).join(TagProduct).join(Tag)
+    query = select(Product).distinct(Product.id).join(TagProduct).join(Tag).join(Category)
     max_price = db_session.scalar(select(func.max(Product.price)))
-    tags = db_session.scalars(select(Tag))
+    tags = db_session.scalars(select(Tag)).all()
+    categories = db_session.scalars(select(Category)).all()
 
     if request.method == 'GET':
         items = db_session.scalars(query).all()
-        return render_template('search.html', items=items, brands=brands, max_price=max_price, tags=tags)
+        return render_template('search.html', items=items, brands=brands, max_price=max_price, tags=tags, categories=categories)
 
     else:
         tag_list = request.form.getlist('tags')
@@ -373,6 +374,7 @@ def search():
         reviews_sort = request.form.get('reviews-sort')
         name_sort = request.form.get('name-sort')
         price_sort = request.form.get('price-sort')
+        category = request.form.get('category')
 
         # I check servono perché potrebbe fare query cercando valori None tra gli attributi
         if tag_list:
@@ -385,6 +387,8 @@ def search():
             query = query.filter(Product.price >= min_price_range)
         if max_price_range:
             query = query.filter(Product.price <= max_price_range)
+        if category and category != 'Any':
+            query = query.filter(Category.id == category)
         # if reviews_sort:
         #     if reviews_sort == 'asc':
         #         query = query.order_by(Product.rating.asc())
@@ -401,8 +405,14 @@ def search():
             else:
                 query = query.order_by(Product.price.desc())
         items = db_session.scalars(query).all()
+        print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+        print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+        print(items)
+        print(query)
+        print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+        print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
 
-        return render_template('search.html', items=items, brands=brands, max_price=max_price, tags=tags)
+        return render_template('search.html', items=items, brands=brands, max_price=max_price, tags=tags, categories=categories)
 
 # Controlla se il file è di tipo corretto (foto/gif)
 def allowed_file(filename):

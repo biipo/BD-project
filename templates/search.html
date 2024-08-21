@@ -25,6 +25,22 @@
                     </label>
                 </div>
             </fieldset>
+            <fieldset style="height:15rem; overflow:auto; position:relative">
+                <legend>Categories</legend>
+                <table>
+                <tr> 
+                {% for category in categories %}
+                    <td style="border:none">
+                        <input type="radio" name="category" value="{{category.id}}">{{category.name}}
+                        {% if loop.last == True %}
+                            <td style="border:none"><input type="radio" name="category" value="Any">Any</td>
+                        {% endif %}
+                    </td>
+                {% if loop.index%3 == 0 %}</tr><tr>{% endif %}
+                {% endfor %}
+                
+                </table>
+            </fieldset>
             <fieldset>
                 <legend>Brands</legend>
                 {% for brand in brands %}
