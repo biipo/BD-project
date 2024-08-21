@@ -199,10 +199,8 @@ def home():
 def product_details(pid):
     if request.method == 'GET':
         item = db_session.scalar(select(Product).filter(Product.id == pid))
-        print('gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg')
         print(item.rating)
         print(item.product_name)
-        print('gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg')
         if item is None:
             return redirect(url_for('home'))
 
@@ -775,7 +773,13 @@ def orders():
                 return redirect(url_for('orders'))
             
             # Query per ordine con certo id e venduto dall'utente corrente
-            order = db_session.scalar(select(Order).join(OrderProducts).join(Product).filter(Order.id == order_id).filter(Product.seller == current_user))
+            order = db_session.scalar(
+                select(Order)
+                .join(OrderProducts)
+                .join(Product)
+                .filter(Order.id == order_id)
+                .filter(Product.seller == current_user)
+            )
             if order is None:
                 return redirect(url_for('orders'))
            
