@@ -69,3 +69,5 @@
 - [x] Ricerca prodotti dalla barra di ricerca
 - [x] Migliorare controlli sugli attributi tabelle
 - [x] Controllare tutti gli input per bene server-side
+- [x] Implementare la tabella Category (completamente dimenticato della sua esistenza :/)
+- [x] Terminare filtri nella pagina di ricerca aggiungendo le categorie e ordinando anche per il rating
