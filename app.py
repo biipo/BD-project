@@ -389,11 +389,11 @@ def search():
             query = query.filter(Product.price <= max_price_range)
         if category and category != 'Any':
             query = query.filter(Category.id == category)
-        # if reviews_sort:
-        #     if reviews_sort == 'asc':
-        #         query = query.order_by(Product.rating.asc())
-        #     else:
-        #         query = query.order_by(Product.rating.desc())
+        if reviews_sort:
+            if reviews_sort == 'asc':
+                query = query.order_by(Product.rating.asc())
+            else:
+                query = query.order_by(Product.rating.desc())
         if name_sort:
             if name_sort == 'asc':
                 query = query.order_by(Product.product_name.asc())
