@@ -99,6 +99,8 @@ class Category(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(nullable=False)
 
+    products: Mapped[List['Product']] = relationship(back_populates='category')
+
     # sub_categories_list: Mapped[List['SubCategory']] = relationship(back_populates='category')
 
     def __init__(self, name):
@@ -140,8 +142,9 @@ class Product(Base):
     seller: Mapped['User'] = relationship('User')
     tags: Mapped[List['TagProduct']] = relationship(back_populates='product')
     reviews: Mapped[List['Review']] = relationship(back_populates='product')
+    category: Mapped['Category'] = relationship(back_populates='products')
 
-    def __init__(self, user_id, brand, category_id, size, product_name, date, price, availability, descr, image_filename):
+    def __init__(self, user_id, brand, category, size, product_name, date, price, availability, descr, image_filename):
         if user_id is None:
             raise MissingData('Missing user id')
         self.user_id = user_id
@@ -150,9 +153,10 @@ class Product(Base):
             raise ValueError('Brand name too long')
         self.brand = brand
 
-        if category_id is None:
-            raise MissingData('Missing category id')
-        self.category_id = category_id
+        if category is None:
+            raise MissingData('Missing category')
+        self.category = category
+        self.category_id = category.id
         
         self.size = size
 

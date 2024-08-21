@@ -24,16 +24,9 @@
                         </select>
                         <select class="mb-.5" name="category">
                             <option selected disabled>Product type</option>
-                            <option value="1">Arts</option>
-                            <option value="2">Personal Care</option>
-                            <option value="3">Electronics</option>
-                            <option value="4">Music</option>
-                            <option value="5">Sports</option>
-                            <option value="6">Movies & TV</option>
-                            <option value="7">Software</option>
-                            <option value="8">Games</option>
-                            <option value="9">House</option>
-                            <option value="10">DIY</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
                         </select>
                         <input class="mb-.5" title="Price (€)" type="number" min="1" step="any" name="price" placeholder="Price (€)">
                         <input class="mb-.5" title="Availability" type="number" min="1" step="any" name="availability" placeholder="Quantity">

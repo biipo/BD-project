@@ -439,7 +439,7 @@ def sell():
                 product = Product(
                     user_id = current_user.get_id(),  # prende l'utente attualmente loggato (current_user)
                     brand = request.form.get('brand'),
-                    category_id = int(request.form.get('category')),
+                    category = db_session.scalar(select(Category).filter(Category.id == int(request.form.get('category')))),
                     size = request.form.get('size'),
                     product_name = request.form.get('name'),
                     date = datetime.datetime.now(),
@@ -477,7 +477,8 @@ def sell():
     else:
         # Renderizziamo la pagina in cui dovrà inserire i dettagli del prodotto
         tags = db_session.scalars(select(Tag)).all()
-        return render_template('sell.html', tags=tags)
+        categories = db_session.scalars(select(Category)).all()
+        return render_template('sell.html', tags=tags, categories=categories)
 
 @login_manager.user_loader
 def load_user(user_id):
