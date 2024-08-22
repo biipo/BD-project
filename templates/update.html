@@ -24,7 +24,7 @@
                         </select>
                         <select class="mb-.5" name="category">
                             {% for category in categories %}
-                            <option {{'selected' if item.category == cat}} value="{{ category.id }}">{{ category.name }}</option>
+                            <option {{'selected' if item.category == category}} value="{{ category.id }}">{{ category.name }}</option>
                             {% endfor %}
                         </select>
                         <input class="mb-.5" title="Price (€)" type="number" min="1" step="any" name="price" placeholder="Price (€)" value={{item.price}}>
