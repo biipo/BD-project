@@ -23,8 +23,8 @@
                             <option value="big" {{'selected' if item.size == 'big'}}>Big (more than 500x500 mm)</option>
                         </select>
                         <select class="mb-.5" name="category">
-                            {% for cat in ('Arts', 'Personal Care', 'Electronics', 'Music', 'Sports', 'Movies & TV', 'Software', 'Games', 'House', 'DIY') %}
-                            <option {{'selected' if item.category_id == loop.index}} value="{{loop.index}}">{{cat}}</option>
+                            {% for category in categories %}
+                            <option {{'selected' if item.category == cat}} value="{{ category.id }}">{{ category.name }}</option>
                             {% endfor %}
                         </select>
                         <input class="mb-.5" title="Price (€)" type="number" min="1" step="any" name="price" placeholder="Price (€)" value={{item.price}}>

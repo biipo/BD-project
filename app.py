@@ -199,8 +199,6 @@ def home():
 def product_details(pid):
     if request.method == 'GET':
         item = db_session.scalar(select(Product).filter(Product.id == pid))
-        print(item.rating)
-        print(item.product_name)
         if item is None:
             return redirect(url_for('home'))
 
@@ -304,7 +302,8 @@ def edit_listing(pid):
         tags = db_session.scalars(select(Tag)).all()
         # Prende tutti i valori dei tag correnti dell prodotto
         it_tags = [it.tag.value for it in item.tags]
-        return render_template('update.html', item=item, tags=tags, it_tags=it_tags)
+        categories = db_session.scalars(select(Category)).all()
+        return render_template('update.html', item=item, tags=tags, it_tags=it_tags, categories=categories)
 
     else:
         # Aggiorna prodotto 
@@ -405,12 +404,6 @@ def search():
             else:
                 query = query.order_by(Product.price.desc())
         items = db_session.scalars(query).all()
-        print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
-        print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
-        print(items)
-        print(query)
-        print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
-        print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
 
         return render_template('search.html', items=items, brands=brands, max_price=max_price, tags=tags, categories=categories)
 
