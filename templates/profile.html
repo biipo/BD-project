@@ -41,6 +41,7 @@
     <div class="col-5 ml-.25">
     </div>
 </div>
+{% if not current_user.is_seller() %}
 <div class="flex">
     <div class="col-7">
         <fieldset>
@@ -86,6 +87,7 @@
     <div class="col-3">
     </div>
 </div>
+{% endif %}
 {% if current_user.is_seller() %}
 <p class="larger"><a href="/home?seller={{user.id}}">Your listings<i class="bi bi-arrow-right"></i></a></p>
 {% endif %}
