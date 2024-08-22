@@ -1,7 +1,7 @@
 import sqlalchemy as sq
 from datetime import datetime
 from sqlalchemy import CheckConstraint, Column, Table, ForeignKey, except_all, null
-from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped, backref
+from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped, backref, validates
 from sqlalchemy import Integer, Numeric, Text, String
 from decimal import Decimal
 from flask_login import UserMixin
@@ -36,21 +36,21 @@ class User(Base, UserMixin):
     cart_products: Mapped[List['CartProducts']] = relationship(back_populates='user')
     reviews: Mapped[List['Review']] = relationship(back_populates='user')
 
-    @staticmethod
-    def __email_checker(email: str):
+    @validates('email')
+    def email_checker(self, key, email: str):
         pat_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
         if not re.match(pat_email, email): # Controlla che l'email segua il pattern "xxx@xxx.xxx"
             raise InvalidCredential("Invalid email")
         return email
 
-    @staticmethod
-    def __username_checker(username: str):
+    @validates('username')
+    def username_checker(self, key, username: str):
         if len(username) < 1 or len(username) > 16:
             raise InvalidCredential("Invalid username")
         return username
 
-    @staticmethod
-    def __password_checker(password: str):
+    @validates('password')
+    def password_checker(self, key, password: str):
         lower, upper, digit, special = 0, 0, 0, 0
         if(len(password) >= 8):
             for c in str(password):
@@ -70,25 +70,13 @@ class User(Base, UserMixin):
         from app import bcrypt
         return bcrypt.generate_password_hash(password) # Salviamo l'hash della password sul database
 
-    @staticmethod
-    def __name_lastname_checker(name: str, lastname: str): # Controlla che non ci siano numeri o simboli in nome e cognome
-        pat_name = r'\b[0-9._%+-]\b'
-        if re.match(pat_name, name):
-            raise InvalidCredential("Invalid name")
-        if re.match(pat_name, lastname):
+    @validates('name', 'last_name')
+    def name_lastname_checker(self, key, value: str): # Controlla che non ci siano numeri o simboli in nome e cognome
+        pat_name = r'[0-9._%+-]'
+        if re.search(pat_name, value): # usando validates SQLAlchemy chiama questa funzione 2 volte per i 2 attributi e value assume un valore alla volta
             raise InvalidCredential("Invalid last name")
-        return name, lastname
+        return value
 
-    def __init__(self, email, username, password, name, last_name, user_type, last_logout):
-        self.email = self.__email_checker(email)
-        if len(username) > 15:
-            raise ValueError("Username length over the limit of 15")
-        self.username = self.__username_checker(username)
-        self.password = self.__password_checker(password)
-        self.name, self.last_name = self.__name_lastname_checker(name, last_name)
-        self.user_type = user_type
-        self.last_logout = last_logout
-    
     def is_seller(self):
         return  self.user_type
 
@@ -273,26 +261,11 @@ class Order(Base):
     def __repr__(self):
         return f"{self.id} {self.user_id} {self.date} {self.price} {self.address} {self.payment_method} {self.status} {self.status_time} {self.confirmed}"
 
-# class TagGroup(Base):
-#     # Tabella con relazione (TagGroup)1:m(Tag), che serve per riconoscere di che categoria è il tag (dimensione, colore o brand)
-#     __tablename__ = 'tag_group'
-
-#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-#     name: Mapped[str] = mapped_column(nullable=False, unique=True)
-
-#     tag_list: Mapped[List['Tag']] = relationship(back_populates='tag_group')
-
-#     def __init__(self, name):
-#         self.name = name
-
 class Tag(Base):
     __tablename__ = 'tags'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     value: Mapped[str] = mapped_column(nullable=False, unique=True)
-
-    # tag_group_id: Mapped[int] = mapped_column(ForeignKey(TagGroup.id))
-    # tag_group: Mapped['TagGroup'] = relationship(back_populates='tag_list')
 
     products: Mapped[List['TagProduct']] = relationship(back_populates='tag')
 
