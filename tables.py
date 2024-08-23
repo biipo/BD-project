@@ -69,7 +69,7 @@ class User(Base, UserMixin):
     def name_lastname_checker(self, key, value: str): # Controlla che non ci siano numeri o simboli in nome e cognome
         pat_name = r'[0-9._%+-]'
         if re.search(pat_name, value): # usando validates SQLAlchemy chiama questa funzione 2 volte per i 2 attributi e value assume un valore alla volta
-            raise InvalidCredential("Invalid last name")
+            raise InvalidCredential('Invalid ' + str(key))
         return value
 
     def is_seller(self):
@@ -84,9 +84,9 @@ class Category(Base):
 
     products: Mapped[List['Product']] = relationship(back_populates='category')
 
-    def __init__(self, name):
-        self.name = name
-
+    @validates('name')
+    def attribute_checker(self, key, value):
+        return not_none_checker(key, value)
 
 class Product(Base):
     __tablename__ = 'products'
@@ -142,8 +142,8 @@ class Address(Base):
     @validates('user_id', 'first_name', 'last_name', 'street', 'postcode', 'state', 'province')
     def attribute_checker(self, key, value):
         not_none_checker(key, value)
-        if key == 'postcode' and not re.fullmatch(r'^\d+$', value):
-            raise ValueError('Postal code must contains only numbers')
+        if key == 'postcode' and (not re.fullmatch(r'^\d+$', value) or len(value) != 5):
+            raise ValueError('Postal code must contains only numbers (exactly 5 numbers)')
         return value
 
 class CartProducts(Base):
@@ -159,23 +159,20 @@ class CartProducts(Base):
 class OrderProducts(Base):
     __tablename__ = 'order_product'
     
-    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'), primary_key=True)
-    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), primary_key=True)
+    # Utilizziamo un id perché un utente nel tempo potrebbe fare più ordini dello stesso prodotto
+    # e ponendo order_id e product_id come chiavi darebbe errore perché ripeteremmo la coppia delle 2 chiavi
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'))
+    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'))
     quantity: Mapped[int]
     
     product: Mapped['Product'] = relationship(back_populates='orders')
     order: Mapped['Order'] = relationship(back_populates='products')
 
-class OrderStatus(Enum):
-    RECEIVED = "Received"
-    PROCESSING = "Processing"
-    SENT = "Sent"
-    CANCELLED = "Cancelled"
-
 class Order(Base):
     __tablename__ = 'orders'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
     date: Mapped[datetime]
     price: Mapped[Decimal] = mapped_column(Numeric(precision=8, scale=2), nullable=False) #8 cifre totali, 2 dopo virgola
@@ -191,7 +188,7 @@ class Order(Base):
 
     @validates('status')
     def status_checker(self, key, value):
-        if value not in OrderStatus.__members__.values():
+        if value not in ['Paid', 'Received', 'Processing', 'Sent', 'Cancelled']:
             raise ValueError('Invalid status')
         return value
 
@@ -220,14 +217,14 @@ class TagProduct(Base):
 class Review(Base):
     __tablename__ = 'reviews'
     
-    # !!! Rendere le 2 chiavi esterne chiavi primarie
-    id: Mapped[int] = mapped_column(primary_key=True)
-    product_id: Mapped[int] = mapped_column(ForeignKey(Product.id))
-    user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
-    review: Mapped[str]
+    product_id: Mapped[int] = mapped_column(ForeignKey(Product.id), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), primary_key=True)
+    review: Mapped[str] = mapped_column(nullable=False)
     stars: Mapped[int] = mapped_column(CheckConstraint('stars >= 1 AND stars <= 5'))
     date: Mapped[datetime] 
 
     user = relationship('User')
     product = relationship('Product')
+
+
 

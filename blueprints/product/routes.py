@@ -12,6 +12,7 @@ import os.path
 from . import product_bp
 from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, TagProduct, Review
 from config import Base, engine, db_session, app, login_manager, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, bcrypt
+from exceptions import InvalidCredential, InvalidOrder, MissingData
 
 @product_bp.route('/product-details/<int:pid>', methods=['GET', 'POST'])
 def product_details(pid):
@@ -19,9 +20,6 @@ def product_details(pid):
         item = db_session.scalar(select(Product).filter(Product.id == pid))
         if item is None:
             return redirect(url_for('home'))
-
-        # Se ci sono recensioni ne calcolo la media
-        # rating = sum(r.stars for r in item.reviews) / len(item.reviews) if len(item.reviews) > 0 else 0
 
         # Se articolo acquistato e non recensito
         bought = db_session.scalar(
@@ -47,7 +45,7 @@ def product_details(pid):
                 
                 # Check server-side disponibilità
                 if order_quantity <= item.availability:
-                    new_cart_item = CartProducts(item, order_quantity, current_user)
+                    new_cart_item = CartProducts(product=item, quantity=order_quantity, user=current_user)
                 else:
                     flash('Invalid quantity selected', 'error')
                     return redirect(url_for('product.product_details', pid=item.id))
@@ -95,8 +93,7 @@ def product_details(pid):
                 .filter(Product.user_id == current_user.get_id())
             )
             if item is not None:
-                # Non si può rimuovere prodotto perché è presente in carrelli e ordini vecchi
-                # invece settiamo disponibilità a 0 e la usiamo come "filtro"
+                # Impostiamo la disponibilità a 0 e la usiamo come "filtro"
                 item.availability = 0
                 db_session.commit()
             return redirect(url_for('home'))
@@ -130,7 +127,6 @@ def edit_listing(pid):
             if 'image_file' in request.files:
                 file = request.files['image_file']
                 if file.filename != '' and file and allowed_file(file.filename):
-                    # filename = secure_filename(file.filename)
                     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                     path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
                     file.save(path)
@@ -158,7 +154,7 @@ def edit_listing(pid):
             for tag_id in tags:
                 # Se tag nel form non presente in tag correnti lo aggiungo
                 if int(tag_id) not in it_tags:
-                    db_session.add_all([TagProduct(db_session.scalar(select(Tag).filter(Tag.id == tag_id)), item)])
+                    db_session.add_all([TagProduct(tag=db_session.scalar(select(Tag).filter(Tag.id == tag_id)), product=item)])
 
             try:
                 db_session.commit()    
@@ -198,7 +194,6 @@ def sell():
             flash('No selected file', 'error')
             return redirect(request.url)
         if file and allowed_file(file.filename):
-            # filename = secure_filename(file.filename)
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(path)
@@ -228,7 +223,7 @@ def sell():
             
             # Per ogni tag scelto si aggiunge una riga alla tabella intermedia tag_products
             for tag_id in tags:
-                db_session.add_all([TagProduct(db_session.scalar(select(Tag).filter(Tag.id == tag_id)), product)])
+                db_session.add_all([TagProduct(tag=db_session.scalar(select(Tag).filter(Tag.id == tag_id)), product=product)])
 
             try:
                 db_session.add(product)
@@ -243,7 +238,6 @@ def sell():
             flash('Invalid file type', 'error')
             return redirect(request.url)
 
-    # Se richiesta GET
     else:
         # Renderizziamo la pagina in cui dovrà inserire i dettagli del prodotto
         tags = db_session.scalars(select(Tag)).all()

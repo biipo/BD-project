@@ -15,7 +15,6 @@ from flask_login import LoginManager, login_required, login_user, logout_user, c
 import datetime
 import os.path
 
-# route del login
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST': # ha inserito i dati, li verifichiamo e reindirizziamo di conseguenza
@@ -74,8 +73,8 @@ def signup():
             flash('Password and confirmation password do not match', 'error')
             return redirect(request.url)
 
-        # Nel costruttore della classe User chiamiamo metodi che controllano la correttenzza dei dati e in caso lanciano un'eccezione
-        # con un messaggio specifico, che prendiamo nel catch e stampiamo a schermo
+        # Nel costruttore della classe User viene controllata la correttenzza dei dati e in caso viene lanciata un'eccezione
+        # con un messaggio specifico
         try:
             new_user = User(
                 email= email,

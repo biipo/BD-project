@@ -42,6 +42,15 @@
     </div>
 </div>
 {% if not current_user.is_seller() %}
+{% with errors = get_flashed_messages(category_filter=["error"]) %}
+{% if errors %}
+    <ul class="flash danger">
+        {% for msg in errors %}
+            {{ msg }}
+        {% endfor %}
+    </ul>
+{% endif %}
+{% endwith %}
 <div class="flex">
     <div class="col-7">
         <fieldset>

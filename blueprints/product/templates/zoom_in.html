@@ -89,7 +89,7 @@
             <p class="muted">There are no reviews for this product...</p>
         {% else %}
             {% for review in item.reviews %}
-                <details id="review-{{review.id}}" open>
+                <details open>
                     <summary style="text-decoration:none" class="default">
                         <p class="my-0 inline block"><b>{{review.user.username}}</b></p>
                         <div class="inline block">

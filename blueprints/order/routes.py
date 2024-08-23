@@ -12,6 +12,7 @@ import os.path
 from . import order_bp
 from tables import User, Product, Base, Product, User, Category, Address, CartProducts, Order, OrderProducts, Tag, TagProduct, Review
 from config import Base, engine, db_session, app, login_manager, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, bcrypt
+from exceptions import InvalidCredential, InvalidOrder, MissingData
 
 
 @order_bp.route('/payment', methods=['GET', 'POST'])
@@ -64,21 +65,24 @@ def payment():
                     date = datetime.datetime.now()
                     # Viene creato un ordine per ciascun venditore
                     if seller_id not in sellers_orders.keys():
-                        new_order = Order(
-                            user_id = current_user.get_id(),
-                            date = date,
-                            price = p.quantity * p.product.price,
-                            address = db_session.scalar(
-                                select(Address.id)
-                                .filter(Address.user_id == current_user.get_id())
-                                .filter(Address.active == True)
-                            ),
-                            payment_method = pay_method,
-                            status = 'Paid',
-                            status_time = date,
-                            confirmed = False,
-                        )
-                        db_session.add(new_order)
+                        try:
+                            new_order = Order(
+                                user_id = current_user.get_id(),
+                                date = date,
+                                price = p.quantity * p.product.price,
+                                address = db_session.scalar(
+                                    select(Address.id)
+                                    .filter(Address.user_id == current_user.get_id())
+                                    .filter(Address.active == True)
+                                ),
+                                payment_method = pay_method,
+                                status = 'Paid',
+                                status_time = date,
+                                confirmed = False,
+                            )
+                            db_session.add(new_order)
+                        except InvalidOrder:
+                            pass
                         db_session.flush() # aggiungiamo nel database la transazione in corso
                         sellers_orders[seller_id] = new_order # aggiungiamo al dizionario il venditore con il relativo ordine
                     
@@ -100,8 +104,6 @@ def payment():
 
             for p in products:
                 p.product.availability -= p.quantity # finito l'ordine riduciamo la quantità di prodotti disponibile
-                # if p.product.availability == 0:
-                #     db_session.execute(delete(Product).where(Product.id == p.product.id)) # se la disponibilità del prodotto va a 0 lo togliamo dal database
             db_session.execute(delete(CartProducts).where(CartProducts.user_id == current_user.get_id()))
             return redirect(url_for('home'))
 

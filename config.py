@@ -30,7 +30,6 @@ class Base(DeclarativeBase):
     pass
 
 engine = create_engine('sqlite:///./data.db', echo=True)
-Base.metadata.create_all(engine)
 db_session = Session(engine)
 
 bcrypt = Bcrypt()

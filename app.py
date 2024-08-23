@@ -20,7 +20,10 @@ app.register_blueprint(order_bp, url_prefix='/order')
 from blueprints.product.routes import product_bp
 app.register_blueprint(product_bp, url_prefix='/product') 
 
+Base.metadata.create_all(engine)
+
 def db_init():
+    # Serve per inserire nel database i tag e le categorie, ma solo nel caso in cui non è già presente il file .db con questi dati
     if db_session.scalar(select(Category)) is None:
         db_session.add_all([ Category(name='Arts'),
                             Category(name='Personal Care'),
@@ -37,26 +40,26 @@ def db_init():
     
     if db_session.scalar(select(Tag)) is None:
         db_session.add_all([ 
-            Tag('Red'),
-            Tag('Blue'),
-            Tag('Green'),
-            Tag('Yellow'),
-            Tag('Orange'),
-            Tag('Purple'),
-            Tag('Pink'),
-            Tag('Brown'),
-            Tag('Black'),
-            Tag('White'),
-            Tag('Gray'),
-            Tag('Beige'),
-            Tag('Maroon'),
-            Tag('Navy'),
-            Tag('Teal'),
-            Tag('Turquoise'),
-            Tag('Lavender'),
-            Tag('Magenta'),
-            Tag('Cyan'),
-            Tag('Lime'),
+            Tag(value='Red'),
+            Tag(value='Blue'),
+            Tag(value='Green'),
+            Tag(value='Yellow'),
+            Tag(value='Orange'),
+            Tag(value='Purple'),
+            Tag(value='Pink'),
+            Tag(value='Brown'),
+            Tag(value='Black'),
+            Tag(value='White'),
+            Tag(value='Gray'),
+            Tag(value='Beige'),
+            Tag(value='Maroon'),
+            Tag(value='Navy'),
+            Tag(value='Teal'),
+            Tag(value='Turquoise'),
+            Tag(value='Lavender'),
+            Tag(value='Magenta'),
+            Tag(value='Cyan'),
+            Tag(value='Lime'),
         ])
         db_session.commit()
 
@@ -121,6 +124,7 @@ def search():
         category = request.form.get('category')
 
         # I check servono perché potrebbe fare query cercando valori None tra gli attributi
+        # a seconda di quale valore NON è none viene estesa la query con WHERE o ORDER BY
         if tag_list:
             query = query.filter(Tag.id.in_(tag_list))
         if size and size != 'Any':
@@ -203,18 +207,21 @@ def profile():
                  .filter(Address.user_id == current_user.get_id())
                  .filter(Address.active == True)) is None)
 
-            new_address = Address(
-                user_id = current_user.get_id(),
-                active = active,
-                first_name = request.form.get('fname'),
-                last_name = request.form.get('lname'),
-                street = request.form.get('street'),
-                postcode = request.form.get('post-code'),
-                state = request.form.get('state'),
-                city = request.form.get('city'),
-                province = request.form.get('province')
-            )
-            db_session.add(new_address)
+            try:
+                new_address = Address(
+                    user_id = current_user.get_id(),
+                    active = active,
+                    first_name = request.form.get('fname'),
+                    last_name = request.form.get('lname'),
+                    street = request.form.get('street'),
+                    postcode = request.form.get('post-code'),
+                    state = request.form.get('state'),
+                    city = request.form.get('city'),
+                    province = request.form.get('province')
+                )
+                db_session.add(new_address)
+            except ValueError as err:
+                flash(str(err), 'error')
             db_session.commit()
         
         return redirect(url_for('profile'))
