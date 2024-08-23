@@ -10,10 +10,10 @@
         <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
 
         <link rel="stylesheet" href="https://matcha.mizu.sh/matcha.css">
-        <link rel="stylesheet" href="../static/css/styles2.css">
-        <link href="../static/icons/font/bootstrap-icons.css" rel="stylesheet">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles2.css') }}">
+        <link href="{{ url_for('static', filename='icons/font/bootstrap-icons.css') }}" rel="stylesheet">
 
-        <link rel="icon" href="../static/img/cart.gif">
+        <link rel="icon" href="{{ url_for('static', filename='img/cart.gif') }}">
         <title>{% block title %}{% endblock %} | Store</title>
         {% endblock %}
     </head>

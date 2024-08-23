@@ -18,7 +18,7 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 from blueprints.order.routes import order_bp
 app.register_blueprint(order_bp, url_prefix='/order')
 from blueprints.product.routes import product_bp
-app.register_blueprint(product_bp, url_prefix='/product')
+app.register_blueprint(product_bp, url_prefix='/product') 
 
 def db_init():
     if db_session.scalar(select(Category)) is None:
