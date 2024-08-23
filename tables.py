@@ -11,10 +11,11 @@ import re # regular expressions
 
 from config import Base, engine, db_session, app, login_manager, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, bcrypt
 
-"""
-Le relationship() vengono definite nelle tabelle in cui "arriva" una foreign key (nel senso: se tab 1
-ha la sua chiave, e poi c'è tab 2 che ha una FK che indica tab 1; in tab 1 dobbiamo mettere una relationship()
-"""
+def not_none_checker(key, value): # 'key' identifica l'attributo 'value' che stiamo verificando non essere nullo 
+    if value is None:
+        raise MissingData('Missing ' + str(key))
+    return value
+
 class User(Base, UserMixin):
     __tablename__ = 'users'
 
@@ -112,14 +113,13 @@ class Product(Base):
 
     @validates('brand', 'product_name', 'descr', 'user_id', 'category', 'price', 'availability', 'image_filename')
     def attributes_checker(self, key, value):
+        not_none_checker(key, value)
         if key  == 'brand' and len(value) > 20:
             raise ValueError('Brand name too long')
         elif key == 'product_name' and len(value) > 50:
             raise ValueError('Product name too long')
         elif key == 'descr' and len(value) > 50:
             raise ValueError('Description too long')
-        elif key in ['user_id', 'category', 'price', 'availability', 'image_filename'] and value is None:
-            raise MissingData('Missing' + str(key))
         return value
 
 
@@ -139,24 +139,12 @@ class Address(Base):
     
     user = relationship('User')
 
-    def __init__(self, user_id, active, first_name, last_name, street, postcode, city, state, province):
-        if user_id is None:
-            raise MissingData('Missing user_id')
-        if None in (first_name, last_name, street, postcode, state, province):
-            raise MissingData('Missing not null attribute')
-        self.user_id = user_id
-        self.active = active
-        self.active = active
-        self.first_name = first_name
-        self.last_name = last_name
-        self.street = street
-        self.postcode = postcode
-        self.city = city
-        self.state = state
-        self.province = province
-
-    def __repr__(self):
-        return f"{self.id} {self.user_id} {self.active} {self.first_name} {self.last_name} {self.street} {self.postcode} {self.state} {self.province}"
+    @validates('user_id', 'first_name', 'last_name', 'street', 'postcode', 'state', 'province')
+    def attribute_checker(self, key, value):
+        not_none_checker(key, value)
+        if key == 'postcode' and not re.fullmatch(r'^\d+$', value):
+            raise ValueError('Postal code must contains only numbers')
+        return value
 
 class CartProducts(Base):
     __tablename__ = 'cart_product'
@@ -168,13 +156,6 @@ class CartProducts(Base):
     product: Mapped['Product'] = relationship(back_populates='cart_product')
     user: Mapped['User'] = relationship(back_populates='cart_products')
 
-    def __init__(self, product, quantity, user):
-        self.product = product
-        self.product_id = product.id
-        self.user = user
-        self.user_id = user.id
-        self.quantity = quantity
-
 class OrderProducts(Base):
     __tablename__ = 'order_product'
     
@@ -184,6 +165,12 @@ class OrderProducts(Base):
     
     product: Mapped['Product'] = relationship(back_populates='orders')
     order: Mapped['Order'] = relationship(back_populates='products')
+
+class OrderStatus(Enum):
+    RECEIVED = "Received"
+    PROCESSING = "Processing"
+    SENT = "Sent"
+    CANCELLED = "Cancelled"
 
 class Order(Base):
     __tablename__ = 'orders'
@@ -202,14 +189,11 @@ class Order(Base):
     address_obj = relationship('Address')
     products: Mapped[List['OrderProducts']] = relationship(back_populates='order')
 
-    # def set_status(status: str):
-    #     if status in ['Paid', 'Confirmed', 'Sent', 'In transit', 'Arrived']: # Esempi di possibili stati
-    #         self.status = status
-    #     else:
-    #         raise InvalidCredential('Invalid status')
-
-    def __repr__(self):
-        return f"{self.id} {self.user_id} {self.date} {self.price} {self.address} {self.payment_method} {self.status} {self.status_time} {self.confirmed}"
+    @validates('status')
+    def status_checker(self, key, value):
+        if value not in OrderStatus.__members__.values():
+            raise ValueError('Invalid status')
+        return value
 
 class Tag(Base):
     __tablename__ = 'tags'
@@ -219,10 +203,9 @@ class Tag(Base):
 
     products: Mapped[List['TagProduct']] = relationship(back_populates='tag')
 
-    def __init__(self, value):
-        if value is None:
-            raise MissingData('Missing tag value')
-        self.value = value
+    @validates('value')
+    def value_checker(self, key, value):
+        return not_none_checker(key, value)
 
 # Tabella intermedia m:m
 class TagProduct(Base):
@@ -233,12 +216,6 @@ class TagProduct(Base):
 
     tag: Mapped['Tag'] = relationship(back_populates='products')
     product: Mapped['Product'] = relationship(back_populates='tags')
-
-    def __init__(self, tag, product):
-        self.tag = tag
-        self.product = product
-        self.tag_id = tag.id
-        self.product_id = product.id
 
 class Review(Base):
     __tablename__ = 'reviews'
@@ -253,7 +230,4 @@ class Review(Base):
 
     user = relationship('User')
     product = relationship('Product')
-
-    def __repr__(self):
-        return f"££{self.id} {self.product.product_name} {self.user.username} {self.review}££"
 
