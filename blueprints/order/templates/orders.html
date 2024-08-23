@@ -41,7 +41,7 @@
             <tr>
                 <th>{{loop.index}}</th>
                 <td>{{ord_prod.quantity}}</td>
-                <td><a href="/product-details/{{prod.id}}" title="{{prod.product_name}}" class="default">{{prod.product_name}}</a></td>
+                <td><a href="s/product-details/{{prod.id}}" title="{{prod.product_name}}" class="default">{{prod.product_name}}</a></td>
                 <td>{{prod.price | round(2)}}</td>
                 <td>{{(prod.price * ord_prod.quantity) | round(2)}}</td>
             </tr>

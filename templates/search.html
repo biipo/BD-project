@@ -107,10 +107,10 @@
         {% for item in items %}
         <article>
             <header>
-                <h1><a class="flex default" href="{{ url_for('product_details', pid=item.id)}}">{{ item.product_name }}</a></h1>
+                <h1><a class="flex default" href="{{ url_for('product.product_details', pid=item.id)}}">{{ item.product_name }}</a></h1>
             </header>
-            <a class="flex" href="{{ url_for('product_details', pid=item.id)}}">
-                <img class="" src="{{ url_for('uploaded_file', filename=item.image_filename)}}" />
+            <a class="flex" href="{{ url_for('product.product_details', pid=item.id)}}">
+                <img class="" src="{{ url_for('product.uploaded_file', filename=item.image_filename)}}" />
             </a>
             <footer>
                 <p class="small muted">{{ item.brand }}</p>

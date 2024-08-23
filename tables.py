@@ -9,12 +9,14 @@ from exceptions import InvalidCredential, MissingData, InvalidOrder
 from typing import List
 import re # regular expressions
 
-engine = sq.create_engine('sqlite:///./data.db', echo=True)
+from config import Base, engine, db_session, app, login_manager, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, bcrypt
+
+# engine = sq.create_engine('sqlite:///./data.db', echo=True)
 
 
 
-class Base(DeclarativeBase):
-    pass
+# class Base(DeclarativeBase):
+#     pass
 
 """
 Le relationship() vengono definite nelle tabelle in cui "arriva" una foreign key (nel senso: se tab 1
@@ -67,7 +69,6 @@ class User(Base, UserMixin):
         else:
             raise InvalidCredential("Invalid password")
         # Salvataggio del hash della password
-        from app import bcrypt
         return bcrypt.generate_password_hash(password) # Salviamo l'hash della password sul database
 
     @validates('name', 'last_name')

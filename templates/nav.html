@@ -8,12 +8,12 @@
         <a href="#">Menu</a>
         <menu>
             <li class="{% if request.path == '/profile' %} selected {% endif %}"><a href="/profile"><i class="bi bi-person-fill"></i> Profile</a></li>
-            <li class="{% if request.path == '/orders' %} selected {% endif %}"><a href="/orders"><i class="bi bi-box-seam"></i> Orders</a></li>
+            <li class="{% if request.path == '/order/orders' %} selected {% endif %}"><a href="/order/orders"><i class="bi bi-box-seam"></i> Orders</a></li>
             {% if current_user.is_authenticated %}
                 {% if current_user.is_seller() %}
-                    <li class="{% if request.path ==  '/sell' %} selected {% endif %}"><a href="/sell"><i class="bi bi-cash-coin"></i> Sell</a></li>
+                    <li class="{% if request.path ==  '/product/sell' %} selected {% endif %}"><a href="/product/sell"><i class="bi bi-cash-coin"></i> Sell</a></li>
                 {% endif %}
-                <li class="attention"><a href="/logout"><i class="bi bi-box-arrow-left"></i> Logout</a></li>
+                <li class="attention"><a href="/auth/logout"><i class="bi bi-box-arrow-left"></i> Logout</a></li>
             {% endif %}
         </menu>
     </li>

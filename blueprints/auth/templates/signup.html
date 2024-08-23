@@ -32,6 +32,6 @@
             </ul>
         {% endif %}
         {% endwith %}
-        <p class="centered">Already have an account? <a href="/login">Log in</a></p>
+        <p class="centered">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
     </div>
 {% endblock %}

@@ -5,7 +5,7 @@
     <h1>{{ item.product_name }}</h1>
     <div class="flex">
         <div class="col-3 m-1">
-            <img class="mw-100 mh-100" src="{{ url_for('uploaded_file', filename=item.image_filename)}}"/>
+            <img class="mw-100 mh-100" src="{{ url_for('product.uploaded_file', filename=item.image_filename)}}"/>
         </div>
         <div class="col-7 m-1">
             <div class="product-details">
@@ -57,7 +57,7 @@
                     </fieldset>
                 </div>
                 <div class="seller-info small py-.25">
-                    <p class="muted inline block">Sold by: <a href="/home?seller={{item.seller.id}}">{{item.seller.username}}</a></p>
+                    <p class="muted inline block">Sold by: <a href="../../../templates/home?seller={{item.seller.id}}">{{item.seller.username}}</a></p>
                 </div> 
             </div>
         </div>
@@ -95,7 +95,7 @@
                         <div class="inline block">
                             <div class="flex attention">
                                 {% for _ in range(review.stars) %}<i class="bi bi-star-fill"></i>{% endfor %}
-                                {% for _ in range(5-item.rating | int) %}<i class="bi bi-star"></i>{% endfor %}
+                                {% for _ in range(5-review.stars | int) %}<i class="bi bi-star"></i>{% endfor %}
                             </div>
                         </div>
                     </summary>
