@@ -11,13 +11,6 @@ import re # regular expressions
 
 from config import Base, engine, db_session, app, login_manager, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, bcrypt
 
-# engine = sq.create_engine('sqlite:///./data.db', echo=True)
-
-
-
-# class Base(DeclarativeBase):
-#     pass
-
 """
 Le relationship() vengono definite nelle tabelle in cui "arriva" una foreign key (nel senso: se tab 1
 ha la sua chiave, e poi c'è tab 2 che ha una FK che indica tab 1; in tab 1 dobbiamo mettere una relationship()
@@ -90,24 +83,8 @@ class Category(Base):
 
     products: Mapped[List['Product']] = relationship(back_populates='category')
 
-    # sub_categories_list: Mapped[List['SubCategory']] = relationship(back_populates='category')
-
     def __init__(self, name):
         self.name = name
-
-# class SubCategory(Base):
-#     __tablename__ = 'sub_categories'
-
-#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-#     category_id: Mapped[int] = mapped_column(ForeignKey(Category.id), nullable=False)
-#     name: Mapped[str] = mapped_column(nullable=False)
-
-#     category: Mapped['Category'] = relationship(back_populates='sub_categories_list')
-
-#     def __init__(self, category, name):
-#         self.category = category
-#         self.category_id = category.id
-#         self.name = name
 
 
 class Product(Base):
@@ -123,7 +100,7 @@ class Product(Base):
     price: Mapped[Decimal] = mapped_column(Numeric(precision=8, scale=2), nullable=False) #8 cifre totali, 2 dopo virgola
     availability: Mapped[int] = mapped_column(nullable=False)
     descr: Mapped[str] = mapped_column(nullable=True)
-    rating: Mapped[int]
+    rating: Mapped[int] = mapped_column(default=0)
     image_filename: Mapped[str] = mapped_column(nullable=False)
 
     cart_product: Mapped[List['CartProducts']] = relationship(back_populates='product')
@@ -133,45 +110,17 @@ class Product(Base):
     reviews: Mapped[List['Review']] = relationship(back_populates='product')
     category: Mapped['Category'] = relationship(back_populates='products')
 
-    def __init__(self, user_id, brand, category, size, product_name, date, price, availability, descr, image_filename):
-        if user_id is None:
-            raise MissingData('Missing user id')
-        self.user_id = user_id
-
-        if len(brand) > 20:
+    @validates('brand', 'product_name', 'descr', 'user_id', 'category', 'price', 'availability', 'image_filename')
+    def attributes_checker(self, key, value):
+        if key  == 'brand' and len(value) > 20:
             raise ValueError('Brand name too long')
-        self.brand = brand
-
-        if category is None:
-            raise MissingData('Missing category')
-        self.category = category
-        self.category_id = category.id
-        
-        self.size = size
-
-        if len(product_name) > 50:
+        elif key == 'product_name' and len(value) > 50:
             raise ValueError('Product name too long')
-        self.product_name = product_name
-
-        self.date = date
-        if price is None:
-            raise MissingData('Missing price')
-        self.price = price
-        if availability is None:
-            raise MissingData('Missing quantity')
-        self.availability = availability
-
-        if len(descr) > 300:
+        elif key == 'descr' and len(value) > 50:
             raise ValueError('Description too long')
-        self.descr = descr
-
-        self.rating = 0
-        if image_filename is None:
-            raise MissingData('Missing image')
-        self.image_filename = image_filename
-
-    def __repr__(self):
-        return f"name: {self.product_name}"
+        elif key in ['user_id', 'category', 'price', 'availability', 'image_filename'] and value is None:
+            raise MissingData('Missing' + str(key))
+        return value
 
 
 class Address(Base):
