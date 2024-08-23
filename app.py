@@ -249,6 +249,8 @@ def user(username):
     user = db_session.scalar(select(User).where(User.username == str(username)))
     return render_template('user.html', user=user)
 
+def clear_cart(user_id):
+    db_session.execute(delete(CartProducts).where(CartProducts.user_id == user_id))
 
 @app.route('/cart' , methods=['GET', 'POST'])
 @login_required
