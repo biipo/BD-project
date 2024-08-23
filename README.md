@@ -17,11 +17,10 @@
 ## Todo
 
 ### Front-end
-- [ ] Sistemare stelline nei prodotti (non capisco perché a volte ne mostra tipo 8 altre volte 4, boh)
+- [ ] Sistemare stelline nei prodotti (sono sparite :/)
 
 ### Back-end
 - [ ] Creare template `products.html` da usare per mostrare prodotti in home e dopo search
-- [ ] Controllare diminuzione quantità dei prodotti dopo ordine ( sembra non andare )
 
 ## Fatti
 
