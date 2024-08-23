@@ -159,11 +159,8 @@ class CartProducts(Base):
 class OrderProducts(Base):
     __tablename__ = 'order_product'
     
-    # Utilizziamo un id perché un utente nel tempo potrebbe fare più ordini dello stesso prodotto
-    # e ponendo order_id e product_id come chiavi darebbe errore perché ripeteremmo la coppia delle 2 chiavi
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'))
-    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'))
+    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'), primary_key=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), primary_key=True)
     quantity: Mapped[int]
     
     product: Mapped['Product'] = relationship(back_populates='orders')
