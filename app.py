@@ -20,48 +20,48 @@ app.register_blueprint(order_bp, url_prefix='/order')
 from blueprints.product.routes import product_bp
 app.register_blueprint(product_bp, url_prefix='/product') 
 
-Base.metadata.create_all(engine)
+@event.listens_for(Category.__table__, 'after_create')
+def category_init(target, connection, **kwargs):
+    db_session.add_all([ Category(name='Arts'),
+                        Category(name='Personal Care'),
+                        Category(name='Electronics'),
+                        Category(name='Music'),
+                        Category(name='Sports'),
+                        Category(name='Movies & TV'),
+                        Category(name='Software'),
+                        Category(name='Games'),
+                        Category(name='House'),
+                        Category(name='DIY')
+                        ])
+    db_session.commit()
 
-def db_init():
-    # Serve per inserire nel database i tag e le categorie, ma solo nel caso in cui non è già presente il file .db con questi dati
-    if db_session.scalar(select(Category)) is None:
-        db_session.add_all([ Category(name='Arts'),
-                            Category(name='Personal Care'),
-                            Category(name='Electronics'),
-                            Category(name='Music'),
-                            Category(name='Sports'),
-                            Category(name='Movies & TV'),
-                            Category(name='Software'),
-                            Category(name='Games'),
-                            Category(name='House'),
-                            Category(name='DIY')
-                            ])
-        db_session.commit()
-    
-    if db_session.scalar(select(Tag)) is None:
-        db_session.add_all([ 
-            Tag(value='Red'),
-            Tag(value='Blue'),
-            Tag(value='Green'),
-            Tag(value='Yellow'),
-            Tag(value='Orange'),
-            Tag(value='Purple'),
-            Tag(value='Pink'),
-            Tag(value='Brown'),
-            Tag(value='Black'),
-            Tag(value='White'),
-            Tag(value='Gray'),
-            Tag(value='Beige'),
-            Tag(value='Maroon'),
-            Tag(value='Navy'),
-            Tag(value='Teal'),
-            Tag(value='Turquoise'),
-            Tag(value='Lavender'),
-            Tag(value='Magenta'),
-            Tag(value='Cyan'),
-            Tag(value='Lime'),
-        ])
-        db_session.commit()
+@event.listens_for(Tag.__table__, 'after_create')
+def tag_init(target, connection, **kwargs):
+    db_session.add_all([ 
+        Tag(value='Red'),
+        Tag(value='Blue'),
+        Tag(value='Green'),
+        Tag(value='Yellow'),
+        Tag(value='Orange'),
+        Tag(value='Purple'),
+        Tag(value='Pink'),
+        Tag(value='Brown'),
+        Tag(value='Black'),
+        Tag(value='White'),
+        Tag(value='Gray'),
+        Tag(value='Beige'),
+        Tag(value='Maroon'),
+        Tag(value='Navy'),
+        Tag(value='Teal'),
+        Tag(value='Turquoise'),
+        Tag(value='Lavender'),
+        Tag(value='Magenta'),
+        Tag(value='Cyan'),
+        Tag(value='Lime'),
+    ])
+    db_session.commit()
+
+Base.metadata.create_all(engine)
 
 # Trigger che aggiorna il rating di un prodotto nel momento in cui viene aggiunta una nuova recensione
 @event.listens_for(db_session, 'before_commit')
@@ -71,10 +71,9 @@ def before_commit(session):
             item = db_session.scalar(select(Product).filter(Product.id == obj.product_id))
             item.rating = sum(r.stars for r in item.reviews) / len(item.reviews) if len(item.reviews if item.reviews is not None else []) > 0 else 0
             session.add(item)
-            
+
 @app.route('/')
 def start():
-    db_init()
     return redirect(url_for('home'))
 
 @app.route('/home')
