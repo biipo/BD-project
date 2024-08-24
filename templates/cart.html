@@ -7,7 +7,7 @@
                 <input type="hidden" value="{{item.product_id}}" name="item-id" />
                 <div class="flex">
                     <div class="col-7">
-                        <p class="larger"><a class="default" href="/product-details/{{item.product.id}}">{{item.product.product_name}}</a></p>
+                        <p class="larger"><a class="default" href="{{ url_for('product.product_details', pid=item.product.id) }}">{{item.product.product_name}}</a></p>
                         <div class="quantity-picker">
                             <b>Qty</b>: <input type="number" id="quantity" name="quantity" style="max-width:5em;" class="quantity-input inline block" value="{{item.quantity}}" min="1" max="{{item.product.availability}}">
                             <button name="update-item" class="ml-.5 success" title="Update"><i class="bi bi-arrow-clockwise"></i></button>

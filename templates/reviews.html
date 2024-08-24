@@ -7,7 +7,7 @@
             <details open>
                 <summary class="default" style="text-decoration:none">
                     <b style="text-decoration:none" class="larger">
-                        <a href="/product-details/{{p.id}}" class="default">{{p.product_name}} <i class="bi bi-arrow-right"></i></a>
+                        <a href="{{ url_for('product.product_details', pid=p.id) }}" class="default">{{p.product_name}} <i class="bi bi-arrow-right"></i></a>
                     </b>
                 </summary>
                 {% if p.reviews | length == 0 %}
@@ -35,7 +35,7 @@
         {% for review in reviews %}
             <details>
                 <summary class="default" style="text-decoration:none">
-                    <p class="my-0 inline block default"><a href="/product-details/{{review.product.id}}" class="default">{{review.product.product_name}} <i class="bi bi-arrow-right"></i></a></p>
+                    <p class="my-0 inline block default"><a href="{{ url_for('product.product_details', pid=review.product.id) }}" class="default">{{review.product.product_name}} <i class="bi bi-arrow-right"></i></a></p>
                     <div class="inline block">
                         <div class="flex attention">
                             {% for _ in range(review.stars) %}<i class="bi bi-star-fill"></i>{% endfor %}

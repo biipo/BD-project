@@ -25,7 +25,7 @@ Cosa mostrare:
         <input type="hidden" value="{{item.product_id}}" name="item-id" />
         <div class="flex">
             <div class="col-7">
-                <p class="larger"><a class="default" href="/product-details/{{item.product.id}}">{{item.product.product_name}}</a></p>
+                <p class="larger"><a class="default" href="{{ url_for('product.product_details', pid=item.product.id) }}">{{item.product.product_name}}</a></p>
                 <p><b>Qty</b>: {{item.quantity}}</p>
             </div>
             <div>
