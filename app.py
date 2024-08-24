@@ -105,7 +105,7 @@ def home():
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
-    brands = db_session.scalars(select(Product.brand)).all()
+    brands = db_session.scalars(select(Product.brand).filter(Product.availability > 0)).all()
     query = select(Product).distinct(Product.id).join(TagProduct).join(Tag).join(Category)
     max_price = db_session.scalar(select(func.max(Product.price)))
     tags = db_session.scalars(select(Tag)).all()
