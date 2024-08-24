@@ -90,7 +90,7 @@ def home():
         search = request.args.get('search')
         
         if search is not None:
-            items_q = items_q.filter(Product.product_name.like('%' + search + '%'))
+            items_q = items_q.filter(Product.product_name.like('%' + search + '%')).filter(Product.availability > 0)
 
         if seller is not None:
             items_q = items_q.filter(Product.user_id == seller)
