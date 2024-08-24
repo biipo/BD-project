@@ -53,9 +53,10 @@ def product_details(pid):
                 # Controllo se esiste già l'elemento nel carrello prima di crearlo
                 existing = db_session.scalar(
                     select(CartProducts)
-                    .filter(CartProducts.product_id == new_cart_item.product_id)
-                    .filter(CartProducts.user_id == new_cart_item.user_id)
+                    .filter(CartProducts.product_id == item.id)
+                    .filter(CartProducts.user_id == current_user.get_id())
                 )
+
 
                 # Se già esiste aggiungiamo la quantità
                 if existing is not None:
