@@ -90,7 +90,7 @@ def home():
         search = request.args.get('search')
         
         if search is not None:
-            items_q = items_q.filter(Product.product_name.like('%' + search + '%')).filter(Product.availability > 0)
+            items_q = items_q.filter(Product.product_name.like('%' + search + '%'))
 
         if seller is not None:
             items_q = items_q.filter(Product.user_id == seller)
@@ -106,7 +106,7 @@ def home():
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     brands = db_session.scalars(select(Product.brand).filter(Product.availability > 0)).all()
-    query = select(Product).distinct(Product.id).join(TagProduct).join(Tag).join(Category)
+    query = select(Product).distinct(Product.id).join(TagProduct).join(Tag).join(Category).filter(Product.availability > 0)
     max_price = db_session.scalar(select(func.max(Product.price)))
     tags = db_session.scalars(select(Tag)).all()
     categories = db_session.scalars(select(Category)).all()
