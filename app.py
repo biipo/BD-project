@@ -63,6 +63,10 @@ def tag_init(target, connection, **kwargs):
 
 Base.metadata.create_all(engine)
 
+@app.errorhandler(404)
+def wrong_url_handler(e):
+    return render_template('404.html'), 404
+
 # Trigger che aggiorna il rating di un prodotto nel momento in cui viene aggiunta una nuova recensione
 @event.listens_for(db_session, 'before_commit')
 def before_commit(session):
