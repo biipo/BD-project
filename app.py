@@ -116,7 +116,7 @@ def search():
         return render_template('search.html', items=items, brands=brands, max_price=max_price, tags=tags, categories=categories)
 
     else:
-        tag_list = request.form.getlist('tags')
+        tag_list = request.form.getlist('tag')
         size = request.form.get('size')
         brand = request.form.get('brand')
         min_price_range = request.form.get('min_price_range')
