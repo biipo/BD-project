@@ -169,9 +169,31 @@ def profile():
     else:
         # Aggiorna dati personali
         if request.form.get('info-update') is not None:
-            current_user.name = request.form.get('info-fname')
-            current_user.last_name = request.form.get('info-lname')
-            current_user.email = request.form.get('info-email')
+            new_password = str(request.form.get('new-password'))
+            conf_password = str(request.form.get('conf-password'))
+            # Se la nuova password è stata settata
+            if len(new_password) != 0 and len(conf_password) != 0:
+                if new_password != conf_password:
+                    flash('The passwords don\'t match', 'error')
+                    return redirect(request.url)
+                try:
+                    current_user.password = new_password
+                except Exception as e:
+                    flash(str(e), 'error')                    
+            
+            try:
+                current_user.name = str(request.form.get('info-fname'))
+                current_user.last_name = str(request.form.get('info-lname'))
+                email = str(request.form.get('info-email'))
+                if email != current_user.email:
+                    # Se la nuova email è di un altro utente
+                    if db_session.scalar(select(User).filter(User.email == email)) is not None:
+                        flash('E-mail address already exists', 'error')
+                        return redirect(request.url)
+                    current_user.email = email
+            except Exception as e:
+                flash(str(e), 'error')
+
             db_session.commit()
         
         # Elimina indirizzo

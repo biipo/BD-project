@@ -22,7 +22,7 @@
                         </tr>
                         <tr>
                             <td><p class="bold muted">E-mail</p></td>
-                            <td><input type="text" name="info-email" value="{{user.email}}" /></td>
+                            <td><input type="text" name="info-email" type="email" value="{{user.email}}" /></td>
                         </tr>
                         <tr>
                             <td><p class="bold muted">Type</p></td>
@@ -33,6 +33,19 @@
                             </td>
                         </tr>
                     </table>
+                    <input class="mb-.5" type="password" minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[~`!@#$%^&*()\-_=+\{\}\[\]|\\;:<>,./?])[A-Za-z\d~`!@#$%^&*()\-_=+\{\}\[\]|\\;:<>,./?]{8,}$" 
+                        title="Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character" name="new-password" placeholder="New password">
+                    <input class="mb-.5" type="password" minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[~`!@#$%^&*()\-_=+\{\}\[\]|\\;:<>,./?])[A-Za-z\d~`!@#$%^&*()\-_=+\{\}\[\]|\\;:<>,./?]{8,}$"
+                        title="Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character" name="conf-password" placeholder="Confirm Password">
+                    {% with errors = get_flashed_messages(category_filter=["error"]) %}
+                    {% if errors %}
+                        <ul class="flash danger">
+                            {% for msg in errors %}
+                                {{ msg }}
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% endwith %}
                     <button style="width:25%" type="submit" name="info-update">Update</button>
                 </form>
             </div>
@@ -42,15 +55,6 @@
     </div>
 </div>
 {% if not current_user.is_seller() %}
-{% with errors = get_flashed_messages(category_filter=["error"]) %}
-{% if errors %}
-    <ul class="flash danger">
-        {% for msg in errors %}
-            {{ msg }}
-        {% endfor %}
-    </ul>
-{% endif %}
-{% endwith %}
 <div class="flex">
     <div class="col-7">
         <fieldset>
