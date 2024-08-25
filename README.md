@@ -5,22 +5,11 @@
 > Materiale prof SQLAlchemy ORM: https://colab.research.google.com/drive/1nHd7iFKzTvvNsnYCbPHcWQVSrcgU_36T?usp=sharing \
 > Documentazione matcha.css: https://matcha.mizu.sh/
 
-### Dubbi 
-
-- In teoria gli utenti venditori, leggendo dal pdf, possono solamente vendere; quindi togliamo la possiblità che possano fare ordini??
-- Se un prodotto termina la sua disponibilità lo eliminamo dal DB o lo impostiamo tipo a -1 e lo mostriamo come 'Esaurito'?\
-    Ee magari, non so, possiamo fare che il venditore può riaumentare le quantità e rimetterlo disponibile\
-    Per ora i prodotti ho messo che vengono eliminati dal DB
-- Possibilità di modificare le recensioni??
-    - Nah
-
 ## Todo
 
 ### Front-end
-- [ ] Sistemare stelline nei prodotti (sono sparite :/)
 
 ### Back-end
-- [ ] Creare template `products.html` da usare per mostrare prodotti in home e dopo search
 
 ## Fatti
 
